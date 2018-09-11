@@ -56,6 +56,18 @@ def gcd( a, b ):
 
 ##############################
 
+def lcm( a, b ):
+    """least common multiple
+    (a, b) -> m
+    where m is the smallest positive integer such that a|m and b|m"""
+
+    if a*b == 0:
+        raise ValueError( 'lcm(_,0) is undefined' )
+    d = gcd(a, b)
+    return (a // d) * b
+
+##############################
+
 def bezout( a, b ):
     """bezout lemma: there exists x, y such that ax + by = gcd(a,b)
     (a, b) -> [x, y] where ax + by = gcd(a,b)"""

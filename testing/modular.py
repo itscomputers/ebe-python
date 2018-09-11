@@ -443,4 +443,8 @@ class MultiplicativeGroup:
 class CyclicGroup( MultiplicativeGroup ):
 
     def __init__(self, modulus, gen=None):
-        print('hi')
+       print('hi') 
+
+
+
+############################################################

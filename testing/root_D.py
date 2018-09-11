@@ -1,5 +1,5 @@
 
-##  ~/itscomputers/number_theory/root_D.py
+#  ~/itscomputers/number_theory/root_D.py
 
 import number_theory as nt
 import primality as pr
