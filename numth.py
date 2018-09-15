@@ -25,7 +25,7 @@ def div(num, div, METHOD=None):
         q += div // abs(div)
         r -= abs(div)
 
-    return (q, r)
+    return q, r
 
 ##############################
 
@@ -95,9 +95,9 @@ def bezout(a, b):
 
     if b == 0:
         if a > 0:
-            return (1, 0)
+            return 1, 0
         else:
-            return (-1, 0)
+            return -1, 0
 
     a_, b_ = a, b
     q, r = div(a_, b_, METHOD='SMALL')
@@ -111,9 +111,9 @@ def bezout(a, b):
         yy, y = y, -q*y + yy
 
     if a*xx + b*yy > 0:
-        return (xx, yy)
+        return xx, yy
     else:
-        return (-xx, -yy)
+        return -xx, -yy
         
 ##############################
 
@@ -137,7 +137,7 @@ def padic(num, base):
     while rest % base == 0:
         exp += 1
         rest //= base
-    return (exp, rest)
+    return exp, rest
 
 ##############################
 
@@ -178,15 +178,9 @@ def mod_power(num, exp, mod):
         raise ValueError('Modulus must be at least 2')
 
     if exp < 0:
-        return mod_power(mod_inverse(num, mod), -exp, mod)
-    elif exp == 0:
-        return 1
-    elif exp == 1:
-        return num % mod
-    elif (exp % 2) == 0:
-        return mod_power(num*num, exp//2, mod)
+        return pow(mod_inverse(num, mod), -exp, mod)
     else:
-        return (num * mod_power(num*num, exp//2, mod)) % mod
+        return pow(num, exp, mod) 
 
 ##############################
 
@@ -224,9 +218,6 @@ def jacobi(a, b):
         return sgn * jacobi(b, a_)
 
 ##############################
-
-
-
 
 
 
@@ -320,3 +311,4 @@ if __name__ == '__main__':
     #   test jacobi
     jacobi_row_15 = [0,1,1,0,1,0,0,-1,1,0,0,-1,0,-1,-1]
     assert( [jacobi(a, 15) for a in range(15)] == jacobi_row_15 )
+

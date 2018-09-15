@@ -193,6 +193,9 @@ class Rational:
     def __float__(self):
         return self.numerator / self.denominator
 
+    def __round__(self):
+        return int(self + .5)
+
     ##########################
 
     def decimal(self, num_digits=None):
