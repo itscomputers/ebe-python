@@ -3,32 +3,29 @@
 
 from random import randint
 from concurrent.futures import ProcessPoolExecutor, wait
-from numth import padic, mod_power, gcd, jacobi
+if __name__ == '__main__':
+    from numth import padic, mod_power, gcd, jacobi
+else:
+    from .numth import padic, mod_power, gcd, jacobi
 
 ##############################
 
 def default_values(kind):
-    if kind is 'num_mr':
+    if kind is 'mr_wit':
         return 20
-    elif kind is 'num_l':
+    elif kind is 'l_wit':
         return 20
-    elif kind is 'prime_count_rate':
-        return 100000
 
 ##############################
 
-def naive_primality_test(num):
+def naive_primality_test(num: int) -> str:
     """
     Naive primality test.
-
-    Keyword arguments:
-    num -- any integer greater than 1
 
     Return:
     'composite' -- if num is divisible by a prime < sqrt(num)
     'prime' -- otherwise
     """
-
     all_nums = [ x for x in range(2, num) if x**2 <= num ]
     while all_nums != []:
         sm = all_nums[0]
@@ -38,29 +35,25 @@ def naive_primality_test(num):
             all_nums = [ x for x in all_nums if x % sm != 0 ]
     return 'prime'
 
-##############################
+############################################################
+############################################################
+#       Miller-Rabin primality testing
+############################################################
+############################################################
 
-def miller_rabin_witness(num, wit):
+def miller_rabin_witness(num: int, wit: int) -> str:
     """
     Miller-Rabin witness for primality.
-
-    Keyword arguments:
-    num, wit -- any integers greater than 1
 
     Return:
     'composite' -- if wit detects that num is composite
     'probable prime' -- otherwise
-    
-    Additional comment:
-    Here, 'probable prime' means that num may or may not be prime,
-    according to wit.
     """
-
     exp, init = padic(num - 1, 2)
     x = mod_power(wit, init, num)
 
     if x in [1, num-1]:
-        return 'pseudoprime'
+        return 'probable prime'
 
     for j in range(exp):
         x = (x*x) % num
@@ -73,9 +66,8 @@ def miller_rabin_witness(num, wit):
 
 ##############################
 
-def miller_rabin_cutoffs():
+def miller_rabin_cutoffs() -> tuple:
     """Cutoff values for witnesses needed in Miller-Rabin primality test"""
-
     return ((1, 2),
             (2047, 3),
             (1373653, 5),
@@ -85,14 +77,15 @@ def miller_rabin_cutoffs():
             (3474749660383, 17),
             (341550071728321, None))
 
-def _generate_miller_rabin_witnesses(num, num_wit=None):
-    """Generate a list of witnesses for Miller-Rabin primality test"""
+##############################
 
+def _generate_miller_rabin_witnesses(num: int, num_wit=None) -> list:
+    """Generate a list of witnesses for Miller-Rabin primality test"""
     cutoffs = miller_rabin_cutoffs()
     max_val = cutoffs[-1][0]
     if num > max_val:
         if num_wit is None:
-            num_wit = default_values('num_mr')
+            num_wit = default_values('mr_wit')
         if num_wit > num:
             witnesses = [ x for x in range(2, num-1) ]
         else:
@@ -111,25 +104,20 @@ def _generate_miller_rabin_witnesses(num, num_wit=None):
 
 ##############################
 
-def miller_rabin_test(num, num_wit=None):
+def miller_rabin_test(num: int, num_wit=None) -> str:
     """
     Miller-Rabin primality test.
-
-    Keyword arguments:
-    num -- any integer greater than 1
-    num_wit -- number of witnesses (at least 1)
 
     Return:
     'composite' -- if any of the witnesses returns 'composite'
     'prime' -- if all of the pre-determined witnesses return 'probable prime'
     'strong probable prime' -- if all of the witnesses return 'probable prime'
 
-    Additional comment:
+    Comment:
     For num < 341 550 071 728 321, the test is deterministic.
     Otherwise, the test is probabilistic with probability of misdiagnosis
     provably at most (.25)**num_wit.
     """
-
     if num == 2:
         return 'prime'
     witnesses = _generate_miller_rabin_witnesses(num, num_wit)
@@ -143,29 +131,37 @@ def miller_rabin_test(num, num_wit=None):
     else:
         return 'strong probable prime'
 
-##############################
+############################################################
+############################################################
+#       Lucas sequence primality testing
+############################################################
+############################################################
 
-def _lucas_double_index(U, V, Q, num):
+def _lucas_double_index(
+        U: int, V: int, Q: int, num: int) -> tuple:
     """Shortcut to double the index of a Lucas sequence."""
-
     return (
         (U*V) % num,
         (V*V - 2*Q) % num,
         (Q**2) % num
     )
 
-def _lucas_index_plus_one(U, V, P, Q, Q1, num):
+##############################
+
+def _lucas_index_plus_one(
+        U: int, V: int, P: int, Q: int, Q1: int, num: int) -> tuple:
     """Shortcut to increase the index of a Lucas sequence by one."""
-    
     return (
         ((P*U + V) * (num + 1)//2) % num,
         (((P**2 - 4*Q1)*U + P*V) * (num + 1)//2) % num,
         (Q*Q1) % num
     )
 
-def _lucas_sequence_by_index(k, P, Q, num):
-    """Explicit formula for any element of a Lucas sequence."""
+##############################
 
+def _lucas_sequence_by_index(
+        k: int, P: int, Q: int, num: int) -> tuple:
+    """Explicit formula for any element of a Lucas sequence."""
     if k == 0:
         return (0, 2, 1)
     elif k == 1:
@@ -177,9 +173,10 @@ def _lucas_sequence_by_index(k, P, Q, num):
         U_, V_, Q_ = _lucas_sequence_by_index(k-1, P, Q, num)
         return _lucas_index_plus_one(U_, V_, P, Q_, Q, num)
 
-def _lucas_sequence(k, P, Q, num):
-    """Recursive formula to generate a Lucas sequence up to some point."""
+##############################
 
+def _lucas_sequence(k: int, P: int, Q: int, num: int) -> list:
+    """Recursive formula to generate a Lucas sequence up to some point."""
     UV = [ (0, 2, 1), (1, P, Q) ]
     for i in range(k-1):
         U_, V_, Q_ = UV[-1]
@@ -193,23 +190,18 @@ def _lucas_sequence(k, P, Q, num):
 
 ##############################
 
-def lucas_witness(num, P, Q):
+def lucas_witness(num: int, P: int, Q: int) -> str:
     """
     Lucas sequence witness for primality.
-    
-    Keyword arguments:
-    num -- any integer greater than 1
-    P, Q -- any nonzero integers (parameters)
 
     Return:
     'composite' -- if Lucas pair U(P,Q), V(P,Q) detects num is composite
     '(strong) probable prime' -- otherwise
 
-    Additional comments:
+    Comment:
     The 'strength' of a probable prime is based on some additional conditions
     that make it more likely to be prime.
     """
-
     D = P**2 - 4*Q
     gcd_D = gcd(D, num)
     gcd_P = gcd(P, num)
@@ -251,11 +243,10 @@ def lucas_witness(num, P, Q):
 
 ##############################
 
-def _generate_lucas_witness_pairs(num, num_wit=None):
+def _generate_lucas_witness_pairs(num: int, num_wit=None) -> list:
     """Generate a list of witnesses for Miller-Rabin primality test"""
-
     if num_wit is None:
-        num_wit = default_values('num_l')
+        num_wit = default_values('l_wit')
     witnesses = []
     D = 5
     sgn = 1
@@ -280,13 +271,9 @@ def _generate_lucas_witness_pairs(num, num_wit=None):
 
 ##############################
 
-def lucas_test(num, num_wit=None):
+def lucas_test(num: int, num_wit=None) -> str:
     """
     Lucas test for primality.
-
-    Keyword arguments:
-    num -- any integer greater than 2
-    num_wit -- number of witness pairs, any positive integer
 
     Return:
     'composite' -- if any pair returns 'composite'
@@ -294,7 +281,6 @@ def lucas_test(num, num_wit=None):
     'strong probable prime -- if any pair returns 'strong probable prime'
                             and the rest return 'probable prime'
     """
-
     if num <= 2:
         raise ValueError('Num should be at least 3')
     if num % 2 == 0:
@@ -314,82 +300,86 @@ def lucas_test(num, num_wit=None):
     else:
         return 'probable prime'
 
-##############################
+############################################################
+############################################################
+#       Primality functions
+############################################################
+############################################################
 
-def is_prime(num, num_mr=None, num_l=None, multiprocess=True, timeout=None):
+def is_prime(num: int, 
+        mr_wit=None, 
+        l_wit=None, 
+        multiprocess=True, 
+        timeout=None) -> bool:
     """
     Primality test (with multiprocessing).
 
     Keyword arguments:
     num -- any integer
-    num_mr -- nonnegative number of Miller-Rabin witnesses
-    num_l -- nonnegative number of Lucas witness pairs
+    mr_wit -- number of Miller-Rabin witnesses for primality testing
+    l_wit -- number of Lucas witness pairs for primality testing
     multiprocess -- bool
     timeout -- any positive number
 
     Return:
     bool True or False
 
-    Additional comments:
-    1. For num < 341550071728321:
+    Comments:
+    1. For num < 341_550_071_728_321:
         a. only pre-designated Miller-Rabin witnesses are used.
         b. the result is completely accurate.
     2. Otherwise:
         a. The default values are:
-                num_mr = 20
-                num_l = 20
+                mr_wit = 20
+                l_wit = 20
         b. the result is probabalistic, with probability of incorrect
-                < ( (1/4)**num_mr ) * ( (4/15)**num_l )
-        c. for the default values, the probability of an incorrect result is
-                < 1 / (3.01 * 10**-24)
+                < ( (1/4)**mr_wit ) * ( (4/15)**l_wit )
+        c. for the default values , the probability of an incorrect result is
+                < 3.01 * 10**-24
     3. If multiprocess is False, Lucas tests are slower than Miller-Rabin
-        tests, so it is prudent to use a smaller num_l.
+        tests, so it is prudent to use a smaller l_wit.
     """
-
     if num < 2:
         return False
     prime = ('prime', 'probable prime', 'strong probable prime')
     if num < miller_rabin_cutoffs()[-1][0]:
-        return (miller_rabin_test(num, num_mr) in prime)
+        return (miller_rabin_test(num, mr_wit) in prime)
     else:
         if multiprocess:
             with ProcessPoolExecutor() as pool:
                 futures = [
-                    pool.submit( miller_rabin_test, num, num_mr ),
-                    pool.submit( lucas_test, num, num_l )
+                    pool.submit( miller_rabin_test, num, mr_wit ),
+                    pool.submit( lucas_test, num, l_wit )
                 ]
                 wait(futures, timeout=timeout)
             mr, l = (x.result() for x in futures)
         else:
-            mr = miller_rabin_test(num, num_mr)
-            l = lucas_test(num, num_l)
+            mr = miller_rabin_test(num, mr_wit)
+            l = lucas_test(num, l_wit)
         return (mr in prime) and (l in prime)
 
 ##############################
 
-def prime_to(num_list, num_mr=None, num_l=None):
+def prime_to(nums: tuple, mr_wit=None, l_wit=None) -> list:
     """
     List of numbers relatively prime to a given list of numbers.
 
     Keyword arguments:
-    num_list -- list of numbers greater than 1 (preferrably primes)
-    num_mr -- number of Miller-Rabin witnesses for primality testing
-    num_l -- number of Lucas witness pairs for primality testing
+    nums -- list of numbers greater than 1 (preferrably primes)
 
     Return:
-    list of all numbers up to the product of the given list
-    which are relatively prime to the given list
+    list of all numbers up to the product of nums
+    which are relatively prime to the the numbers in nums
     """
-
-    num_list = sorted(num_list)
-    val = num_list[0]
+    nums = sorted(nums)
+    val = nums[0]
     already_used = [val]
-    if is_prime(val, num_mr, num_l):
+    if is_prime(val, mr_wit, l_wit):
         result = [ x for x in range(1, val) ]
     else:
         result = [ x for x in range(1, val) if gcd(x, val) == 1 ]
     
-    for num in num_list[1:]:
+    for num in nums[1:]:
         orig = [ x for x in result ]
         for i in range(1, num):
             result += [ i * val + x for x in orig ]
@@ -403,185 +393,185 @@ def prime_to(num_list, num_mr=None, num_l=None):
 
 ##############################
 
-def _test_block(num, num_list=None):
-    """Generate block of prime candidates."""
-
+def _choose_primes(num: int) -> list:
+    """Choose primes to be used in creating blocks."""
     if num < 6:
-        num_list = [2]
+        return [2]
     elif num < 30:
-        num_list = [2,3]
+        return [2,3]
     elif num < 210:
-        num_list = [2,3,5]
-    elif num_list is None:
-        num_list = [2,3,5,7]
-    
-    diameter = 1
-    for num in num_list:
-        diameter *= num
-    block = prime_to(num_list, num_mr=5, num_l=1)
-
-    return (num_list, block, diameter)
-
-##############################
-
-def next_prime(num, num_primes=None, num_mr=None, num_l=None):
-    """
-    Find the next primes.
-
-    Keyword arguments:
-    num -- real number
-    num_primes -- number of primes
-    num_mr -- number of Miller-Rabin witnesses for primality testing
-    num_l -- number of Lucas witness pairs for primality testing
-
-    Return:
-    the prime or the list of num_primes primes greater than num
-    """
-    
-    if num < 1:
-        num = 1
-    if num_primes is None:
-        num_primes = 1
-
-    result = []
-    num_list, block, diameter = _test_block(num)
-    r = num % diameter
-    preblock = [ x for x in block if x > r ]
-    lower = num - r
-    for x in preblock:
-        if (len(result) < num_primes) and is_prime(lower + x, num_mr, num_l):
-                result.append(lower + x)
-    lower += diameter
-
-    while len(result) < num_primes:
-        for x in block:
-            if is_prime(lower + x, num_mr, num_l):
-                result.append(lower + x)
-            if len(result) == num_primes:
-                break
-        lower += diameter
-
-    if num_primes == 1:
-        return result[0]
+        return [2,3,5]
     else:
-        return result
+        return [2,3,5,7]
 
 ##############################
 
-def prev_prime(num, num_primes=None, num_mr=None, num_l=None):
-    """
-    Find the previous primes.
+def _generate_block(primes: list) -> tuple:
+    """Generate a block of offsets for prime searching."""
+    diam = 1
+    for p in primes:
+        diam *= p
+    
+    return prime_to(primes, mr_wit=5, l_wit=1), diam
 
-    Keyword arguments:
-    num -- real number
-    num_primes -- number of primes
-    num_mr -- number of Miller-Rabin witnesses for primality testing
-    num_l -- number of Lucas witness pairs for primality testing
+##############################
 
-    Return:
-    the prime or the list of num_primes primes less than num
-    """
+def _shift_block(num: int, block: list, diam: int) -> list:
+    """Shift a block of offsets for prime searching."""
+    block_min = num - num % diam
+    
+    return [ block_min + x for x in block ]
 
-    if num_primes == None:
-        num_primes = 1
+##############################
+
+def _restrict_block(block: list, l_bd=None, u_bd=None) -> list:
+    if l_bd:
+        block = [ x for x in block if x >= l_bd ]
+    if u_bd:
+        block = [ x for x in block if x < u_bd ]
+    
+    return block
+
+##############################
+
+def _next_block(block: list, diam: int) -> list:
+    return [ x + diam for x in block ]
+
+##############################
+
+def _prev_block(block: list, diam: int) -> list:
+    return [ x - diam for x in block ]
+
+##############################
+
+def next_prime_gen(num: int,
+        block_primes=None, mr_wit=None, l_wit=None):
+    """Generate the next primes."""
+    if num < 1:
+        num == 1
+    if block_primes is None:
+        block_primes = _choose_primes(num)
+    block, diam = _generate_block(block_primes)
+    block = _shift_block(num, block, diam)
+    preblock = _restrict_block(block, l_bd=num+1)
+    if preblock:
+        for x in preblock:
+            if is_prime(x, mr_wit, l_wit):
+                yield x
+    while True:
+        block = _next_block(block, diam)
+        for x in block:
+            if is_prime(x, mr_wit, l_wit):
+                yield x
+
+##############################
+
+def next_prime(num: int,
+        block_primes=None, mr_wit=None, l_wit=None) -> int:
+    """Find the next prime."""
+    gen = next_prime_gen(num, block_primes, mr_wit, l_wit)
+    return next(gen)
+
+##############################
+
+def next_primes(num: int, num_primes: int,
+        block_primes=None, mr_wit=None, l_wit=None) -> list:
+    """Find the next primes."""
+    if num < 2:
+        primes = [2]
+        num = 2
+    else:
+        primes = []
+
+    gen = next_prime_gen(num, block_primes, mr_wit, l_wit)
+    while len(primes) < num_primes:
+        primes.append( next(gen) )
+
+    return primes
+
+##############################
+
+def prev_prime_gen(num: int,
+        block_primes=None, mr_wit=None, l_wit=None):
+    """Generate the previous primes."""
+    if block_primes is None:
+        block_primes = _choose_primes(num)
+    block, diam = _generate_block(block_primes)
+    block = _shift_block(num, block, diam)
+    preblock = _restrict_block(block, u_bd=num)
+    if preblock:
+        for x in reversed(preblock):
+            if is_prime(x, mr_wit, l_wit):
+                yield x
+    while True:
+        block = _prev_block(block, diam)
+        for x in reversed(block):
+            if block[0] == 1 and x < max(block_primes):
+                for y in reversed(block_primes):
+                    yield y
+                raise StopIteration('Iterator is empty')
+            elif is_prime(x, mr_wit, l_wit):
+                yield x
+
+##############################
+
+def prev_prime(num: int, 
+        block_primes=None, mr_wit=None, l_wit=None) -> int:
+    """Find the previous prime."""
     if num < 3:
         return None
-    if num == 3:
-        if num_primes == 1:
-            return 2
-        else:
-            return [2]
-
-    result = []
-    num_list, block, diameter = _test_block(num)
-    r = num % diameter
-    preblock = [ x for x in block if x < r ]
-    lower = num - r
-    for x in reversed(preblock):
-        if (len(result) < num_primes) and is_prime(lower + x, num_mr, num_l):
-            result.append(lower + x)
-    lower -= diameter
-
-    while len(result) < num_primes:
-        for x in reversed(block):
-            if is_prime(lower + x, num_mr, num_l):
-                result.append(lower + x)
-            if len(result) == num_primes:
-                break
-        if min(result) <= 11:
-            for p in [7, 5, 3, 2]:
-                if (p < num) and (p not in result)\
-                        and (len(result) < num_primes):
-                    result.append(p)
-            break
-        lower -= diameter 
-
-    if num_primes == 1:
-        return result[0]
+    elif num == 3:
+        return 2
     else:
-        return result
+        gen = prev_prime_gen(num, block_primes, mr_wit, l_wit)
+        return next(gen)
 
 ##############################
 
-def primes_in_range(l_bd, u_bd, p_list=None, num_mr=None, num_l=None):
-    """
-    Find primems in a range.
+def prev_primes(num: int, num_primes: int,
+        block_primes=None, mr_wit=None, l_wit=None) -> list:
+    """Find the previous primes."""
+    if num < 6:
+        return [ x for x in [5, 3, 2] if x < num ]
+    gen = prev_prime_gen(num, block_primes, mr_wit, l_wit)
+    
+    primes = []
+    while len(primes) < num_primes and 2 not in primes:
+        primes.append( next(gen) )
+    
+    return primes
 
-    Keyword arguments:
-    l_bd -- lower bound, any integer
-    u_bd -- upper bound, any integer
-    p_list -- list of small prime numbers for creating a test block
-    num_mr -- number of Miller-Rabin witnesses for primality testing
-    num_l -- number of Lucas witness pairs for primality testing
+##############################
+
+def primes_in_range(l_bd: int, u_bd: int,
+        block_primes=None, mr_wit=None, l_wit=None) -> list:
+    """
+    Find primes in a range.
 
     Return:
     list of primes between l_bd (inclusive) and u_bd (exclusive)
     """
-
-    if u_bd - l_bd < 2:
-        return None
-    num_list, block, diameter = _test_block(u_bd, p_list)
-    if l_bd < max(num_list):
-        result = [ x for x in num_list if x >= l_bd ]
-        l_bd = max(num_list) + 1
-    elif is_prime(l_bd, num_mr, num_l):
-        result = [ l_bd ]
-    else:
-        result = []
-
-    lower = l_bd - (l_bd % diameter)
-    for x in block:
-        if (lower + x > l_bd)\
-                and (lower + x < u_bd)\
-                and is_prime(lower + x, num_mr, num_l):
-            result.append(lower + x)
-    lower += diameter
-    while lower < u_bd - (u_bd % diameter):
-        for x in block:
-            if is_prime(lower + x, num_mr, num_l):
-                result.append(lower + x)
-        lower += diameter
-    for x in block:
-        if (lower + x < u_bd) and is_prime(lower + x, num_mr, num_l):
-            result.append(lower + x)
-
-    return result
+    if block_primes is None:
+        block_primes = _choose_primes( u_bd - l_bd )
+    gen = next_prime_gen(l_bd - 1, block_primes, mr_wit, l_wit)
+    
+    primes = [ p for p in block_primes if p >= l_bd and p < u_bd ]
+    while True:
+        p = next(gen)
+        if p < u_bd:
+            primes.append(p)
+        else:
+            break
+    
+    return primes
 
 ##############################
 
-def next_twin_primes(num, num_mr, num_l):
+def next_twin_primes(num: int, mr_wit=None, l_wit=None) -> tuple:
     """
     Find next pair of twin primes.
-    
-    Keyword arguments:
-    num -- any integer
-    num_mr -- number of Miller-Rabin witnesses for primality testing
-    num_l -- number of Lucas witness pairs for primality testing
 
-    Return:
-    pair of twin primes 'after' num
-
-    Additional comments:
+    Comments:
     1. if num is in between or part of a twin prime pair,
         then that pair will be returned.
     2. this is a 'dangerous' function until Twin Prime Conjecture is proved. ;]
@@ -589,79 +579,63 @@ def next_twin_primes(num, num_mr, num_l):
 
     if num < 4:
         return 3, 5
-    p = next_prime(num - 2, num_mr, num_l)
+    p = next_prime(num - 2, mr_wit, l_wit)
     while not is_prime(p+2):
-        p = next_prime(p+2, num_mr, num_l)
+        p = next_prime(p+2, mr_wit, l_wit)
 
     return p, p+2
 
 ##############################
 
-def prev_twin_primes(num, num_mr, num_l):
+def prev_twin_primes(num: int, mr_wit=None, l_wit=None) -> tuple:
     """
     Find previous pair of twin primes.
-    
-    Keyword arguments:
-    num -- any integer
-    num_mr -- number of Miller-Rabin witnesses for primality testing
-    num_l -- number of Lucas witness pairs for primality testing
 
-    Return:
-    pair of twin primes 'before' num
-
-    Additional comment:
+    Comment:
     if num is in between or part of a twin prime pair,
         then that pair will be returned.
     """
 
     if num < 4:
         return None
-    p = prev_prime(num + 2, num_mr, num_l)
+    p = prev_prime(num + 2, mr_wit, l_wit)
     while not is_prime(p-2):
-        p = prev_prime(p-2, num_mr, num_l)
+        p = prev_prime(p-2, mr_wit, l_wit)
 
     return p-2, p
 
 ##############################
 
-def prime_count(num, rate=None, num_mr=None, num_l=None):
+def prime_count(yield_values, mr_wit=None, l_wit=None):
     """
     The prime-counting function pi(x).
-
-    Keyword arguments:
-    num -- any integer
-    rate -- integer dictating how often to yield partial results
-    num_mr -- number of Miller-Rabin witnesses for primality testing
-    num_l -- number of Lucas witness pairs for primality testing
-
+    
     Return:
-    the number of primes less than or equal to num
+    the number of primes less than or equal to each of yield_values
 
-    Additional comment:
-    this is computationally laborious, so it will yield values
-    spaced every rate until num
+    Comment:
+    yield_values should be a tuple or generator
     """
+    start = 1
+    count = 0
 
-    if rate is None:
-        rate = default_values('prime_count_rate')
-    if num <= rate:
-        return len(primes_in_range(2, num, num_mr=num_mr, num_l=num_l))
-    else:
-        curr_val = 2
-        next_val = rate
-        prime_count = 0
-        while curr_val < num - (num % rate):
-            print('number of primes up to {}'.format(next_val))
-            prime_count += len(primes_in_range(\
-                    curr_val, next_val, num_mr=num_mr, num_l=num_l))
-            curr_val, next_val = next_val, next_val + rate
-            yield prime_count
+    if isinstance(yield_values, tuple):
+        yield_values = (y for y in yield_values)
 
-        prime_count += len(primes_in_range(\
-                curr_val, num, num_mr=num_mr, num_l=num_l))
-        return prime_count
-
-
+    end = next(yield_values)
+    yield_ability = True
+    while True:
+        if not yield_ability:
+            yield None
+        else:
+            count += len(primes_in_range(
+                start, end, mr_wit=mr_wit, l_wit=l_wit))
+            try:
+                yield end, count
+                start, end = end, next(yield_values)
+            except StopIteration:
+                print('Iterator is empty')
+                yield_ability = False
 
 
 
@@ -733,42 +707,35 @@ if __name__ == '__main__':
         assert( prime_to(num_list) == result )
 
     ##########################
-    #   test next_prime
+    #   test next_primes
     for j in range(5):
         num = randint(2,10**6)
         num_primes = randint(1,11)
-        primes = next_prime(num, num_primes)
-        if num_primes == 1:
-            assert( is_prime(primes) )
-            for x in range(num+1, primes):
+        primes = next_primes(num, num_primes)
+        for p in primes:
+            assert( is_prime(p) )
+        for x in range(num + 1 + num%2, max(primes)+1,2):
+            if x not in primes:
                 assert( not is_prime(x) )
-        else:
-            for p in primes:
-                assert( is_prime(p) )
-            for x in range(num + 1 + num%2, max(primes)+1,2):
-                if x not in primes:
-                    assert( not is_prime(x) )
+    small_primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+    for i in range(9):
+        assert( next_prime(small_primes[i]) == small_primes[i+1] )
 
     ##########################
-    #   test prev_prime
+    #   test prev_primes
     for j in range(5):
         num = randint(40,10**6)
         num_primes = randint(1,11)
-        primes = prev_prime(num, num_primes)
-        if num_primes == 1:
-            assert( is_prime(primes) )
-            for x in range(primes+1, num):
+        primes = prev_primes(num, num_primes)
+        for p in primes:
+            assert( is_prime(p) )
+        for x in range(min(primes) + 2, num - num%2, 2):
+            if x not in primes:
                 assert( not is_prime(x) )
-        else:
-            for p in primes:
-                assert( is_prime(p) )
-            for x in range(min(primes) + 2, num - num%2, 2):
-                if x not in primes:
-                    assert( not is_prime(x) )
     assert( prev_prime(2) is None )
     small_primes = [29, 23, 19, 17, 13, 11, 7, 5, 3, 2]
     for i in range(3,31):
-        assert( prev_prime(i,10) == [x for x in small_primes if x < i] )
+        assert( prev_primes(i,10) == [x for x in small_primes if x < i] )
 
     ##########################
     #   test primes_in_range
