@@ -1,13 +1,18 @@
 
 totally transferred:
-	numth
+	numth,
+		including:
+		Rational class
+		mod_inverse
+		mod_power
+		jacobi
 	primality
 
 next:
-	add Rational class to numth
 	add sqrt to numth
 	work on factorization module
 	add Mod class to numth
+	add other modular functions to numth
 	expand Mod class to include order, etc
 	sums of squares
 	add Quadratic class to numth
