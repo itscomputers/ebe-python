@@ -7,7 +7,7 @@ import number_theory as nt
 ##############################
 
 def newton_iteration( value, f, df ):
-    
+        
     value = Decimal(value)
     return value - f(value) / df(value)
 

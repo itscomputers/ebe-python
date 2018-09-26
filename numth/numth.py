@@ -3,18 +3,13 @@
 
 ##############################
 
-def default_values(kind):
-    if kind == 'frac_to_dec':
-        return 20
-
-##############################
-
-def div(num: int, div: int, METHOD=None) -> (int, int):
+def div(num, div, SMALL_REM=False):
     """
     Performs division and returns the quotient and remainder.
 
-    Keyword arguments:
-    METHOD -- None (default) or SMALL (for small remainders)
+    Example:
+    div(60, 13) = 4, 8
+    div(60, 13, SMALL_REM=True) = 5, -5
     """
     if div == 0:
         raise ValueError('Attempted division by zero')
@@ -24,7 +19,7 @@ def div(num: int, div: int, METHOD=None) -> (int, int):
     else:
         q, r = num//div + 1, (num%div) + abs(div)
 
-    if (METHOD == 'SMALL') and (r > abs(div)//2):
+    if (SMALL_REM) and (r > abs(div)//2):
         q += div // abs(div)
         r -= abs(div)
 
@@ -32,13 +27,8 @@ def div(num: int, div: int, METHOD=None) -> (int, int):
 
 ##############################
 
-def euclidean_algorithm(a: int, b: int, METHOD=None) -> None:
-    """
-    Prints the Euclidean algorithm on two integers.
-
-    Keyword arguments:
-    METHOD -- None (default) or SMALL (for small remainders)
-    """
+def euclidean_algorithm(a, b, SMALL_REM=False):
+    """Prints the Euclidean algorithm on two integers."""
     q, r = div(a, b, METHOD)
     print('{} = {} * {} + {}'.format(a, q, b, r))
     if r != 0:
@@ -46,28 +36,26 @@ def euclidean_algorithm(a: int, b: int, METHOD=None) -> None:
 
 ##############################
 
-def gcd(a: int, b: int) -> int:
+def gcd(a, b):
     """Computes the greatest common divisor of two integers."""
     if (a, b) == (0, 0):
         raise ValueError('gcd(0, 0) is undefined')
-    
-    a_, b_ = a, b
-    while b_ != 0:
-        a_, b_ = b_, div(a_, b_, METHOD='SMALL')[1]
-    return abs(a_)
+    while b != 0:
+        a, b = b, a%b
+    return abs(a)
 
 ##############################
 
-def lcm(a: int, b: int) -> int:
+def lcm(a, b):
     """Computes the least common multiple of two integers."""
-    if a*b == 0:
+    if a * b == 0:
         raise ValueError('lcm(_,0) is undefined')
     
-    return a // gcd(a, b) * b
+    return abs(a // gcd(a, b) * b)
 
 ##############################
 
-def bezout(a: int, b: int) -> (int, int):
+def bezout(a, b):
     """
     Computes an integer solution to Bezout's lemma.
 
@@ -101,7 +89,7 @@ def bezout(a: int, b: int) -> (int, int):
         
 ##############################
 
-def padic(num: int, base: int) -> (int, int):
+def padic(num, base):
     """
     Computes p-adic representation of a number.
 
@@ -118,9 +106,13 @@ def padic(num: int, base: int) -> (int, int):
         rest //= base
     return exp, rest
 
-##############################
+############################################################
+############################################################
+#       Modular functions
+############################################################
+############################################################
 
-def mod_inverse(num: int, mod: int) -> int:
+def mod_inverse(num, mod):
     """
     Computes the inverse of a number relative to a modulus.
 
@@ -136,7 +128,7 @@ def mod_inverse(num: int, mod: int) -> int:
 
 ##############################
 
-def mod_power(num: int, exp: int, mod: int) -> int:
+def mod_power(num, exp, mod):
     """
     Computes power of a number relative to a modulus.
 
@@ -153,7 +145,7 @@ def mod_power(num: int, exp: int, mod: int) -> int:
 
 ##############################
 
-def jacobi(a: int, b: int) -> int:
+def jacobi(a, b):
     """
     Computes Jacobi symbol for two integers.
 
@@ -181,249 +173,6 @@ def jacobi(a: int, b: int) -> int:
             sgn *= -1
         return sgn * jacobi(b, a_)
 
-##############################
-
-
-
-############################################################
-############################################################
-#       Rational class
-############################################################
-############################################################
-
-class Rational:
-    """Class for arithmetic in rational numbers."""
-    def __init__(self, numer: int, denom: int) -> None:
-        if denom == 0:
-            raise ValueError('Attempt to divide by zero')
-        
-        if numer * denom < 0:
-            sgn = -1
-        else:
-            sgn = 1
-        d = gcd(numer, denom)
-        self.numer = sgn * abs(numer) // d
-        self.denom = abs(denom) // d
-
-    def __repr__(self):
-        if self.numer * self.denom < 0:
-            sgn = -1
-        else:
-            sgn = 1
-        if self.denom == 1:
-            return '{}'.format(self.numer)
-        else:
-            return '{}/{}'.format(self.numer, self.denom)
-
-    ##########################
-    
-    def inverse(self):
-        return Rational(self.denom, self.numer)
-
-    ##########################
-
-    def __add__(self, other):
-        other = frac(other)
-        d = gcd(self.denom, other.denom)
-        self_sc = other.denom // d
-        other_sc = self.denom // d
-        new_numer = (self.numer * self_sc) + (other.numer * other_sc)
-        new_denom = (self.denom // d) * other.denom
-        return Rational(new_numer, new_denom)
-
-    def __radd__(self, other):
-        return self + other
-
-    def __iadd__(self, other):
-        return self + other
-
-    ##########################
-
-    def __sub__(self, other):
-        other = frac(other)
-        return self + Rational(-other.numer, other.denom)
-
-    def __rsub__(self, other):
-        return -self + other
-
-    def __isub__(self, other):
-        return self - other
-
-    ##########################
-
-    def __mul__(self, other):
-        other = frac(other)
-        return Rational( self.numer * other.numer, self.denom * other.denom )
-
-    def __rmul__(self, other):
-        return self * other
-
-    def __imul__(self, other):
-        return self * other
-
-    ##########################
-
-    def __truediv__(self, other):
-        other = frac(other)
-        return self * other.inverse()
-
-    def __rtruediv__(self, other):
-        return self.inverse() * other
-
-    def __itruediv__(self, other):
-        return self / other
-
-    ##########################
-
-    def __pow__(self, other):
-        return Rational( pow(self.numer, other), pow(self.denom, other) )
-
-    def __ipow__(self, other):
-        return self**other
-
-    ##########################
-
-    def __mod__(self, other):
-        inv_denom = mod_inverse(self.denom, other)
-        return (self.numer * inv_denom) % other
-
-    def __imod__(self, other):
-        return self % other
-
-    ##########################
-
-    def __neg__(self):
-        return Rational(-self.numer, self.denom)
-
-    def __abs__(self):
-        return Rational(abs(self.numer), self.denom)
-
-    def __int__(self):
-        return self.numer // self.denom
-
-    def __float__(self):
-        return self.numer / self.denom
-
-    def __round__(self):
-        return round(float(self))
-
-    ##########################
-
-    def __eq__(self, other):
-        other = frac(other)
-        return (self.numer * other.denom) == (other.numer * self.denom)
-
-    def __ne__(self, other):
-        return not (self == other)
-
-    def __lt__(self, other):
-        other = frac(other)
-        return (self.numer * other.denom) < (other.numer * self.denom)
-
-    def __ge__(self, other):
-        return not (self < other)
-
-    def __gt__(self, other):
-        other = frac(other)
-        return (self.numer * other.denom) > (other.numer * self.denom)
-
-    def __le__(self, other):
-        return not (self > other)
-
-    ##########################
-
-    def decimal(self, num_digits=None):
-        """Write a rational number as a decimal."""
-        whole = int(self)
-        if num_digits is None:
-            num_digits = default_values('frac_to_dec')
-        if num_digits == 0:
-            return whole
-        remainder = self.numer % self.denom
-        frac = '.'
-        while len(frac) < num_digits:
-            remainder *= 10
-            next_digit = remainder // self.denom
-            frac += str(next_digit)
-            remainder %= self.denom
-        remainder *= 10
-        next_digit = remainder // self.denom
-        remainder %= self.denom
-        if 2 * remainder >= self.denom:
-            next_digit += 1
-        frac += str(next_digit)
-        return str(whole) + frac
-
-############################################################
-
-def int_to_rational(a: int) -> Rational:
-    """Convert an integer to a rational number."""
-    return Rational(a, 1)
-
-def float_to_rational(a: float) -> Rational:
-    """Convert a float to a rational number."""
-    whole, frac = str(a).split('.')
-    return Rational( int(whole + frac), 10**len(frac) )
-
-def frac_to_rational(frac: str) -> Rational:
-    """Convert a string 'a/b' to a rational number."""
-    numer, denom = frac.split('/')
-    numer.strip(' ', '')
-    denom.replace(' ', '')
-    return Rational( int(numer), int(denom) )
-
-def repeating_dec_to_rational(initial, repeat: int) -> Rational:
-    """
-    Convert a repeating decimal to a rational number.
-
-    Comment:
-    To convert 3.24178178178178... to a fraction, use input (3.24, 178)
-    """
-    period = len(str(repeat))
-    if '.' not in str(initial):
-        displace = 0
-    else:
-        displace = len(str(initial).split('.')[-1])
-    first = Rational(repeat, 10**(displace + period))
-    one_minus_r = Rational(1) - Rational(1, 10**period)
-    return float_to_rational(initial) + (first / one_minus_r)
-
-def str_to_rational(s: str) -> Rational:
-    """Convert a string to a rational number."""
-    try:
-        return frac_to_rational(s)
-    except:
-        pass
-    try:
-        return repeating_dec_to_rational(s)
-    except:
-        pass
-    try:
-        return frac( float(s) )
-    except:
-        pass
-    try:
-        return frac( int(s) )
-    except Exception as e:
-        raise TypeError(e)
-
-def frac(a, b=None) -> Rational:
-    """A shortcut function for creating an instance of the Rational class."""
-    if b:
-        return Rational(a, b)
-    elif isinstance(a, Rational):
-        return a
-    elif isinstance(a, int):
-        return int_to_rational(a)
-    elif isinstance(a, float):
-        return float_to_rational(a)
-    elif isinstance(a, str):
-        return str_to_rational(a)
-    else:
-        raise ValueError('Cannot convert to rational number')
-
-############################################################
-############################################################
 
 
 
@@ -512,44 +261,3 @@ if __name__ == '__main__':
     jacobi_row_15 = [0,1,1,0,1,0,0,-1,1,0,0,-1,0,-1,-1]
     assert( [jacobi(a, 15) for a in range(15)] == jacobi_row_15 )
 
-    ##########################
-    #   test Rational class
-    a = frac(3,4)
-    b = frac(.4)
-    c = frac(3)
-    assert( a + b == frac(23,20) and a + b == 1.15 )
-    assert( a + c == frac(15,4) and a + c == 3.75 )
-    assert( b + c == frac(17,5) and b + c == 3.4 )
-    assert( a + 3 == a + c and 3 + a == a + c )
-    assert( a + b == b + a and a + c == c + a and b + c == c + b )
-    assert( a - b == frac(7,20) and a - b == .35 )
-    assert( a - c == frac(-9,4) and a - c == -2.25 )
-    assert( b - c == frac(-13,5) and b - c == -2.6 )
-    assert( a - b == -b + a and a - c == -c + a and b - c == -c + b )
-    assert( b - a == -a + b and c - a == -a + c and c - b == -b + c )
-    assert( a - 3 == a - c and 3 - a == c - a )
-    assert( a * b == frac(3,10) and a * b == .3 )
-    assert( a * c == frac(9,4) and a * c == 2.25 )
-    assert( b * c == frac(6,5) and b * c == 1.2 )
-    assert( a * b == b * a and a * c == c * a and b * c == b * c )
-    assert( a * 3 == a * c and 3 * a == c * a )
-    assert( a / b == frac(15,8) and a / b == 1.875 )
-    assert( a / c == frac(1,4) and a / c == .25 )
-    assert( c / b == frac(15,2) and c / b == 7.5 )
-    assert( a / b == 1 / (b / a)\
-            and a / c == 1 / (c / a)\
-            and b / c == 1 / (c / b) )
-    assert( a / 3 == a / c and 3 / a == c / a )
-    assert( a + a == 2 * a and a - a == 0 )
-    assert( b * b == b**2 and b / b == 1 )
-    assert( a.inverse() * a == 1 )
-    assert( b.inverse() * b == 1 )
-    assert( c.inverse() * c == 1 )
-    assert( int(a) == 0 and int(b) == 0 )
-    assert( round(a) == 1 and round(b) == 0 )
-    assert( float(a) == .75  and float(b) == .4 )
-    assert( -a == frac(-3,4) and -b == frac(-.4) )
-    assert( abs(-a) == a and abs(-b) == b )
-    assert( b < a and a < c and b < c )
-    assert( -b > -a and -a > -c and -b > -c )
-    assert( a % 13 == 4 and b % 13 == 3 )

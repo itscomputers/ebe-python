@@ -2,21 +2,21 @@
 totally transferred:
 	numth,
 		including:
-		Rational class
 		mod_inverse
 		mod_power
 		jacobi
 	primality
+	polynomial
+	rational
 
 next:
-	add sqrt to numth
 	work on factorization module
-	add Mod class to numth
+	add modular classes
 	add other modular functions to numth
+	tests
 	expand Mod class to include order, etc
 	sums of squares
 	add Quadratic class to numth
-	add std approx to numth
 	add ContinuedFraction class
 	factorization in rings of integers?
 

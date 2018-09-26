@@ -3,10 +3,7 @@
 
 from random import randint
 from concurrent.futures import ProcessPoolExecutor, wait
-if __name__ == '__main__':
-    from numth import padic, mod_power, gcd, jacobi
-else:
-    from .numth import padic, mod_power, gcd, jacobi
+import numth.numth as numth
 
 ##############################
 
@@ -49,8 +46,8 @@ def miller_rabin_witness(num: int, wit: int) -> str:
     'composite' -- if wit detects that num is composite
     'probable prime' -- otherwise
     """
-    exp, init = padic(num - 1, 2)
-    x = mod_power(wit, init, num)
+    exp, init = numth.padic(num - 1, 2)
+    x = numth.mod_power(wit, init, num)
 
     if x in [1, num-1]:
         return 'probable prime'
@@ -203,17 +200,17 @@ def lucas_witness(num: int, P: int, Q: int) -> str:
     that make it more likely to be prime.
     """
     D = P**2 - 4*Q
-    gcd_D = gcd(D, num)
-    gcd_P = gcd(P, num)
-    gcd_Q = gcd(Q, num)
+    gcd_D = numth.gcd(D, num)
+    gcd_P = numth.gcd(P, num)
+    gcd_Q = numth.gcd(Q, num)
     for g in (gcd_D, gcd_P, gcd_Q):
         if g == num:
             raise ValueError('Bad parameters: {}, {}'.format(P, Q))
         elif g > 1:
             return 'composite'
 
-    delta = num - jacobi(D, num)
-    s, d = padic(delta, 2)
+    delta = num - numth.jacobi(D, num)
+    s, d = numth.padic(delta, 2)
     strong = False
 
     U, V, Q_ = _lucas_sequence_by_index(d, P, Q, num)
@@ -229,10 +226,10 @@ def lucas_witness(num: int, P: int, Q: int) -> str:
         if delta == num + 1:
             if V != (2*Q) % num:
                 return 'composite'
-            if Q_ != (Q * jacobi(Q, num)) % num:
+            if Q_ != (Q * numth.jacobi(Q, num)) % num:
                 return 'composite'
         else:
-            if Q_ != jacobi(Q, num) % num:
+            if Q_ != numth.jacobi(Q, num) % num:
                 return 'composite'
         if strong:
             return 'strong probable prime'
@@ -252,7 +249,7 @@ def _generate_lucas_witness_pairs(num: int, num_wit=None) -> list:
     sgn = 1
     counter = 0   ## after i make a decent square root, this will be slow
     while len(witnesses) < num_wit // 2 + 1:
-        if (jacobi(D*sgn, num) == -1):
+        if (numth.jacobi(D*sgn, num) == -1):
             witnesses.append( (1, (1 - D)//4) )
         D += 2
         sgn *= 1
@@ -377,7 +374,7 @@ def prime_to(nums: tuple, mr_wit=None, l_wit=None) -> list:
     if is_prime(val, mr_wit, l_wit):
         result = [ x for x in range(1, val) ]
     else:
-        result = [ x for x in range(1, val) if gcd(x, val) == 1 ]
+        result = [ x for x in range(1, val) if numth.gcd(x, val) == 1 ]
     
     for num in nums[1:]:
         orig = [ x for x in result ]
