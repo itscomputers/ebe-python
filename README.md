@@ -1,2 +1,2 @@
-# number-theory-library
-a (n unfinished but in progress) number theory library
+# numth
+a (n unfinished but in progress) number theory package
