@@ -77,12 +77,19 @@ class Polynomial:
     ##########################
 
     def eval(self, val):
-        result = 0
         def term(coeff, power):
             return coeff * val**power
         powers = itertools.count(0)
         return sum(map(term, self.coeffs, powers))
 
+    ##########################
+
+    def mod_eval(self, val, mod):
+        def term(coeff, power):
+            return (coeff * pow(val, power, mod)) % mod
+        powers = itertools.count(0)
+        return sum(map(term, self.coeffs, powers))
+    
     ##########################
 
     def deriv(self, order=None):
