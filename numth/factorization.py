@@ -9,29 +9,40 @@ import numth.rational as rational
 import math
 from random import randint
 import itertools
-from concurrent.futures import TimeoutError, wait
 import pebble
+from concurrent.futures import wait
 
 ##############################
 
 def _default_values(cat):
     if cat == 'small primes bound':
-        return 100
+        return 1000
     if cat == 'rho seeds':
         return [2, 3] + [ randint(4,10**10) for j in range(2) ]
     if cat == 'rho polyns':
         return [(1,0,1), (1,0,0,0,1)]
     if cat == 'p-1 seeds':
         return [2, 3] + [ randint(4,10**10) for j in range(2) ]
-    if cat == 'divisor timeout':
-        return 1
     if cat == 'prime base':
         return primality.primes_in_range(2,1000)
 
-##############################
+############################################################
+############################################################
+#       Total Factorization
+############################################################
+############################################################
 
-def find_divisor(num, rs=[], rp=[], ms=[], mp=False):
-    """Find a divisor of a number."""
+def find_divisor(num, rs=[], rp=[], ms=[]):
+    """
+    Find a divisor of a number.
+    
+    Args:   num: int
+            rs: list (pollard_rho seeds)
+            rp: list (pollard_rho polynomials)
+            ms: list (pollard_p_minus_one seeds)
+
+    Return: d: int (divisor of num)
+    """
     if rs == []:
         rs = _default_values('rho seeds')
     if rp == []:
@@ -39,40 +50,29 @@ def find_divisor(num, rs=[], rp=[], ms=[], mp=False):
     if ms == []:
         ms = _default_values('p-1 seeds')
 
-    if not mp:
-        for s, p in itertools.product(rs, rp):
-            d = pollard_rho(num, s, p)
-            if d < num:
-                return d
-        for s in ms:
-            d = pollard_p_minus_one(num, s)
-            if d < num:
-                return d
-    else:
-        futures = []
-        divisor = num
-        with pebble.ProcessPool() as pool:
-            for s, p in itertools.product(rs, rp):
-                futures.append(pool.schedule( pollard_rho, (num, s, p) ))
-            for s in ms:
-                futures.append(pool.schedule( pollard_p_minus_one, (num, s) ))
-            while divisor == num:
-                wait(futures, return_when='FIRST_COMPLETED')
-                for x in futures:
-                    if x.done():
-                        divisor = x.result()
-                        if divisor == num:
-                            futures.remove(x)
-            for x in futures:
-                x.cancel()
-        return divisor
+    for p, s in itertools.product(rp, rs):
+        d = pollard_rho(num, s, p)
+        if d < num:
+            return d
+    for s in ms:
+        d = pollard_p_minus_one(num, s)
+        if d < num:
+            return d
 
 ##############################
 
-def trivial_divisors(num, prime_base):
-    """Find prime divisors of a number up to a given bound."""
+def trivial_divisors(num, pb):
+    """
+    Find prime divisors of a number from a prime base.
+    
+    Args:   num: int
+            pb: list (prime numbers)
+
+    Return: primes: list (prime divisors of num from pb)
+            num: int (leftover number after dividing num by prime divisors)
+    """
     primes = []
-    for p in prime_base:
+    for p in pb:
         if num % p == 0:
             exp, num = numth.padic(num, p)
             primes = primes + [p] * exp
@@ -82,7 +82,16 @@ def trivial_divisors(num, prime_base):
 ##############################
 
 def nontrivial_divisors(num, rs=[], rp=[], ms=[]):
-    """Find nontrivial prime divisors of a number."""
+    """
+    Find nontrivial prime divisors of a number.
+
+    Args:   num: int
+            rs: list
+            rp: list
+            ms: list
+
+    Return: primes: list (prime divisors of num)
+    """
     if primality.is_prime(num):
         return [num]
     sqrt = rational.integer_sqrt(num)
@@ -99,8 +108,18 @@ def nontrivial_divisors(num, rs=[], rp=[], ms=[]):
 
 ##############################
 
-def factor(num, prime_base=None, rs=[], rp=[], ms=[]):
-    """Factor a number into prime divisors."""
+def factor(num, pb=None, rs=[], rp=[], ms=[]):
+    """
+    Factor a number into prime divisors.
+    
+    Args:   num: int
+            pb: list
+            rs: list
+            rp: list
+            ms: list
+
+    Return: primes: list (prime divisors of num, sorted)
+    """
     if num < 2:
         return None
     if primality.is_prime(num):
@@ -114,21 +133,58 @@ def factor(num, prime_base=None, rs=[], rp=[], ms=[]):
     
     return sorted(small_primes + nontrivial_divisors(num, rs, rp, ms))
 
+##############################
 
-
+def find_divisor_mp(num, rs=[], rp=[], ms=[], to=None):
+    """
+    Find a divisor of a number using multiprocessing.
     
+    Args:   num: int
+            rs: list
+            rp: list
+            ms: list
+            to: int (timeout)
 
+    Return: d: int (divisor, or num itself if timeout occurs)
+    """
+    if rs == []:
+        rs = _default_values('rho seeds')
+    if rp == []:
+        rp = _default_values('rho polyns')
+    if ms == []:
+        ms = _default_values('p-1 seeds')
 
+    d = num
+    futures = []
+    with pebble.ProcessPool() as pool:
+        for p, s in itertools.product(rp, rs):
+            futures.append(pool.schedule( find_divisor, (num, rs, rp, ms) ))
+        wait(futures, timeout=to, return_when='FIRST_COMPLETED')
+        for x in futures:
+            if x.done() and x.result() < num:
+                d = x.result()
+            else:
+                x.cancel()
+    return d
 
-
+############################################################
 ############################################################
 #       Pollard's rho algorithm
 ############################################################
+############################################################
 
 def pollard_rho(num, seed, polyn):
-    """Pollard's rho algorithm for factor-finding."""
-    if not isinstance(polyn, polynomial.Polynomial):
-        polyn = polynomial.polyn(polyn)
+    """
+    Pollard's rho algorithm for factor-finding.
+    
+    Args:   num: int
+            seed: int (initial value of sequence)
+            polyn: list or tuple (polynomial used to determine sequence)
+                    e.g. (1,2,3) is the polynomial 1 + 2*x + 3*x^2
+
+    Return: d: int (divisor of num or num itself)
+    """
+    polyn = polynomial.polyn(polyn)
     def f(x):
         return polyn.mod_eval(x, num)
     xi = f(seed % num)
@@ -143,11 +199,20 @@ def pollard_rho(num, seed, polyn):
     return d
 
 ############################################################
+############################################################
 #       Pollard's p-1 algorithm
+############################################################
 ############################################################
 
 def pollard_p_minus_one(num, seed):
-    """Pollard's p-1 algorithm for factor-finding."""
+    """
+    Pollard's p-1 algorithm for factor-finding.
+    
+    Args:   num: int
+            seed: int (initial value of sequence)
+
+    Return: d: int (divisor of num, or num itself)
+    """
     d = numth.gcd(num, seed)
     if d > 1:
         return d
@@ -164,7 +229,9 @@ def pollard_p_minus_one(num, seed):
     return d
 
 ############################################################
+############################################################
 #       Williams' p+1 algorithm
+############################################################
 ############################################################
 
 def williams_p_plus_one(num, quad_int):
@@ -175,11 +242,13 @@ def williams_p_plus_one(num, quad_int):
     return None
 
 ############################################################
+############################################################
 #       Rational quadratic sieve
+############################################################
 ############################################################
 
 def add(v1, v2):
-    """Add two arrays modulo 2"""
+    """Add two arrays modulo 2."""
     return [ b1 ^ b2 for b1, b2 in zip(v1, v2) ]
 
 ##############################
@@ -225,8 +294,39 @@ def append_new_row(new_row, nums):
 
     return nums_copy
 
-##############################
+############################################################
+############################################################
+#       Factorize class
+############################################################
+############################################################
 
+class Factorize:
+    """Factorize class."""
 
+    def __init__(self, num):
+        """Initialize with number."""
+        self.num = num
+        self.factorization = factor(num)
 
+    def __repr__(self):
+        """Print the factorization of num."""
+        factors = []
+        for prime, exp in sorted( self.multiplicity().items() ):
+            if exp == 1:
+                factors.append(str(prime))
+            else:
+                factors.append('{}^{}'.format(prime, exp))
+        return ' * '.join(factors)
+
+    def multiplicity(self):
+        """Find factorization of num with multiplicity."""
+        return { prime : self.factorization.count(prime)\
+                    for prime in sorted(set(self.factorization)) }
+
+    def divisors(self):
+        """Find all divisors of num."""
+        divs = [1]
+        for p in self.factorization:
+            divs = divs + [ p * d for d in divs if p * d not in divs ]
+        return sorted(divs)
 
