@@ -167,10 +167,8 @@ class Polynomial:
     def __add__(self, other):
         if isinstance(other, int):
             other = Polynomial(other)
-
         self_other = list(itertools.zip_longest(
             self.coeffs, other.coeffs, fillvalue=0))
-
         return Polynomial( tuple(map(sum, self_other)) )
 
     def __radd__(self, other):
