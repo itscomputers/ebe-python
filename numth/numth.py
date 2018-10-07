@@ -5,11 +5,13 @@
 
 def div(num, div, SMALL_REM=False):
     """
-    Performs division and returns the quotient and remainder.
+    Division algorithm.
 
-    Example:
-    div(60, 13) = 4, 8
-    div(60, 13, SMALL_REM=True) = 5, -5
+    Args:   int:    num, div        div != 0
+            bool:   SMALL_REM       True -> |r| <= |div|/2
+                                    False -> 0 <= r < |div|
+
+    Return: int:    q, r            a == q * b + r
     """
     if div == 0:
         raise ValueError('Attempted division by zero')
@@ -28,7 +30,13 @@ def div(num, div, SMALL_REM=False):
 ##############################
 
 def euclidean_algorithm(a, b, SMALL_REM=False):
-    """Prints the Euclidean algorithm on two integers."""
+    """
+    Euclidean algorithm.
+    
+    Args:   int:    a, b        b != 0
+
+    Return: None:   prints a = q * b + r until r == 0
+    """
     q, r = div(a, b, METHOD)
     print('{} = {} * {} + {}'.format(a, q, b, r))
     if r != 0:
@@ -37,7 +45,13 @@ def euclidean_algorithm(a, b, SMALL_REM=False):
 ##############################
 
 def gcd(a, b):
-    """Computes the greatest common divisor of two integers."""
+    """
+    Greatest common divisor.
+    
+    Args:   int:    a, b        (a, b) != (0, 0)
+
+    Return: int:    largest positive integer dividing a and b
+    """
     if (a, b) == (0, 0):
         raise ValueError('gcd(0, 0) is undefined')
     while b != 0:
@@ -47,7 +61,13 @@ def gcd(a, b):
 ##############################
 
 def lcm(a, b):
-    """Computes the least common multiple of two integers."""
+    """
+    Least common multiple.
+    
+    Args:   int:    a, b        a * b != 0
+
+    Return: int:    (smallest positive integer divisible by a and b)
+    """
     if a * b == 0:
         raise ValueError('lcm(_,0) is undefined')
     
@@ -57,10 +77,11 @@ def lcm(a, b):
 
 def bezout(a, b):
     """
-    Computes an integer solution to Bezout's lemma.
+    Integer solution to Bezout's lemma.
 
-    Return:
-    x, y -- satisfying a*x + b*y == gcd(a, b)
+    Args:   int:    a, b        (a, b) != (0, 0)
+
+    Return: int:    x, y        a*x + b*y == gcd(a,b)
     """
     if (a, b) == (0, 0):
         raise ValueError('gcd(0, 0) is undefined')
@@ -91,10 +112,12 @@ def bezout(a, b):
 
 def padic(num, base):
     """
-    Computes p-adic representation of a number.
+    p-adic representation.
 
-    Return:
-    exp, rest -- satisfying num == (base**exp) * rest and rest % base != 0
+    Args:   int:    num, base       base > 1
+
+    Return: int:    exp, rest       num == (base**exp) * rest
+                                    rest % base != 0
     """
     if base < 2:
         raise ValueError('p-adic base must be at least 2')
@@ -114,12 +137,13 @@ def padic(num, base):
 
 def mod_inverse(num, mod):
     """
-    Computes the inverse of a number relative to a modulus.
+    Modular inverse.
 
-    Returns:
-    inv -- satisfying (num * inv) % mod == 1
+    Args:   int:    num, mod        mod > 1
+    
+    Return: int:    inv             (num * inv) % mod == 1
     """
-    if mod < 1:
+    if mod < 2:
         raise ValueError('Modulus must be at least 2')
     if gcd(num, mod) != 1:
         raise ValueError('{} is not invertible modulo {}'.format(num, mod))
@@ -130,10 +154,11 @@ def mod_inverse(num, mod):
 
 def mod_power(num, exp, mod):
     """
-    Computes power of a number relative to a modulus.
+    Power of a number relative to a modulus.
 
-    Returns:
-    (num**exp) % mod -- even for negative exp
+    Args:   int:    num, exp, mod       mod > 1
+    
+    Return: int:    val                 val == (num**exp) % mod
     """
     if mod < 2:
         raise ValueError('Modulus must be at least 2')
@@ -147,10 +172,11 @@ def mod_power(num, exp, mod):
 
 def jacobi(a, b):
     """
-    Computes Jacobi symbol for two integers.
+    Jacobi symbol.
 
-    Returns:
-    the Jacobi symbol ( a | b ) == 1, 0, or -1
+    Args:   int:    a, b        b odd
+
+    Return: int:    val         val in [1, 0, or -1]
     """
     if b % 2 == 0:
         raise ValueError(

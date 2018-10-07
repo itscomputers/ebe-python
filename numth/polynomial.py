@@ -12,8 +12,19 @@ import numth.numth as numth
 ############################################################
 
 class Polynomial:
+    """
+    Polynomial class with integer coefficients.
 
+    Args:   tuple/list/int:     coeffs
+            (int, ):            *rest
+
+    Example:    for polynomial 1 + 2*x + 3*x^3, can use
+                Polynomial(1,2,0,3) or 
+                Polynomial((1,2,0,3)) or
+                Polynomial([1,2,0,3])
+    """
     def __init__(self, coeff, *rest):
+        """Initialize polynomial."""
         if isinstance(coeff, tuple):
             self.coeffs = coeff
         elif isinstance(coeff, list):
@@ -37,7 +48,8 @@ class Polynomial:
     ##########################
 
     def __repr__(self):
-        if self.deg in [-1, 0]:
+        """Print polynomial."""
+        if self.deg < 1:
             return format(self.coeffs[0])
         else:
             def term(coeff, power):
@@ -77,14 +89,20 @@ class Polynomial:
     ##########################
 
     def eval(self, val):
-        def term(coeff, power):
-            return coeff * val**power
+        """
+        Evaluate polynomial.
+
+        Args:   int:    val
+        
+        Note:   val could actually be any type that supports arithmetic
+        """
         powers = itertools.count(0)
-        return sum(map(term, self.coeffs, powers))
+        return sum(map(lambda c, p: c*v**p, self.coeffs, powers))
 
     ##########################
 
     def mod_eval(self, val, mod):
+        """Soon deprecated"""
         def term(coeff, power):
             return (coeff * pow(val, power, mod)) % mod
         powers = itertools.count(0)
@@ -93,16 +111,21 @@ class Polynomial:
     ##########################
 
     def deriv(self, order=None):
+        """
+        Derivative of polyomial.
+
+        Args:   int:        order     order of derivative to evaluate
+
+        Return: Polynomial: derivative
+        """
         if order == 0:
             return self
         if self.deg == 0:
             return Polynomial(0)
 
-        def term(coeff, power):
-            return coeff * power
         powers = itertools.count(1)
         coeffs = self.coeffs[1:]
-        diff = tuple(map(term, coeffs, powers))
+        diff = tuple(map(lambda c, p: c*p, coeffs, powers))
 
         if (order is None) or order == 1:
             return Polynomial(diff)
@@ -112,8 +135,13 @@ class Polynomial:
     ##########################
 
     def gcd(self, other):
-        if not instance(other, Polynomial):
-            other = Polynomial(other)
+        """
+        Greatest common divisor with another polynomial.
+
+        Args:   Polynomial: other
+
+        Return: Polynomial: largest degree polyn dividing self and other
+        """
         if self.deg == -1 and other.deg == -1:
             raise ValueError('gcd(0,0) is undefined')
         if other.deg == -1:
@@ -137,7 +165,7 @@ class Polynomial:
     ##########################
 
     def __add__(self, other):
-        if not isinstance(other, Polynomial):
+        if isinstance(other, int):
             other = Polynomial(other)
 
         self_other = list(itertools.zip_longest(
@@ -154,7 +182,7 @@ class Polynomial:
     ##########################
 
     def __sub__(self, other):
-        if not isinstance(other, Polynomial):
+        if isinstance(other, int):
             other = Polynomial(other)
         return -other + self
 
@@ -167,7 +195,7 @@ class Polynomial:
     ##########################
 
     def __mul__(self, other):
-        if not isinstance(other, Polynomial):
+        if isinstance(other, int):
             other = Polynomial(other)
         def term(power):
             coeff = 0
@@ -188,7 +216,7 @@ class Polynomial:
     ##########################
 
     def __floordiv__(self, other):
-        if not isinstance(other, Polynomial):
+        if isinstance(other, int):
             other = Polynomial(other)
         if not other.monic:
             raise ValueError('Can only divide by monic polynomials')
@@ -206,7 +234,7 @@ class Polynomial:
         return Polynomial( tuple(q) )
 
     def __rfloordiv__(self, other):
-        if not isinstance(other, Polynomial):
+        if is isinstance(other, int):
             other = Polynomial(other)
         return other // self
 
@@ -231,6 +259,7 @@ class Polynomial:
     ##########################
 
     def __mod__(self, other):
+        """Maybe change this first case."""
         if isinstance(other, int):
             return Polynomial( tuple(map(lambda x: x % other, self.coeffs)) )
         else:
@@ -242,8 +271,6 @@ class Polynomial:
     ##########################
 
     def __eq__(self, other):
-        if not isinstance(other, Polynomial):
-            other = Polynomial(other)
         return abs(self).coeffs == abs(other).coeffs
 
     def __ne__(self, other):
@@ -264,6 +291,7 @@ class Polynomial:
 ############################################################
 
 def polyn(*coeffs):
+    """Shortcut for creating instance of Polynomial class."""
     return Polynomial(*coeffs)
 
 ############################################################

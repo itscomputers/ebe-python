@@ -36,12 +36,12 @@ def find_divisor(num, rs=[], rp=[], ms=[]):
     """
     Find a divisor of a number.
     
-    Args:   num: int
-            rs: list (pollard_rho seeds)
-            rp: list (pollard_rho polynomials)
-            ms: list (pollard_p_minus_one seeds)
+    Args:   int:    num
+            list:   rs          seeds for pollard_rho
+                    rp          polynomials for pollard_rho
+                    ms          seeds for pollard_p_minus_one
 
-    Return: d: int (divisor of num)
+    Return: int:    divisor of num
     """
     if rs == []:
         rs = _default_values('rho seeds')
@@ -65,19 +65,20 @@ def trivial_divisors(num, pb):
     """
     Find prime divisors of a number from a prime base.
     
-    Args:   num: int
-            pb: list (prime numbers)
+    Args:   int:    num
+            list:   pb          prime base
 
-    Return: primes: list (prime divisors of num from pb)
-            num: int (leftover number after dividing num by prime divisors)
+    Return: list:   primes      prime divisors of num from pb
+            int:    rest        leftover after dividing num by prime divisors
     """
     primes = []
+    rest = num
     for p in pb:
-        if num % p == 0:
-            exp, num = numth.padic(num, p)
+        if rest % p == 0:
+            exp, rest = numth.padic(rest, p)
             primes = primes + [p] * exp
     
-    return primes, num
+    return primes, rest
 
 ##############################
 
@@ -85,12 +86,10 @@ def nontrivial_divisors(num, rs=[], rp=[], ms=[]):
     """
     Find nontrivial prime divisors of a number.
 
-    Args:   num: int
-            rs: list
-            rp: list
-            ms: list
+    Args:   int:    num
+            list:   rs, rp, ms
 
-    Return: primes: list (prime divisors of num)
+    Return: list:   primes      prime divisors of num
     """
     if primality.is_prime(num):
         return [num]
@@ -112,13 +111,10 @@ def factor(num, pb=None, rs=[], rp=[], ms=[]):
     """
     Factor a number into prime divisors.
     
-    Args:   num: int
-            pb: list
-            rs: list
-            rp: list
-            ms: list
+    Args:   int:    num
+            list:   pb, rs, rp, ms
 
-    Return: primes: list (prime divisors of num, sorted)
+    Return: list:   primes      prime divisors of num, sorted
     """
     if num < 2:
         return None
@@ -139,13 +135,10 @@ def find_divisor_mp(num, rs=[], rp=[], ms=[], to=None):
     """
     Find a divisor of a number using multiprocessing.
     
-    Args:   num: int
-            rs: list
-            rp: list
-            ms: list
-            to: int (timeout)
+    Args:   int:    num, to         to: timeout value
+            list:   rs, rp, ms
 
-    Return: d: int (divisor, or num itself if timeout occurs)
+    Return: int:    divisor of num or num itself if timeout occurs
     """
     if rs == []:
         rs = _default_values('rho seeds')
@@ -177,12 +170,12 @@ def pollard_rho(num, seed, polyn):
     """
     Pollard's rho algorithm for factor-finding.
     
-    Args:   num: int
-            seed: int (initial value of sequence)
-            polyn: list or tuple (polynomial used to determine sequence)
-                    e.g. (1,2,3) is the polynomial 1 + 2*x + 3*x^2
+    Args:   int:        num, seed       seed: initial value of sequence
+            list/tuple: polyn           polynomial used to determine sequence
+                                        eg. (1,2,0,3) represents the
+                                        polynomial 1 + 2*x + 3*x^3
 
-    Return: d: int (divisor of num or num itself)
+    Return: int:        divisor of num or num itself
     """
     polyn = polynomial.polyn(polyn)
     def f(x):
@@ -208,10 +201,9 @@ def pollard_p_minus_one(num, seed):
     """
     Pollard's p-1 algorithm for factor-finding.
     
-    Args:   num: int
-            seed: int (initial value of sequence)
+    Args:   int:    num, seed       seed: initial value of sequence
 
-    Return: d: int (divisor of num, or num itself)
+    Return: int:    divisor of num, or num itself
     """
     d = numth.gcd(num, seed)
     if d > 1:

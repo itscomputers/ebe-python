@@ -22,8 +22,15 @@ def _default_values(cat):
 ############################################################
 
 class Rational:
-    """Class for arithmetic of rational numbers."""
-    def __init__(self, numer: int, denom: int) -> None:
+    """
+    Class for arithmetic of rational numbers.
+    
+    Args:   int:    numer, denom
+    """
+    ##########################
+
+    def __init__(self, numer, denom):
+        """Initialize rational number."""
         if denom == 0:
             raise ValueError('Attempt to divide by zero')
         
@@ -35,7 +42,10 @@ class Rational:
         self.numer = sgn * abs(numer) // d
         self.denom = abs(denom) // d
 
+    ##########################
+
     def __repr__(self):
+        """Print rational number."""
         if self.numer * self.denom < 0:
             sgn = -1
         else:
@@ -48,6 +58,7 @@ class Rational:
     ##########################
     
     def inverse(self):
+        """Reciprocal of rational number."""
         return Rational(self.denom, self.numer)
 
     ##########################
@@ -167,7 +178,13 @@ class Rational:
     ##########################
 
     def decimal(self, num_digits=None):
-        """Write a rational number as a decimal."""
+        """
+        Write rational number as a decimal.
+        
+        Args:   int:    num_digits
+
+        Return: str:    represented by num_digits digits
+        """
         whole = int(self)
         if num_digits is None:
             num_digits = _default_values('frac_to_dec')
@@ -194,15 +211,27 @@ class Rational:
     ##########################
 
     def approx_equal(self, other, num_digits=None):
-        """Determine if a rational number is approximately equal
-        to another rational number, up to a given number of digits."""
+        """
+        If rational number is approximately equal to another rational number.
+        
+        Args:   Rational:   other
+                int:        num_digits
+
+        Return: bool
+        """
         other = frac(other)
         return self.decimal(num_digits) == other.decimal(num_digits)
 
     ##########################
 
     def sqrt(self, num_digits=None):
-        """Approximate square root with arbitrary precision."""
+        """
+        Approximate square root of rational number with arbitrary precision.
+        
+        Args:   int:        num_digits
+
+        Return: Rational
+        """
         if num_digits is None:
             num_digits = _default_values('sqrt_digits')
         size_n = len(str(self.numer))
@@ -218,26 +247,44 @@ class Rational:
 ############################################################
 ############################################################
 
-def int_to_rational(a: int) -> Rational:
-    """Convert an integer to a rational number."""
-    return Rational(a, 1)
+def _int_to_rational(i):
+    """
+    Convert an integer to a rational number.
+    
+    Args:   int:        i
+    
+    Return: Rational
+    """
+    return Rational(i, 1)
 
 ##############################
 
-def float_to_rational(a: float) -> Rational:
-    """Convert a float to a rational number."""
-    if 'e-' in str(a):
-        num, exp = str(a).split('e-')
+def _float_to_rational(f):
+    """
+    Convert a float to a rational number.
+    
+    Args:   float:      f
+    Return: Rational
+    """
+    if 'e-' in str(f):
+        num, exp = str(f).split('e-')
         whole = '0'
         frac = '0'*(int(exp) - 1) + num.replace('.', '')
     else:
-        whole, frac = str(a).split('.')
+        whole, frac = str(f).split('.')
     return Rational( int(whole + frac), 10**len(frac) )
 
 ##############################
 
-def frac_to_rational(frac: str) -> Rational:
-    """Convert a string 'a/b' to a rational number."""
+def _frac_to_rational(frac):
+    """
+    Convert a fraction string to a rational number.
+    
+    Args:   str:        frac
+                        eg frac = 'a/b'
+
+    Return: Rational
+    """
     numer, denom = frac.split('/')
     numer.strip(' ', '')
     denom.replace(' ', '')
@@ -245,28 +292,39 @@ def frac_to_rational(frac: str) -> Rational:
 
 ##############################
 
-def repeating_dec_to_rational(initial, repeat: int) -> Rational:
+def repeating_dec_to_rational(init, repeat):
     """
     Convert a repeating decimal to a rational number.
 
-    Comment:
-    To convert 3.24178178178178... to a fraction, use input (3.24, 178)
+    Args:   int/float:  init
+            int:        repeat
+
+    Return: Rational
+    
+    Example:    to convert 3.24178178178178... to a rational, use
+                    init = 3.24,    repeat = 178
     """
     period = len(str(repeat))
-    if '.' not in str(initial):
+    if '.' not in str(init):
         displace = 0
     else:
-        displace = len(str(initial).split('.')[-1])
+        displace = len(str(init).split('.')[-1])
     first = Rational(repeat, 10**(displace + period))
     one_minus_r = Rational(1) - Rational(1, 10**period)
-    return float_to_rational(initial) + (first / one_minus_r)
+    return float_to_rational(init) + (first / one_minus_r)
 
 ##############################
 
-def str_to_rational(s: str) -> Rational:
-    """Convert a string to a rational number."""
+def _str_to_rational(s):
+    """
+    Convert a string to a rational number.
+    
+    Args:   str:        s
+
+    Return: Rational
+    """
     try:
-        return frac_to_rational(s)
+        return _frac_to_rational(s)
     except:
         pass
     try:
@@ -274,18 +332,25 @@ def str_to_rational(s: str) -> Rational:
     except:
         pass
     try:
-        return frac( float(s) )
+        return _float_to_rational( float(s) )
     except:
         pass
     try:
-        return frac( int(s) )
+        return _int_to_rational( int(s) )
     except Exception as e:
         raise TypeError(e)
 
 ##############################
 
-def frac(a, b=None) -> Rational:
-    """A shortcut function for creating an instance of the Rational class."""
+def frac(a, b=None):
+    """
+    A shortcut for creating an instance of the Rational class.
+    
+    Args:   int/float/str/Rational:     a
+            int/Rational:               b
+
+    Return: Rational
+    """
     if isinstance(b, int):
         return Rational(a, b)
     elif isinstance(b, Rational):
@@ -294,11 +359,11 @@ def frac(a, b=None) -> Rational:
         if isinstance(a, Rational):
             return a
         elif isinstance(a, int):
-            return int_to_rational(a)
+            return _int_to_rational(a)
         elif isinstance(a, float):
-            return float_to_rational(a)
+            return _float_to_rational(a)
         elif isinstance(a, str):
-            return str_to_rational(a)    
+            return _str_to_rational(a)    
     raise ValueError('Cannot convert to rational number')
 
 ############################################################
@@ -310,10 +375,14 @@ def frac(a, b=None) -> Rational:
 def newton_gen(init, coeffs):
     """
     Newton's method for approximating a zero of a polynomial.
-    
-    Example:
-    For the polynomial -10 + x^3, which has coeffs = (-10, 0, 0, 1),
-    and an initial guess near 2, this will approximate cube root of 10.
+
+    Args:   int/float/Rational:     init        initial guess
+            tuple                   coeffs      coefficients of polynomial
+                                                eg use (-10, 0, 0, 1)
+                                                for polynomial -10 + x^3
+                                                to approximate cube root of 10
+
+    Return: generator:  Rational
     """
     x = frac(init)
     p = polynomial.polyn(coeffs)
@@ -325,7 +394,14 @@ def newton_gen(init, coeffs):
 ##############################
 
 def halley_gen(init, coeffs):
-    """Halley's method for approximating a zero of a polynomial."""
+    """
+    Halley's method for approximating a zero of a polynomial.
+    
+    Args:   int/float/Rational:     init        initial guess
+            tuple:                  coeffs      coefficients of polynomial
+
+    Return: generator:  Rational
+    """
     x = frac(init)
     p = polynomial.polyn(coeffs)
     dp = p.deriv()
@@ -338,7 +414,18 @@ def halley_gen(init, coeffs):
 ##############################
 
 def sqrt(num, num_digits=None, FLOAT=False):
-    """Square root approximation with arbitrary precision."""
+    """
+    Square root approximation with arbitrary precision.
+    
+    Args:   int/float/Rational:     num
+            int:                    num_digits
+            bool:                   FLOAT           return a float
+
+    Return: Rational/float
+
+    Note:   this uses math.sqrt() for initial approximation, 
+            then Babylonian method and Rational class for arbitrary precision
+    """
     if num_digits is None:
         num_digits = _default_values('sqrt_digits')
    
@@ -370,7 +457,15 @@ def sqrt(num, num_digits=None, FLOAT=False):
 ##############################
 
 def Pi(num_digits=None):
-    """Rational approximation of pi."""
+    """
+    Rational approximation of pi.
+    
+    Args:   int:        num_digits
+
+    Return: Rational
+
+    Note:   this uses Ramanujan-Hardy series to approximate 1 / pi
+    """
     if num_digits is None:
         num_digits = _default_values('pi_digits')
     rh = ramanujan_hardy(num_digits)
@@ -385,7 +480,13 @@ def Pi(num_digits=None):
 ############################################################
 
 def rough_sqrt(num):
-    """Rough estimate of square root to be used in other approximations."""
+    """
+    Rough estimate of square root.
+    
+    Args:   int:    num
+
+    Return: int:    half as many bits as num
+    """
     if num in [0, 1]:
         return num
     elif num < 1:
@@ -397,11 +498,14 @@ def rough_sqrt(num):
 
 def babylonian_sqrt_gen(num, init=None):
     """
-    Generator for Babylonian square root approximation.
+    Babylonian method to approximate square root.
 
-    Comments:
-    An initial value may be supplied for faster convergence.
-    This is equivalent to Newton's method.
+    Args:   int:        num
+            int:        init        initial guess
+
+    Return: generator:  Rational
+    
+    Note:   this is equivalent to Newton's method
     """
     if init is None:
         x = frac(rough_sqrt(num))
@@ -414,7 +518,7 @@ def babylonian_sqrt_gen(num, init=None):
 ##############################
 
 def integer_sqrt(num):
-    """Computer integer part of square root of a number."""
+    """Integer part of square root of a number."""
     bab = babylonian_sqrt_gen(num)
     m = int(next(bab))
     m2 = m**2
@@ -426,7 +530,13 @@ def integer_sqrt(num):
 ##############################
 
 def halley_sqrt_gen(num):
-    """Generator for Halley's square root approximation."""
+    """
+    Halley's method to approximate square root.
+    
+    Args:   int:        num
+
+    Return: generator:  Rational
+    """
     x = frac(integer_sqrt(num))
     while True:
         yield x
@@ -435,7 +545,13 @@ def halley_sqrt_gen(num):
 ##############################
 
 def bakhshali_sqrt_gen(num):
-    """Generator for Bakhshali's square root approximation."""
+    """
+    Bakhshali's method to approximate square root.
+    
+    Args:   int:        num
+
+    Return: generator:  Rational
+    """
     x = frac(integer_sqrt(num))
     while True:
         yield x
@@ -447,10 +563,13 @@ def bakhshali_sqrt_gen(num):
 
 def goldschmidt_sqrt_gen(num):
     """
-    Generator for Goldschmidt's square root approximation.
+    Goldschmidt's method to approximate square root.
+    
+    Args:   int:        num
 
-    Comment:
-    This simultaneously approximates sqrt(num) and sqrt(1/num)
+    Return: generator:  tuple(Rational, Rational)
+    
+    Note: this simultaneously approximates sqrt(num) and sqrt(1/num)
     """
     b = num
     Y = integer_sqrt(num)
@@ -467,8 +586,13 @@ def goldschmidt_sqrt_gen(num):
 ##############################
 
 def continued_fraction_sqrt_gen(num):
-    """Generator for the continued fraction convergents 
-    of the square root of a number."""
+    """
+    Continued fraction method to approximate square root.
+    
+    Args:   int:        num
+
+    Return: generator:  Rational
+    """
     m = integer_sqrt(num)
     n0, n1 = 0, 1
     d0, d1 = 1, 0
@@ -487,7 +611,13 @@ def continued_fraction_sqrt_gen(num):
 ##############################
 
 def generalized_continued_fraction_sqrt_gen(num):
-    """Generator for the generalized continued fraction convergents."""
+    """
+    Generalized continued fraction method to approximate square root.
+    
+    Args:   int:        num
+
+    Return: generator:  Rational
+    """
     m = integer_sqrt(num)
     a = num - m**2
     b = 2*m
@@ -503,8 +633,16 @@ def generalized_continued_fraction_sqrt_gen(num):
 ##############################
 
 def generalized_continued_fraction_sqrt_gen_2(num):
-    """Generator for the generalized continued fraction convergents,
-    sped up by collapsing each pair of fractions into a single."""
+    """
+    Alternate generalized continued fraction method to approximate square root.
+    
+    Args:   int:        num
+
+    Return: generator: Rational
+
+    Note:   sped up from original by collapsing 
+            each pair of fractions into a single fraction.
+    """
     m = integer_sqrt(num)
     r = num - m**2
     a0 = 2*m*r
@@ -524,7 +662,13 @@ def generalized_continued_fraction_sqrt_gen_2(num):
 ##############################
 
 def ladder_arithmetic_sqrt_gen(num):
-    """Generator for square root approximation using ladder arithmetic."""
+    """
+    Ladder arithmetic method to approximate square root.
+    
+    Args:   int:        num
+
+    Return: generator:  Rational
+    """
     m = integer_sqrt(num)
     m2 = m**2
     s0, s1 = 0, 1
@@ -535,8 +679,13 @@ def ladder_arithmetic_sqrt_gen(num):
 ##############################
         
 def linear_fractional_transformation_sqrt_gen(num, a, c):
-    """Generator for square root approximation 
-    using linear fractional transformations."""
+    """
+    Linear fractional transformation method to approximate square root.
+    
+    Args:   int:        num, a, c       a, c: parameters
+
+    Return: generator:  Rational
+    """
     b = num * c
     x = frac(a, c)
     while True:
@@ -551,11 +700,14 @@ def linear_fractional_transformation_sqrt_gen(num, a, c):
 
 def ramanujan_hardy(num_digits):
     """
-    Ramanujan's original approximmation of pi.
-    
-    Comment:
-    num_digits refers to the decimal accuracy of the
-    approximation of sqrt(1/2).
+    Ramanujan-Hardy approximmation of 1/pi.
+
+    Args:   int:        num_digits
+   
+    Return: generator:  Rational
+
+    Note:   the num_digits argument is NOT in reference to 1/pi, but
+            in reference to the accuracy of the approximation of sqrt(1/2)
     """
     k = 0
     multiplier = frac(2, 9801) / sqrt(.5, num_digits)
