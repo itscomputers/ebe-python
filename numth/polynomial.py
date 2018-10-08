@@ -97,7 +97,7 @@ class Polynomial:
         Note:   val could actually be any type that supports arithmetic
         """
         powers = itertools.count(0)
-        return sum(map(lambda c, p: c*v**p, self.coeffs, powers))
+        return sum(map(lambda c, p: c*val**p, self.coeffs, powers))
 
     ##########################
 
@@ -215,7 +215,7 @@ class Polynomial:
 
     def __floordiv__(self, other):
         if isinstance(other, int):
-            other = Polynomial(other)
+            return Polynomial( tuple(map(lambda c: c//other, self.coeffs)) )
         if not other.monic:
             raise ValueError('Can only divide by monic polynomials')
         if self < other:
@@ -232,12 +232,30 @@ class Polynomial:
         return Polynomial( tuple(q) )
 
     def __rfloordiv__(self, other):
-        if is isinstance(other, int):
-            other = Polynomial(other)
-        return other // self
+        return Polynomial(other) // self
 
     def __ifloordiv__(self, other):
         return self // other
+
+    ##########################
+
+    def __truediv__(self, other):
+        if isinstance(other, int):
+            for c in self.coeffs:
+                if c % other != 0:
+                    raise ValueError('{} not divisible by {}'\
+                            .format(self, other))
+            return self // other
+        if (self % other).deg != -1:
+            raise ValueError('{} not divisible by {}'.format(self, other))
+        else:
+            return self // other
+
+    def __rtruediv__(self, other):
+        return Polynomial(other) / self
+
+    def __itruediv__(self, other):
+        return self / other
 
     ##########################
 
@@ -257,11 +275,13 @@ class Polynomial:
     ##########################
 
     def __mod__(self, other):
-        """Maybe change this first case."""
         if isinstance(other, int):
-            return Polynomial( tuple(map(lambda x: x % other, self.coeffs)) )
+            return Polynomial( tuple(map(lambda c: c % other, self.coeffs)) )
         else:
             return self - (self // other) * other
+
+    def __rmod__(self, other):
+        return Polynomial(other) % self
 
     def __imod__(self, other):
         return self % other
@@ -292,4 +312,5 @@ def polyn(*coeffs):
     """Shortcut for creating instance of Polynomial class."""
     return Polynomial(*coeffs)
 
+############################################################
 ############################################################

@@ -180,7 +180,7 @@ def jacobi(a, b):
     """
     if b % 2 == 0:
         raise ValueError(
-                'Jacobi symbol ( {} | {} ) is undefined'.format(num, mod))
+                'Jacobi symbol ( {} | {} ) is undefined'.format(a, b))
 
     if b == 1:
         return 1

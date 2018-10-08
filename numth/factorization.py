@@ -300,6 +300,8 @@ class Factorize:
         self.num = num
         self.factorization = factor(num)
 
+    ##########################
+
     def __repr__(self):
         """Print the factorization of num."""
         factors = []
@@ -310,10 +312,14 @@ class Factorize:
                 factors.append('{}^{}'.format(prime, exp))
         return ' * '.join(factors)
 
+    ##########################
+
     def multiplicity(self):
         """Find factorization of num with multiplicity."""
         return { prime : self.factorization.count(prime)\
                     for prime in sorted(set(self.factorization)) }
+
+    ##########################
 
     def divisors(self):
         """Find all divisors of num."""
@@ -322,3 +328,29 @@ class Factorize:
             divs = divs + [ p * d for d in divs if p * d not in divs ]
         return sorted(divs)
 
+    ##########################
+
+    def euler_phi(self):
+        output = 1
+        for p, e in self.multiplicity().items():
+            ouput *= (p-1)
+            for i in range(e-1):
+                output *= p
+        return output
+
+    ##########################
+
+    def carmichael_lambda(self):
+        output = 1
+        for p, e in self.multiplicity().items():
+            output *= (p-1) // numth.gcd(output, p-1)
+            if p == 2:
+                if e == 2:
+                    output *= p
+                elif e > 2:
+                    output *= p**(e-2)
+            else:
+                result *= p**(e-1)
+        return result
+
+    ##########################
