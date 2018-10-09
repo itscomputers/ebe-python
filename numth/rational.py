@@ -125,7 +125,7 @@ class Rational:
     ##########################
 
     def __mod__(self, other):
-        inv_denom = mod_inverse(self.denom, other)
+        inv_denom = numth.mod_inverse(self.denom, other)
         return (self.numer * inv_denom) % other
 
     def __imod__(self, other):

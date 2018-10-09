@@ -37,10 +37,10 @@ def euclidean_algorithm(a, b, SMALL_REM=False):
 
     Return: None:   prints a = q * b + r until r == 0
     """
-    q, r = div(a, b, METHOD)
+    q, r = div(a, b, SMALL_REM)
     print('{} = {} * {} + {}'.format(a, q, b, r))
     if r != 0:
-        euclidean_algorithm(b, r, METHOD)
+        euclidean_algorithm(b, r, SMALL_REM)
 
 ##############################
 
@@ -93,13 +93,13 @@ def bezout(a, b):
             return -1, 0
 
     a_, b_ = a, b
-    q, r = div(a_, b_, METHOD='SMALL')
+    q, r = div(a_, b_, SMALL_REM=True)
     xx, x = 0, 1
     yy, y = 1, -q
 
     while r != 0:
         a_, b_ = b_, r
-        q, r = div(a_, b_, METHOD='SMALL')
+        q, r = div(a_, b_, SMALL_REM=True)
         xx, x = x, -q*x + xx
         yy, y = y, -q*y + yy
 
