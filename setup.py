@@ -1,9 +1,7 @@
+
 #   setup.py
 
 from setuptools import setup
-
-with open('README.md', 'r') as fh:
-    long_description = fh.read()
 
 setup(
     name = 'NumTh',
@@ -11,7 +9,7 @@ setup(
     author = 'itscomputers',
     author_email = 'its_computers@protonmail.com',
     description = 'A number theory package for Python'
-    long_description = long_description,
+    long_description = open('README.md', 'r').read(),
     long_description_content_type = 'text/markdown',
     url = 'https://github.com/itscomputers/numth',
     license = 'GNU General Public License v3.0',

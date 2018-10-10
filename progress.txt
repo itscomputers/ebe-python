@@ -8,15 +8,13 @@ totally transferred:
 	primality
 	polynomial
 	rational
-
+	factorization
+	modular
+	
 next:
-	work on factorization module
-	add modular classes
 	add other modular functions to numth
 	tests
-	expand Mod class to include order, etc
 	sums of squares
-	add Quadratic class to numth
 	add ContinuedFraction class
 	factorization in rings of integers?
 
