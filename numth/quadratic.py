@@ -1,8 +1,8 @@
 
 #   numth/quadratic.py
 
-import numth.numth as numth
-import numth.rational as rational
+from numth.main import mod_inverse 
+from numth.rational import frac, sqrt 
 
 ############################################################
 ############################################################
@@ -71,11 +71,11 @@ class Quadratic:
         """Inverse of quadratic element."""
         norm = self.r(self.norm())
         if self.mod is not None:
-            norm_inverse = numth.mod_inverse(norm, self.mod)
+            norm_inverse = mod_inverse(norm, self.mod)
         elif abs(norm) == 1:
             norm_inverse = norm
         else:
-            norm_inverse = rational.frac(norm).inverse()
+            norm_inverse = frac(norm).inverse()
         
         new_real = self.real * norm_inverse
         new_imag = -self.imag * norm_inverse
@@ -87,10 +87,10 @@ class Quadratic:
         return Quadratic(-self.real, -self.imag, self.root, self.mod)
 
     def __int__(self):
-        return int(self.real + self.imag * rational.sqrt(self.root))
+        return int(self.real + self.imag * sqrt(self.root))
 
     def __float__(self):
-        return float(self.real + self.imag * rational.sqrt(self.root))
+        return float(self.real + self.imag * sqrt(self.root))
 
     def __round__(self):
         f = float(self)

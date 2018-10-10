@@ -1,8 +1,9 @@
 
 #   numth/rational.py
 
-import numth.numth as numth
-import numth.polynomial as polynomial
+from main import gcd, mod_inverse 
+from polynomial import polyn
+
 import math
 
 ##############################
@@ -38,7 +39,7 @@ class Rational:
             sgn = -1
         else:
             sgn = 1
-        d = numth.gcd(numer, denom)
+        d = gcd(numer, denom)
         self.numer = sgn * abs(numer) // d
         self.denom = abs(denom) // d
 
@@ -65,7 +66,7 @@ class Rational:
 
     def __add__(self, other):
         other = frac(other)
-        d = numth.gcd(self.denom, other.denom)
+        d = gcd(self.denom, other.denom)
         self_sc = other.denom // d
         other_sc = self.denom // d
         new_numer = (self.numer * self_sc) + (other.numer * other_sc)
@@ -125,7 +126,7 @@ class Rational:
     ##########################
 
     def __mod__(self, other):
-        inv_denom = numth.mod_inverse(self.denom, other)
+        inv_denom = mod_inverse(self.denom, other)
         return (self.numer * inv_denom) % other
 
     def __imod__(self, other):
@@ -385,7 +386,7 @@ def newton_gen(init, coeffs):
     Return: generator:  Rational
     """
     x = frac(init)
-    p = polynomial.polyn(coeffs)
+    p = polyn(coeffs)
     dp = p.deriv()
     while True:
         yield x
@@ -403,7 +404,7 @@ def halley_gen(init, coeffs):
     Return: generator:  Rational
     """
     x = frac(init)
-    p = polynomial.polyn(coeffs)
+    p = polyn(coeffs)
     dp = p.deriv()
     d2p = dp.deriv()
     while True:
@@ -456,7 +457,7 @@ def sqrt(num, num_digits=None, FLOAT=False):
 
 ##############################
 
-def Pi(num_digits=None):
+def pi(num_digits=None):
     """
     Rational approximation of pi.
     
@@ -604,7 +605,7 @@ def continued_fraction_sqrt_gen(num):
         d0, d1 = d1, q*d1 + d0
         x = q * c - a
         d = num * b**2 - x**2
-        g = numth.gcd(c, d)
+        g = gcd(c, d)
         alpha = (x * c // g, b * c // g, d // g)
         yield frac(n1, d1)
 
@@ -722,61 +723,8 @@ def ramanujan_hardy(num_digits):
         lin_term = lin_term + 26390
         value += mult_term * lin_term
 
-
-
-
 ############################################################
 ############################################################
+#       End
 ############################################################
 ############################################################
-############################################################
-
-##  testing
-
-#############################
-
-if __name__ == '__main__':
-
-    ##########################
-    #   test Rational class
-    a = frac(3,4)
-    b = frac(.4)
-    c = frac(3)
-    assert( a + b == frac(23,20) and a + b == 1.15 )
-    assert( a + c == frac(15,4) and a + c == 3.75 )
-    assert( b + c == frac(17,5) and b + c == 3.4 )
-    assert( a + 3 == a + c and 3 + a == a + c )
-    assert( a + b == b + a and a + c == c + a and b + c == c + b )
-    assert( a - b == frac(7,20) and a - b == .35 )
-    assert( a - c == frac(-9,4) and a - c == -2.25 )
-    assert( b - c == frac(-13,5) and b - c == -2.6 )
-    assert( a - b == -b + a and a - c == -c + a and b - c == -c + b )
-    assert( b - a == -a + b and c - a == -a + c and c - b == -b + c )
-    assert( a - 3 == a - c and 3 - a == c - a )
-    assert( a * b == frac(3,10) and a * b == .3 )
-    assert( a * c == frac(9,4) and a * c == 2.25 )
-    assert( b * c == frac(6,5) and b * c == 1.2 )
-    assert( a * b == b * a and a * c == c * a and b * c == b * c )
-    assert( a * 3 == a * c and 3 * a == c * a )
-    assert( a / b == frac(15,8) and a / b == 1.875 )
-    assert( a / c == frac(1,4) and a / c == .25 )
-    assert( c / b == frac(15,2) and c / b == 7.5 )
-    assert( a / b == 1 / (b / a)\
-            and a / c == 1 / (c / a)\
-            and b / c == 1 / (c / b) )
-    assert( a / 3 == a / c and 3 / a == c / a )
-    assert( a + a == 2 * a and a - a == 0 )
-    assert( b * b == b**2 and b / b == 1 )
-    assert( a.inverse() * a == 1 )
-    assert( b.inverse() * b == 1 )
-    assert( c.inverse() * c == 1 )
-    assert( int(a) == 0 and int(b) == 0 )
-    assert( round(a) == 1 and round(b) == 0 )
-    assert( float(a) == .75  and float(b) == .4 )
-    assert( -a == frac(-3,4) and -b == frac(-.4) )
-    assert( abs(-a) == a and abs(-b) == b )
-    assert( b < a and a < c and b < c )
-    assert( -b > -a and -a > -c and -b > -c )
-    assert( a % 13 == 4 and b % 13 == 3 )
-    assert( frac(.599).decimal(2) == '0.60' )
-    assert( frac(100,49).sqrt() == frac(10,7) )

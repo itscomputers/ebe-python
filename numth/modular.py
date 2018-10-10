@@ -1,10 +1,10 @@
 
 #   numth/modular.py
 
-import numth.numth as numth
-import numth.primality as primality
-import numth.factorization as factorization
-import numth.quadratic as quadratic
+from numth.main import gcd, jacobi, mod_inverse, padic
+from numth.factorization import Factorize
+from numth.primality import is_prime, prime_to
+from numth.quadratic import Quadratic
 
 ##############################
 
@@ -15,13 +15,13 @@ def _default_values(cat):
 
 def euler_phi(num):
     """Euler's totient/phi function."""
-    return factorization.Factorize(num).euler_phi()
+    return Factorize(num).euler_phi()
 
 ##############################
 
 def carmichael_lambda(num):
     """Carmichael's lambda function."""
-    return factorization.Factorize(num).carmichael_lambda()
+    return Factorize(num).carmichael_lambda()
 
 ##############################
 
@@ -36,14 +36,14 @@ def legendre(num, prime, EULER_CRITERION=False):
                     0   <-  if num is divisible by prime
                     -1  <-  if num is not a square modulo prime
     """
-    if not primality.is_prime(prime):
+    if not is_prime(prime):
         raise ValueError('{} is not prime'.format(prime))
     else:
-        return numth.jacobi(num, prime)
+        return jacobi(num, prime)
 
 ##############################
 
-def sqrt_minus_one(prime, LEGENDRE=True):
+def mod_sqrt_minus_one(prime, LEGENDRE=True):
     """
     Square root of -1 modulo a prime.
 
@@ -53,7 +53,7 @@ def sqrt_minus_one(prime, LEGENDRE=True):
 
     Return: tuple:  (val1, val2)    val**2 % prime == prime - 1
     """
-    if not primality.is_prime(prime):
+    if not is_prime(prime):
         raise ValueError('{} is not prime'.format(prime))
     if prime == 2:
         return (1, 1)
@@ -74,7 +74,7 @@ def sqrt_minus_one(prime, LEGENDRE=True):
 
 ##############################
 
-def sqrt(num, prime, METHOD=None):
+def mod_sqrt(num, prime, METHOD=None):
     """
     Square root of a number modulo a prime.
 
@@ -83,12 +83,12 @@ def sqrt(num, prime, METHOD=None):
 
     Return: tuple:  (val1, val2)    val**2 % prime == num % prime
     """
-    if not primality.is_prime(prime):
+    if not is_prime(prime):
         raise ValueError('{} is not prime'.format(prime))
     if num % prime == 0:
         return (0, 0)
     elif num % prime == prime - 1:
-        return sqrt_minus_one(prime)
+        return mod_sqrt_minus_one(prime)
     elif jacobi(num, prime) != 1:
         return None
 
@@ -96,7 +96,7 @@ def sqrt(num, prime, METHOD=None):
         val = pow(num, (prime+1)//4, prime)
         return tuple(sorted([val, prime - val]))
 
-    s, q = numth.padic(prime-1, 2)
+    s, q = padic(prime-1, 2)
     m = len(bin(prime)[2:])
     
     if METHOD == 'cipolla' or (METHOD == None and s*(s - 1) > 8*m + 20):
@@ -105,7 +105,7 @@ def sqrt(num, prime, METHOD=None):
             root = (y**2 - num) % prime
             if jacobi(root, p) == -1:
                 break
-        val = (quadratic.QuadraticInt(y, 1, root)**((p+1)//2)).real
+        val = (Quadratic(y, 1, root)**((p+1)//2)).real
         return tuple(sorted([val, prime - val]))
 
     else:
@@ -143,7 +143,7 @@ class ModRing:
 
     def __init__(self, mod):
         self.mod = mod
-        self.factorize = factorization.Factorize(mod)
+        self.factorize = Factorize(mod)
         self.euler = self.factorize.euler_phi()
         self.carmichael = self.factorize.carmichael_lambda()
         self.is_cyclic = self.euler == self.carmichael
@@ -162,7 +162,7 @@ class ModRing:
     def get_multiplicative_group(self):
         """Populate class with group of invertible elements."""
         self.multiplicative_group =\
-                (x for x in primality.prime_to(self.factorize.factorization))
+                (x for x in prime_to(self.factorize.factorization))
 
     ##########################
 
@@ -196,7 +196,7 @@ class ModRing:
                 raise ValueError('{} is not a generator'.format(gen))
         self.all_generators = (pow(gen, j, self.mod)\
                 for j in range(1, self.euler)\
-                if numth.gcd(j, self.euler) == 1)
+                if gcd(j, self.euler) == 1)
 
     ##########################
 
@@ -229,7 +229,7 @@ class ModRing:
 
         Return: dict:   { j : gen**j }
         """
-        order is None:
+        if order is None:
             order = self.order_of(gen)
         return { j : pow(gen, j, self.mod) for j in range(order) }
 
@@ -244,7 +244,7 @@ class ModRing:
         Return: int:    order       smallest positive int with 
                                     pow(elem, order, self.mod) == 1
         """
-        if numth.gcd(elem, self.mod) != 1:
+        if gcd(elem, self.mod) != 1:
             raise ValueError('{} is not invertible'.format(elem))
 
         if num % self.mod == 1:
@@ -271,7 +271,7 @@ class ModRing:
         if elem % self.mod in [1, self.mod - 1]:
             return elem
         elif self.cylic_subgroup is None:
-            return numth.mod_inverse(elem, self.mod)
+            return mod_inverse(elem, self.mod)
         else:
             index = self.cyclic_log_of(elem, subgroup)
             return subgroup[self.mod - index]
@@ -302,9 +302,9 @@ class ModRing:
 
         Return: int:    sqrt        pow(sqrt, 2, self.mod) == elem
         """
-        if self.cyclic_group is None and primality.is_prime(self.mod):
+        if self.cyclic_group is None and is_prime(self.mod):
             return sqrt(elem, self.mod)
-        elif: self.cyclic_group is not None:
+        elif self.cyclic_group is not None:
             index = self.cyclic_log_of(elem, self.cyclic_group)
             if index % 2 == 1:
                 return None

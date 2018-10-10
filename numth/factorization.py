@@ -1,10 +1,10 @@
 
 #   numth/factorization.py
 
-import numth.numth as numth
-import numth.primality as primality
-import numth.polynomial as polynomial
-import numth.rational as rational
+from numth.main import gcd, padic
+from numth.primality import is_prime
+from numth.polynomial import polyn
+from numth.rational import integer_sqrt
 
 import math
 from random import randint
@@ -15,8 +15,6 @@ from concurrent.futures import wait
 ##############################
 
 def _default_values(cat):
-    if cat == 'small primes bound':
-        return 1000
     if cat == 'rho seeds':
         return [2, 3] + [ randint(4,10**10) for j in range(2) ]
     if cat == 'rho polyns':
@@ -24,7 +22,7 @@ def _default_values(cat):
     if cat == 'p-1 seeds':
         return [2, 3] + [ randint(4,10**10) for j in range(2) ]
     if cat == 'prime base':
-        return primality.primes_in_range(2,1000)
+        return primes_in_range(2,1000)
 
 ############################################################
 ############################################################
@@ -75,7 +73,7 @@ def trivial_divisors(num, pb):
     rest = num
     for p in pb:
         if rest % p == 0:
-            exp, rest = numth.padic(rest, p)
+            exp, rest = padic(rest, p)
             primes = primes + [p] * exp
     
     return primes, rest
@@ -91,9 +89,9 @@ def nontrivial_divisors(num, rs=[], rp=[], ms=[]):
 
     Return: list:   primes      prime divisors of num
     """
-    if primality.is_prime(num):
+    if is_prime(num):
         return [num]
-    sqrt = rational.integer_sqrt(num)
+    sqrt = integer_sqrt(num)
     if sqrt**2 == num:
         primes = nontrivial_divisors(sqrt, rs, rp, ms)
         return 2*primes
@@ -118,7 +116,7 @@ def factor(num, pb=None, rs=[], rp=[], ms=[]):
     """
     if num < 2:
         return None
-    if primality.is_prime(num):
+    if is_prime(num):
         return [num]
 
     if prime_base is None:
@@ -166,28 +164,27 @@ def find_divisor_mp(num, rs=[], rp=[], ms=[], to=None):
 ############################################################
 ############################################################
 
-def pollard_rho(num, seed, polyn):
+def pollard_rho(num, s, p):
     """
     Pollard's rho algorithm for factor-finding.
     
-    Args:   int:        num, seed       seed: initial value of sequence
-            list/tuple: polyn           polynomial used to determine sequence
+    Args:   int:        num, s          s: initial value of sequence
+            list/tuple: p               polynomial used to determine sequence
                                         eg. (1,2,0,3) represents the
                                         polynomial 1 + 2*x + 3*x^3
 
     Return: int:        divisor of num or num itself
     """
-    polyn = polynomial.polyn(polyn)
     def f(x):
-        return polyn.mod_eval(x, num)
-    xi = f(seed % num)
+        return polyn(p).mod_eval(x, num)
+    xi = f(s % num)
     x2i = f(xi)
-    d = numth.gcd(x2i - xi, num)
+    d = gcd(x2i - xi, num)
 
     while d == 1:
         xi = f(xi)
         x2i = f( f(x2i) )
-        d = numth.gcd(x2i - xi, num)
+        d = gcd(x2i - xi, num)
 
     return d
 
@@ -205,18 +202,18 @@ def pollard_p_minus_one(num, seed):
 
     Return: int:    divisor of num, or num itself
     """
-    d = numth.gcd(num, seed)
+    d = gcd(num, seed)
     if d > 1:
         return d
 
     xi = seed % num
-    d = numth.gcd(xi - 1, num)
+    d = gcd(xi - 1, num)
     index = 1
 
     while d == 1:
         index += 1
         xi = pow(xi, index, num)
-        d = numth.gcd(xi - 1, num)
+        d = gcd(xi - 1, num)
 
     return d
 
@@ -343,7 +340,7 @@ class Factorize:
     def carmichael_lambda(self):
         output = 1
         for p, e in self.multiplicity().items():
-            output *= (p-1) // numth.gcd(output, p-1)
+            output *= (p-1) // gcd(output, p-1)
             if p == 2:
                 if e == 2:
                     output *= p

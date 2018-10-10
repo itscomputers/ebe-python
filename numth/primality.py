@@ -1,10 +1,11 @@
 
 #   numth/primality.py
 
+from main import gcd, jacobi, padic
+from rational import integer_sqrt
+
 from random import randint
 from concurrent.futures import ProcessPoolExecutor, wait
-import numth.numth as numth
-import numth.rational as rational
 
 ##############################
 
@@ -46,13 +47,13 @@ def is_prime(num, mr_wit=None, l_wit=None, mp=True):
     if num < miller_rabin_cutoffs()[-1][0]:
         return (miller_rabin_test(num, mr_wit) in prime)
     else:
-        if multiprocess:
+        if mp:
             with ProcessPoolExecutor() as pool:
                 futures = [
                     pool.submit( miller_rabin_test, num, mr_wit ),
                     pool.submit( lucas_test, num, l_wit )
                 ]
-                wait(futures, timeout=timeout)
+                wait(futures)
             mr, l = (x.result() for x in futures)
         else:
             mr = miller_rabin_test(num, mr_wit)
@@ -76,7 +77,7 @@ def prime_to(nums, mr_wit=None, l_wit=None):
     if is_prime(val, mr_wit, l_wit):
         result = [ x for x in range(1, val) ]
     else:
-        result = [ x for x in range(1, val) if numth.gcd(x, val) == 1 ]
+        result = [ x for x in range(1, val) if gcd(x, val) == 1 ]
     
     for num in nums[1:]:
         orig = [ x for x in result ]
@@ -106,7 +107,7 @@ def next_prime_gen(num, sieve_primes=None, mr_wit=None, l_wit=None):
     if sieve_primes is None:
         sieve_primes = _choose_primes(num)
     sieve, diam = _generate_block(sieve_primes)
-    block = _shift_block(num, block, diam)
+    block = _shift_block(num, sieve, diam)
     preblock = _restrict_block(block, l_bd=num+1)
     if preblock:
         for x in preblock:
@@ -150,7 +151,7 @@ def next_primes(num, k, sieve_primes=None, mr_wit=None, l_wit=None):
         primes = []
 
     gen = next_prime_gen(num, sieve_primes, mr_wit, l_wit)
-    while len(primes) < num_primes:
+    while len(primes) < k:
         primes.append( next(gen) )
 
     return primes
@@ -220,7 +221,7 @@ def prev_primes(num, k, sieve_primes=None, mr_wit=None, l_wit=None):
     gen = prev_prime_gen(num, sieve_primes, mr_wit, l_wit)
     
     primes = []
-    while len(primes) < num_primes and 2 not in primes:
+    while len(primes) < k and 2 not in primes:
         primes.append( next(gen) )
     
     return primes
@@ -237,11 +238,11 @@ def primes_in_range(l_bd, u_bd, sieve_primes=None, mr_wit=None, l_wit=None):
 
     Return: list:   primes in range(l_bd, u_bd)
     """
-    if block_primes is None:
-        block_primes = _choose_primes( u_bd - l_bd )
-    gen = next_prime_gen(l_bd - 1, block_primes, mr_wit, l_wit)
+    if sieve_primes is None:
+        sieve_primes = _choose_primes( u_bd - l_bd )
+    gen = next_prime_gen(l_bd - 1, sieve_primes, mr_wit, l_wit)
     
-    primes = [ p for p in block_primes if p >= l_bd and p < u_bd ]
+    primes = [ p for p in sieve_primes if p >= l_bd and p < u_bd ]
     while True:
         p = next(gen)
         if p < u_bd:
@@ -299,7 +300,7 @@ def next_twin_primes_gen(num, mr_wit=None, l_wit=None):
     Args:   int:        num, mr_wit, l_wit
 
     Return: generator:  tuple(int p, int p+2)       p, p+2 both prime
-                                                    p+2 >= num
+                                                    p+1 >= num
 
     Note:   This is a 'dangerous' function until the
             Twin Prime Conjecture is proved ;]
@@ -323,7 +324,7 @@ def next_twin_primes(num, mr_wit=None, l_wit=None):
     Args:   int:    num, mr_wit, l_wit
 
     Return: tuple:  (p, p+2)            p, p+2 both prime
-                                        p+2 >= num
+                                        p+1 >= num
     """
     gen = next_twin_primes_gen(num, mr_wit, l_wit)
     return next(gen)
@@ -337,7 +338,7 @@ def prev_twin_primes(num, mr_wit=None, l_wit=None):
     Args:   int:    num, mr_wit, l_wit
 
     Return: tuple:  (p-2, p)            p-2, p both prime
-                                        p-2 <= num
+                                        p-1 <= num
     """
     if num < 4:
         return None
@@ -386,8 +387,8 @@ def miller_rabin_witness(num, wit):
     Return: str:    'composite'         <- if wit detects num is composite
                     'probable prime'    <- otherwise
     """
-    exp, init = numth.padic(num - 1, 2)
-    x = numth.mod_power(wit, init, num)
+    exp, init = padic(num - 1, 2)
+    x = pow(wit, init, num)
 
     if x in [1, num-1]:
         return 'probable prime'
@@ -567,17 +568,17 @@ def lucas_witness(num, P, Q):
             some additional conditions that make it more likely to be prime.
     """
     D = P**2 - 4*Q
-    gcd_D = numth.gcd(D, num)
-    gcd_P = numth.gcd(P, num)
-    gcd_Q = numth.gcd(Q, num)
+    gcd_D = gcd(D, num)
+    gcd_P = gcd(P, num)
+    gcd_Q = gcd(Q, num)
     for g in (gcd_D, gcd_P, gcd_Q):
         if g == num:
             raise ValueError('Bad parameters: {}, {}'.format(P, Q))
         elif g > 1:
             return 'composite'
 
-    delta = num - numth.jacobi(D, num)
-    s, d = numth.padic(delta, 2)
+    delta = num - jacobi(D, num)
+    s, d = padic(delta, 2)
     strong = False
 
     U, V, Q_ = _lucas_sequence_by_index(d, P, Q, num)
@@ -593,10 +594,10 @@ def lucas_witness(num, P, Q):
         if delta == num + 1:
             if V != (2*Q) % num:
                 return 'composite'
-            if Q_ != (Q * numth.jacobi(Q, num)) % num:
+            if Q_ != (Q * jacobi(Q, num)) % num:
                 return 'composite'
         else:
-            if Q_ != numth.jacobi(Q, num) % num:
+            if Q_ != jacobi(Q, num) % num:
                 return 'composite'
         if strong:
             return 'strong probable prime'
@@ -619,11 +620,11 @@ def _generate_lucas_witness_pairs(num, num_wit=None):
         num_wit = default_values('l_wit')
     witnesses = []
 
-    if rational.integer_sqrt(num)**2 != num:
+    if integer_sqrt(num)**2 != num:
         D = 5
         sgn = 1
         while len(witnesses) < num_wit // 2 + 1:
-            if (numth.jacobi(D*sgn, num) == -1):
+            if (jacobi(D*sgn, num) == -1):
                 witnesses.append( (1, (1 - D)//4) )
             D += 2
             sgn *= 1
@@ -741,115 +742,8 @@ def _prev_block(block, diam):
     """Find previous block."""
     return [ x - diam for x in block ]
 
-##############################
-
-
-
-
-
-
-
-
 ############################################################
 ############################################################
+#       End
 ############################################################
 ############################################################
-############################################################
-
-##  testing
-
-##############################
-
-if __name__ == '__main__':
-    from random import choice
-
-#   ##########################
-#   #   test miller_rabin_test
-#   for j in range(10):
-#       num = randint(2,10**5)
-#       num += 1 - num%2
-#       assert( naive_primality_test(num) == miller_rabin_test(num) )
-
-    ##########################
-    #   test lucas_sequence
-    for j in range(10):
-        num = randint(2,10**6)
-        num += (1 - num%2)
-        P, Q = (choice([-1,1]) * randint(1,10) for i in range(2))
-        UV = _lucas_sequence(100, P, Q, num)
-        for k in range(30):
-            uvk = _lucas_sequence_by_index(k, P, Q, num)
-            assert( uvk == UV[k] )
-
-    ##########################
-    #   test lucas_test
-    for j in range(10):
-        num = randint(3,10**5)
-        num += 1 - num%2
-        primality = lucas_test(num, 4)
-        if 'prime' in primality:
-            primality = 'prime'
-        assert( naive_primality_test(num) ==  primality )
-
-    ##########################
-    #   test is_prime
-    for j in range(10):
-        num = randint(2, 10**5)
-        num += 1 - num%2
-        naive = naive_primality_test(num) == 'prime'
-        prime = is_prime(num)
-        assert( naive == prime )
-    naive = ['prime' == naive_primality_test(x) for x in range(2,30)]
-    prime = [is_prime(x) for x in range(2,30)]
-    assert( naive == prime )
-
-    ##########################
-    #   test prime_to
-    test_blocks = [
-            [[2],       [1]],
-            [[2,3],     [1,5]],
-            [[2,5],     [1,3,7,9]],
-            [[3,5],     [1,2,4,7,8,11,13,14]],
-            [[2,3,5],   [1,7,11,13,17,19,23,29]]
-        ]
-    for num_list, result in test_blocks:
-        assert( prime_to(num_list) == result )
-
-    ##########################
-    #   test next_primes
-    for j in range(5):
-        num = randint(2,10**6)
-        num_primes = randint(1,11)
-        primes = next_primes(num, num_primes)
-        for p in primes:
-            assert( is_prime(p) )
-        for x in range(num + 1 + num%2, max(primes)+1,2):
-            if x not in primes:
-                assert( not is_prime(x) )
-    small_primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
-    for i in range(9):
-        assert( next_prime(small_primes[i]) == small_primes[i+1] )
-
-    ##########################
-    #   test prev_primes
-    for j in range(5):
-        num = randint(40,10**6)
-        num_primes = randint(1,11)
-        primes = prev_primes(num, num_primes)
-        for p in primes:
-            assert( is_prime(p) )
-        for x in range(min(primes) + 2, num - num%2, 2):
-            if x not in primes:
-                assert( not is_prime(x) )
-    assert( prev_prime(2) is None )
-    small_primes = [29, 23, 19, 17, 13, 11, 7, 5, 3, 2]
-    for i in range(3,31):
-        assert( prev_primes(i,10) == [x for x in small_primes if x < i] )
-
-    ##########################
-    #   test primes_in_range
-    l_bd = randint(1, 10**10)
-    u_bd = randint(l_bd, l_bd + 10**4)
-    assert( primes_in_range(l_bd, u_bd)\
-            ==\
-            [ x for x in range(l_bd, u_bd) if is_prime(x) ] )

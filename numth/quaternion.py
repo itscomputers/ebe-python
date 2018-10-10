@@ -1,7 +1,7 @@
 
 #   numth/quaternion.py
 
-import numth.rational as rational
+from numth.rational import frac
 
 ############################################################
 ############################################################
@@ -53,7 +53,7 @@ class Quaternion:
         if abs(norm) == 1:
             norm_inverse = norm
         else:
-            norm_inverse = rational.frac(norm).inverse()
+            norm_inverse = frac(norm).inverse()
         r = self.r * norm_inverse
         i = self.i * norm_inverse
         j = self.j * norm_inverse
