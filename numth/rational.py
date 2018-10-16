@@ -1,8 +1,8 @@
 
 #   numth/rational.py
 
-from main import gcd, mod_inverse 
-from polynomial import polyn
+from numth.main import gcd, mod_inverse 
+from numth.polynomial import polyn
 
 import math
 
@@ -311,7 +311,7 @@ def repeating_dec_to_rational(init, repeat):
     else:
         displace = len(str(init).split('.')[-1])
     first = Rational(repeat, 10**(displace + period))
-    one_minus_r = Rational(1) - Rational(1, 10**period)
+    one_minus_r = Rational(1,1) - Rational(1, 10**period)
     return float_to_rational(init) + (first / one_minus_r)
 
 ##############################

@@ -1,8 +1,8 @@
 
 #   numth/primality.py
 
-from main import gcd, jacobi, padic
-from rational import integer_sqrt
+from numth.main import gcd, jacobi, padic
+from numth.rational import integer_sqrt
 
 from random import randint
 from concurrent.futures import ProcessPoolExecutor, wait
