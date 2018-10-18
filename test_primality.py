@@ -3,7 +3,7 @@
 
 if __name__ == '__main__':
     
-    from primality import *
+    from numth.primality import *
     from random import choice
 
     ##########################

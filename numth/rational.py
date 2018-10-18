@@ -312,7 +312,7 @@ def repeating_dec_to_rational(init, repeat):
         displace = len(str(init).split('.')[-1])
     first = Rational(repeat, 10**(displace + period))
     one_minus_r = Rational(1,1) - Rational(1, 10**period)
-    return float_to_rational(init) + (first / one_minus_r)
+    return _float_to_rational(float(init)) + (first / one_minus_r)
 
 ##############################
 

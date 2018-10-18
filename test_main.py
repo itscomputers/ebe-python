@@ -1,7 +1,7 @@
 
 if __name__ == '__main__':
     
-    from main import *
+    from numth.main import *
     from random import randint, choice
 
     ##########################
