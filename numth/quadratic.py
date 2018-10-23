@@ -2,7 +2,16 @@
 #   numth/quadratic.py
 
 from numth.main import mod_inverse 
-from numth.rational import frac, sqrt 
+from numth.rational import Rational, frac, sqrt 
+import tabulate
+
+##############################
+
+def _default_values(cat):
+    if cat == 'decimal':
+        return 20
+    if cat == 'continued fraction':
+        return 10
 
 ############################################################
 ############################################################
@@ -35,15 +44,23 @@ class Quadratic:
             root_disp = '\u2139'
         else:
             root_disp = '\u221a{}'.format(self.root)
-        
+       
+        if abs(self.imag) == 1:
+            imag_part = root_disp
+        else:
+            imag_part = '{} {}'.format(abs(self.imag), root_disp)
+
         if self.imag == 0:
             return format(self.real)
         elif self.real == 0:
-            return '{} {}'.format(self.imag, root_disp)
+            if self.imag > 0:
+                return imag_part
+            else:
+                return '-' + imag_part
         elif self.imag < 0:
-            return '{} - {} {}'.format(self.real, -self.imag, root_disp)
+            return '{} - {}'.format(self.real, imag_part)
         else:
-            return '{} + {} {}'.format(self.real, self.imag, root_disp)
+            return '{} + {}'.format(self.real, imag_part)
 
     ##########################
 
@@ -98,6 +115,18 @@ class Quadratic:
             return int(float(self) + .5)
         else:
             return int(float(self) - .5)
+
+    def decimal(self, num_digits=None):
+        if num_digits is None:
+            num_digits = _default_values('decimal')
+        if self.imag > 1:
+            sqrt_digits = num_digits
+        else:
+            sqrt_digits = num_digits + len(str(int(1/self.imag)))
+        return (self.real +\
+                self.imag *\
+                sqrt(self.root, num_digits=sqrt_digits)\
+                ).decimal(num_digits)
 
     ##########################
 
@@ -239,6 +268,25 @@ class Quadratic:
     def __le__(self, other):
         return not self > other
 
+    ##########################
+
+    def continued_fraction_print(self):
+        i = 0
+        alpha = self
+        q = int(alpha)
+        beta = alpha - q
+        beta0 = beta
+        table = [i, alpha, q, beta]
+        while True:
+            i += 1
+            alpha = beta.inverse()
+            q = int(alpha)
+            beta = alpha - q
+            table.append([i, alpha, q, beta])
+            if beta == beta0:
+                break
+        return ''
+
 ############################################################
 
 def quad(real, imag, root, mod=None):
@@ -246,3 +294,85 @@ def quad(real, imag, root, mod=None):
     return Quadratic(real, imag, root, mod)
 
 ############################################################
+############################################################
+#       Continued fractions
+############################################################
+############################################################
+
+class ContinuedFraction:
+
+    def __init__(self, num, display_rows=None):
+        self.num = num
+        if display_rows is None:
+            display_rows = _default_values('continued fraction')
+        self.display_rows = display_rows
+        self.terminates = isinstance(num, Rational)
+        self.periodic = isinstance(num, Quadratic)
+        self.table = self.get_table()
+        self.coeffs = [row[1] for row in self.table]
+        self.length = len(self.coeffs)
+
+    def __repr__(self):
+        self.print_table()
+        return self.print_coeffs()
+
+    ##########################
+
+    def get_table(self):
+        alpha = self.num
+        q = int(alpha)
+        beta = alpha - q
+        result = [ [alpha, q, beta] ]
+        if self.terminates or self.periodic:
+            while True:
+                alpha = 1 / beta
+                q = int(alpha)
+                beta = alpha - q
+                result.append( [alpha, q, beta] )
+                if beta == 0 or beta == result[0][2]:
+                    break
+        else:
+            for i in range(self.display_rows - 1):
+                alpha = 1 / beta
+                q = int(alpha)
+                beta = alpha - q
+                result.append( [alpha, q, beta] )
+
+        return result
+
+    ##########################
+
+    def print_table(self, rows=None, tablefmt='fancy_grid'):
+        if rows is None:
+            rows = _default_values('continued fraction')
+        if rows == 'ALL' or rows > self.length:
+            table = self.table
+        else:
+            table = self.table[:rows]
+            table.append(['\u22ee'] * 3)
+        table_str = [ [ str(x) for x in row] for row in table ]
+        print('\n' + tabulate.tabulate(
+            table_str, 
+            headers=['alpha', 'q', 'beta'], 
+            tablefmt=tablefmt
+        ))
+
+    ##########################
+
+    def print_coeffs(self, num_coeffs=None):
+        if num_coeffs is None:
+            num_coeffs = _default_values('continued fraction')
+        coeffs = ', '.join(str(x) for x in self.coeffs[:num_coeffs])
+        if num_coeffs < self.length:
+            coeffs += ', ...'
+        if self.periodic:
+            coeffs = coeffs.replace(',', ';', 1)
+        return '[ {} ]'.format(coeffs)
+
+    ##########################
+
+
+
+    
+
+
