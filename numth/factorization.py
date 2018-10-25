@@ -5,8 +5,10 @@ from numth.main import gcd, padic
 from numth.primality import is_prime, primes_in_range
 from numth.polynomial import polyn
 from numth.rational import integer_sqrt
+from numth.quadratic import gaussian, gaussian_divisor
 
 import math
+from functools import reduce
 from random import randint
 import itertools
 import pebble
@@ -30,7 +32,6 @@ def _default_values(cat):
 #       Total Factorization
 ############################################################
 ############################################################
-
 
 def find_divisor(num, rs=[], rp=[], ms=[]):
     """
@@ -526,13 +527,23 @@ class Factorize:
         """Initialize with number."""
         self.num = num
         self.factorization = factor(num)
-
+        self.multiplicity = self._multiplicity() 
+        self.euler_phi = self._euler_phi()
+        self.carmichael_lambda = self._carmichael_lambda()
+        self.square_part = []
+        self.square_free = []
+        self.primes_one = []
+        self.primes_three = []
+        self.bad_primes = []
+        self.is_sum_of_squares = True
+        self.split_primes()
+        
     ##########################
 
     def __repr__(self):
         """Print the factorization of num."""
         factors = []
-        for prime, exp in sorted( self.multiplicity().items() ):
+        for prime, exp in sorted( self.multiplicity.items() ):
             if exp == 1:
                 factors.append(str(prime))
             else:
@@ -541,10 +552,27 @@ class Factorize:
 
     ##########################
 
-    def multiplicity(self):
+    def _multiplicity(self):
         """Find factorization of num with multiplicity."""
         return { prime : self.factorization.count(prime)\
                     for prime in sorted(set(self.factorization)) }
+
+    ##########################
+
+    def split_primes(self):
+        """Split primes into classifications."""
+        for p, e in self.multiplicity.items():
+            if p == 2 or p % 4 == 1:
+                self.primes_one += [p]*e
+            else:
+                if e % 2 == 1:
+                    self.bad_primes += [p]*e
+                    self.is_sum_of_squares = False
+                else:
+                    self.primes_three += [p]*(e//2)
+            if e % 2 == 1:
+                self.square_free.append(p)
+            self.square_part += [p] * (e - (e % 2))
 
     ##########################
 
@@ -557,27 +585,42 @@ class Factorize:
 
     ##########################
 
-    def euler_phi(self):
-        output = 1
-        for p, e in self.multiplicity().items():
-            ouput *= (p-1)
-            for i in range(e-1):
-                output *= p
-        return output
+    def _euler_phi(self):
+        """Euler's phi function (totient)."""
+        def e(pair):
+            p, e = pair
+            return p**(e-1) * (p - 1)
+        def p(x, y):
+            return x * y
+        return reduce(p, map(e, self.multiplicity.items()), 1)
 
     ##########################
 
-    def carmichael_lambda(self):
-        output = 1
-        for p, e in self.multiplicity().items():
-            output *= (p-1) // gcd(output, p-1)
+    def _carmichael_lambda(self):
+        """Carmichael's lambda function."""
+        result = 1
+        for p, e in self.multiplicity.items():
+            result *= (p-1) // gcd(result, p-1)
             if p == 2:
                 if e == 2:
-                    output *= p
+                    result *= p
                 elif e > 2:
-                    output *= p**(e-2)
+                    result *= p**(e-2)
             else:
                 result *= p**(e-1)
         return result
 
     ##########################
+
+    def random_sum_of_squares(self):
+        """Write number as sum of two squares."""
+        if self.is_sum_of_squares:
+            g = reduce(lambda x, y : x*y, self.primes_three, 1)
+            g = gaussian(g, 0)
+            for p in self.primes_one:
+                d = gaussian_divisor(p)
+                if randint(0,1) == 1:
+                    d = d.conjugate()
+                g = g * d
+            g = g.canonical()
+            return (g.real, abs(g.imag))

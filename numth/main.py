@@ -1,6 +1,8 @@
 
 #   numth/main.py
 
+from functools import reduce
+
 ##############################
 
 def div(num, div, SMALL_REM=False):
@@ -198,6 +200,67 @@ def jacobi(a, b):
         if (b % 4 != 1) and (a_ % 4 != 1):
             sgn *= -1
         return sgn * jacobi(b, a_)
+
+##############################
+
+def mod_sqrt_minus_one(prime, LEGENDRE=True):
+    """
+    Square root of -1 modulo a prime.
+
+    Args:   int:    prime           must be a prime for correct result
+            bool:   LEGENDRE        True    <- use Legendre's method
+                                    False   <- use Wilson's method
+
+    Return: tuple:  (val1, val2)    val**2 % prime == prime - 1
+    """
+    if prime == 2:
+        return (1, 1)
+    if prime % 4 == 3:
+        return None
+    if LEGENDRE:
+        for x in range(2, prime-1):
+            if jacobi(x, prime) == -1:
+                val = pow(x, (prime-1)//4, prime)
+    else:
+        f = lambda x, y : (x*y) % prime
+        val = reduce(f, range(2, (prime-1)//2 + 1), 1)
+
+    return tuple(sorted([val, prime-val]))
+
+############################################################
+############################################################
+#       Shortcut involving generators
+############################################################
+############################################################
+
+def generator_range(f, lower, upper, *args, **kwargs):
+    """
+    Range of outputs from a function that returns a generator.
+
+    Args:   func:       f
+            int:        lower, upper
+
+    Return: generator   analog of (f(i) for i in range(lower, upper))
+    """
+    gen = f(*args, **kwargs)
+    for i in range(lower):
+        next(gen)
+    return (next(gen) for i in range(lower, upper))
+
+##############################
+
+def generator_nth(f, num, *args, **kwargs):
+    """
+    Nth output from a function that returns a generator.
+
+    Args:   func:       f
+            int:        num
+                        *args           optional arguments of f
+
+    Return: generator   analog of f(num)
+    """
+    gen = generator_range(f, num, num+1, *args, **kwargs)
+    return next(gen)
 
 ############################################################
 ############################################################

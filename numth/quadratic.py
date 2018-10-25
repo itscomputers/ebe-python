@@ -1,8 +1,12 @@
 
 #   numth/quadratic.py
 
-from numth.main import mod_inverse 
-from numth.rational import Rational, frac, sqrt, is_square, ContinuedFraction 
+from numth.main import\
+        mod_inverse,\
+        mod_sqrt_minus_one,\
+        generator_range,\
+        generator_nth
+from numth.rational import Rational, frac, sqrt, is_square 
 import tabulate
 
 ##############################
@@ -12,6 +16,36 @@ def _default_values(cat):
         return 20
     if cat == 'continued fraction':
         return 10
+
+##############################
+
+def quad(real, imag, root, mod=None):
+    """Shortcut for creating instance of Quadratic class."""
+    return Quadratic(real, imag, root, mod)
+
+##############################
+
+def gaussian(real, imag):
+    """Shortcut for creating Gaussian integer or rational."""
+    return Quadratic(real, imag, -1)
+
+##############################
+
+def gaussian_divisor(prime):
+    """
+    Find Gaussian integer divisor of a prime.
+
+    Args:   int:        prime       must be a prime number
+
+    Return: Gaussian:   d           d is irreducible and divides prime
+    """
+    if prime % 4 == 3:
+        raise ValueError('{} does not split over Z[i]'.format(prime))
+
+    s = min(mod_sqrt_minus_one(prime))
+    d = gaussian(prime, 0).gcd(gaussian(s, 1))
+
+    return d
 
 ############################################################
 ############################################################
@@ -108,6 +142,32 @@ class Quadratic:
         else:
             a, b = convergent
         return int((a + b*self) * (a + b*self.conjugate()))
+
+    ##########################
+
+    def canonical(self):
+        if self.root == -1:
+            canon = self
+            if abs(canon.real) < abs(canon.imag):
+                canon = canon * Quadratic(0, 1, -1)
+            if canon.real < 0:
+                canon = -canon
+            return canon
+        else:
+            raise ValueError('canonical not defined for sqrt({})'.format(self.root))
+
+    ##########################
+
+    def gcd(self, other):
+        if self.root == -1:
+            if isinstance(other, int):
+                other = Quadratic(other, 0, self.root)
+            if other == 0:
+                return self.canonical()
+            else:
+                return other.gcd(self % other)
+        else:
+            raise ValueError('canonical not defined for sqrt({})'.format(self.root))
 
     ##########################
 
@@ -247,7 +307,7 @@ class Quadratic:
             return Quadratic(new_real, new_imag, self.root, self.mod)
 
     def __rmod__(self, other):
-        return QuadraticInt(other, 0, self.root, self.mod) % self
+        return Quadratic(other, 0, self.root, self.mod) % self
 
     def __imod__(self, other):
         return self % other
@@ -255,6 +315,8 @@ class Quadratic:
     ##########################
 
     def __eq__(self, other):
+        if other == 0:
+            return self.real == 0 and self.imag == 0
         return      self.real == other.real\
                 and self.imag == other.imag\
                 and self.root == other.root\
@@ -279,30 +341,40 @@ class Quadratic:
     def __le__(self, other):
         return not self > other
 
-    ##########################
-
-    def continued_fraction_print(self):
-        i = 0
-        alpha = self
-        q = int(alpha)
-        beta = alpha - q
-        beta0 = beta
-        table = [i, alpha, q, beta]
-        while True:
-            i += 1
-            alpha = beta.inverse()
-            q = int(alpha)
-            beta = alpha - q
-            table.append([i, alpha, q, beta])
-            if beta == beta0:
-                break
-        return ''
-
+############################################################
+############################################################
+#       Gaussian integers/rationals
+############################################################
 ############################################################
 
-def quad(real, imag, root, mod=None):
-    """Shortcut for creating instance of Quadratic class."""
-    return Quadratic(real, imag, root, mod)
+class Gaussian(Quadratic):
+
+    def __init__(self, real, imag):
+        self.real = real
+        self.imag = imag
+        self.root = -1
+        self.mod = None
+
+    ##########################
+
+    def canonical(self):
+        canon = self
+        if abs(canon.real) < abs(canon.imag):
+            canon = canon * Gaussian(0,1)
+        if abs(canon.real) < 0:
+            canon = -canon
+        return canon
+
+    ##########################
+
+    def gcd(self, other):
+        if isinstance(other, int):
+            other = Gaussian(other, 0)
+
+        if other == 0:
+            return self.canonical()
+        else:
+            return other.gcd(self % other)
 
 ############################################################
 ############################################################
@@ -310,7 +382,7 @@ def quad(real, imag, root, mod=None):
 ############################################################
 ############################################################
 
-class ContinuedFraction(ContinuedFraction):
+class ContinuedFraction:
 
     def __init__(self, num, num_rows=None):
         if not isinstance(num, int) or num < 2 or is_square(num):
@@ -470,6 +542,59 @@ class ContinuedFraction(ContinuedFraction):
             yield solution
             element = element * first_element
             solution = self._element_to_solution(element)
+
+    ##########################
+
+    def convergents_range(self, lower, upper):
+        return generator_range(self.convergents_gen, lower, upper)
+
+    ##########################
+
+    def convergent_nth(self, n):
+        return generator_nth(self.convergents_gen, n)
+
+    ##########################
+
+    def pell_solutions_range(self, lower, upper):
+        return generator_range(
+                self.pell_solutions_gen, lower, upper)
+
+    ##########################
+
+    def pell_solution_nth(self, n):
+        return generator_nth(self.pell_solutions_gen, n)
+
+    ##########################
+
+    def find_convergents(self, denom_digits):
+        psg = self.pell_solutions_gen(True)
+        lower_ps = (1, 0)
+        upper_ps = next(psg)
+        while len(str(upper_ps[1])) < denom_digits:
+            lower_ps, upper_ps = upper_ps, next(psg)
+
+        first, second = None, None
+        while first is None and second is None:
+            offset_element = self._solution_to_element(lower_ps)
+            for c in self.convergents[1:]:
+                element = self._solution_to_element(c)
+                convergent = self._element_to_solution(element * offset_element)
+                if len(str(convergent[1])) >= denom_digits:
+                    if first is None:
+                        first = convergent
+                    else:
+                        second = convergent
+                        break
+            lower_ps, upper_ps = upper_ps, next(psg)
+
+        if first[0] * second[1] < first[1] * second[0]:
+            lower_bound = Rational(first[0], first[1])
+            upper_bound = Rational(second[0], second[1])
+        else:
+            upper_bound = Rational(first[0], first[1])
+            lower_bound = Rational(second[0], second[1])
+        
+        return lower_bound, upper_bound
 
 ############################################################
 ############################################################

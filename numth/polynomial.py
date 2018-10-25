@@ -4,6 +4,12 @@
 import itertools
 import re
 
+##############################
+
+def polyn(*coeffs):
+    """Shortcut for creating instance of Polynomial class."""
+    return Polynomial(*coeffs)
+
 ############################################################
 ############################################################
 #       Polynomial class
@@ -306,10 +312,7 @@ class Polynomial:
         return not self > other
 
 ############################################################
-
-def polyn(*coeffs):
-    """Shortcut for creating instance of Polynomial class."""
-    return Polynomial(*coeffs)
-
+############################################################
+#       End
 ############################################################
 ############################################################

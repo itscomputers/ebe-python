@@ -4,6 +4,7 @@ from numth.main import\
         lcm,\
         mod_inverse,\
         mod_power,\
+        mod_sqrt_minus_one,\
         jacobi
 
 from numth.factorization import\
@@ -47,12 +48,14 @@ from numth.primality import\
         lucas_test
 
 from numth.quadratic import\
+        quad,\
+        gaussian,\
+        gaussian_divisor,\
         Quadratic,\
-        quad
+        ContinuedFraction
 
 from numth.quaternion import\
-        Quaternion,\
-        quaternion
+        Quaternion
 
 from numth.rational import\
         Rational,\

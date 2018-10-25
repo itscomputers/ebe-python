@@ -1,27 +1,22 @@
 
 #   numth/modular.py
 
-from numth.main import gcd, jacobi, mod_inverse, padic
+from numth.main import gcd, jacobi, mod_inverse, mod_sqrt_minus_one, padic
 from numth.factorization import Factorize
 from numth.primality import is_prime, prime_to
 from numth.quadratic import Quadratic
 
 ##############################
 
-def _default_values(cat):
-    pass
-
-##############################
-
 def euler_phi(num):
     """Euler's totient/phi function."""
-    return Factorize(num).euler_phi()
+    return Factorize(num).euler_phi
 
 ##############################
 
 def carmichael_lambda(num):
     """Carmichael's lambda function."""
-    return Factorize(num).carmichael_lambda()
+    return Factorize(num).carmichael_lambda
 
 ##############################
 
@@ -38,39 +33,11 @@ def legendre(num, prime, EULER_CRITERION=False):
     """
     if not is_prime(prime):
         raise ValueError('{} is not prime'.format(prime))
+    
+    if EULER_CRITERION:
+        return pow(num, (prime-1)//2, prime)
     else:
         return jacobi(num, prime)
-
-##############################
-
-def mod_sqrt_minus_one(prime, LEGENDRE=True):
-    """
-    Square root of -1 modulo a prime.
-
-    Args:   int:    prime
-            bool:   LEGENDRE        True    <- use Legendre's method
-                                    False   <- use Wilson's method
-
-    Return: tuple:  (val1, val2)    val**2 % prime == prime - 1
-    """
-    if not is_prime(prime):
-        raise ValueError('{} is not prime'.format(prime))
-    if prime == 2:
-        return (1, 1)
-    if prime % 4 == 3:
-        return None
-    
-    if METHOD == 'legendre':
-        for x in range(2, prime-1):
-            if jacobi(x, prime) == -1:
-                val = pow(x, (prime-1)//4, prime)
-                return tuple(sorted([val, prime - val]))
-
-    else:
-        val = 1
-        for x in range(2, (prime-1)//2 + 1):
-            val = (val * x) % prime
-        return tuple(sorted([val, prime - val]))
 
 ##############################
 
