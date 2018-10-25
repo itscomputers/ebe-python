@@ -2,7 +2,7 @@
 #   numth/quadratic.py
 
 from numth.main import mod_inverse 
-from numth.rational import Rational, frac, sqrt 
+from numth.rational import Rational, frac, sqrt, is_square, ContinuedFraction 
 import tabulate
 
 ##############################
@@ -42,8 +42,10 @@ class Quadratic:
         """Print quadratic element."""
         if self.root == -1 or (self.mod and self.root == self.mod - 1):
             root_disp = '\u2139'
-        else:
+        elif isinstance(self.root, int):
             root_disp = '\u221a{}'.format(self.root)
+        else:
+            root_disp = '\u221a({})'.format(self.root)
        
         if abs(self.imag) == 1:
             imag_part = root_disp
@@ -97,6 +99,15 @@ class Quadratic:
         new_real = self.real * norm_inverse
         new_imag = -self.imag * norm_inverse
         return Quadratic(new_real, new_imag, self.root, self.mod)
+
+    ##########################
+
+    def pell_number(self, convergent):
+        if isinstance(convergent, Rational):
+            a, b = convergent.numer, convergent.denom
+        else:
+            a, b = convergent
+        return int((a + b*self) * (a + b*self.conjugate()))
 
     ##########################
 
@@ -295,84 +306,173 @@ def quad(real, imag, root, mod=None):
 
 ############################################################
 ############################################################
-#       Continued fractions
+#       Quadratic continued fractions
 ############################################################
 ############################################################
 
-class ContinuedFraction:
+class ContinuedFraction(ContinuedFraction):
 
-    def __init__(self, num, display_rows=None):
-        self.num = num
-        if display_rows is None:
-            display_rows = _default_values('continued fraction')
-        self.display_rows = display_rows
-        self.terminates = isinstance(num, Rational)
-        self.periodic = isinstance(num, Quadratic)
-        self.table = self.get_table()
-        self.coeffs = [row[1] for row in self.table]
-        self.length = len(self.coeffs)
-
-    def __repr__(self):
-        self.print_table()
-        return self.print_coeffs()
+    def __init__(self, num, num_rows=None):
+        if not isinstance(num, int) or num < 2 or is_square(num):
+            raise ValueError('only positive non-square integers allowed')
+        self.num = Quadratic(0, 1, num)
+        self.period = None
+        self.length = 0
+        self.is_complete = False
+        self.table = None
+        self.pre_coeff = None
+        self.coeffs = []
+        self.beta = None
+        self.convergents = [(1, 0)]
+        self.pell_numbers = None
+        self.initialize_table(num_rows)
 
     ##########################
 
-    def get_table(self):
+    def __repr__(self):
+        display = _default_values('continued fraction')
+        self.print_table(display)
+        self.print_coeffs(display)
+        return ''
+
+    ##########################
+
+    def initialize_table(self, num_rows=None):
+        if num_rows is None:
+            num_rows = _default_values('continued fraction')
         alpha = self.num
         q = int(alpha)
         beta = alpha - q
-        result = [ [alpha, q, beta] ]
-        if self.terminates or self.periodic:
-            while True:
-                alpha = 1 / beta
-                q = int(alpha)
-                beta = alpha - q
-                result.append( [alpha, q, beta] )
-                if beta == 0 or beta == result[0][2]:
-                    break
-        else:
-            for i in range(self.display_rows - 1):
-                alpha = 1 / beta
-                q = int(alpha)
-                beta = alpha - q
-                result.append( [alpha, q, beta] )
-
-        return result
+        convergent = (q, 1)
+        self.pre_coeff = q
+        self.table = [(alpha, q, beta)]
+        self.length += 1
+        self.beta = beta
+        self.convergents.append(convergent)
+        self.pell_numbers = [self.num.pell_number(convergent)]
+        self.extend(num_rows)
+        if self.is_complete:
+            self.period = self.length - 1
 
     ##########################
 
-    def print_table(self, rows=None, tablefmt='fancy_grid'):
-        if rows is None:
-            rows = _default_values('continued fraction')
-        if rows == 'ALL' or rows > self.length:
-            table = self.table
+    def get_next(self):
+        if not self.is_complete:
+            alpha, q, beta = self.table[-1]
+
+            alpha = 1 / beta
+            q = int(alpha)
+            beta = alpha - q
+
+            self.coeffs.append(q)
+            self.table.append((alpha, q, beta))
+
+            (a0, b0), (a1, b1) = self.convergents[-2:]
+            convergent = (q * a1 + a0, q * b1 + b0)
+            self.convergents.append(convergent)
+            self.pell_numbers.append(self.num.pell_number(convergent))
+
+            if beta == self.beta:
+                self.is_complete = True
+                self.period = self.length - 1
+
+    ##########################
+
+    def extend(self, num_rows=None):
+        while not self.is_complete:
+            if num_rows is not None and self.length >= num_rows:
+                break
+            self.get_next()
+            self.length += 1
+
+    ##########################
+
+    def _restrict(self, array, display=None, vertical=True):
+        if not self.is_complete or (display is not None and self.length > display):
+            array_display = array[:display]
+            if vertical:
+                array_display.append(('\u22ee',) * len(array[0]))
+            else:
+                array_display.append('...')
+            return array_display
         else:
-            table = self.table[:rows]
-            table.append(['\u22ee'] * 3)
-        table_str = [ [ str(x) for x in row] for row in table ]
+            return array
+
+    ##########################
+
+    def print_table(self, display=None, tablefmt='fancy_grid'):
+        table = [ [str(x) for x in row] for row in self.table ]
+        table = self._restrict(table, display)
+        headers = ['alpha', 'q', 'beta']
+        print('\n' + tabulate.tabulate(table, headers=headers, tablefmt=tablefmt))
+
+    ##########################
+
+    def print_coeffs(self, display=None):
+        coeffs = [str(x) for x in self.coeffs]
+        coeffs = self._restrict(coeffs, display, vertical=False)
+        print('[ {} ; {} ]'.format(self.pre_coeff, ', '.join(coeffs)))
+
+    ##########################
+
+    def print_convergents(self, display=None, tablefmt='fancy_grid'):
+        convergents = [[
+            Rational(c[0], c[1]).display(), 
+            Rational(c[0], c[1]).decimal(10)
+            ] for c in self.convergents[1:] ]
+        convergents = self._restrict(convergents, display)
+        headers = ['convergent', 'convergent']
+        tabulate.PRESERVE_WHITESPACE=True
         print('\n' + tabulate.tabulate(
-            table_str, 
-            headers=['alpha', 'q', 'beta'], 
-            tablefmt=tablefmt
-        ))
+            convergents,
+            headers=headers,
+            tablefmt=tablefmt,
+            floatfmt='.10f'))
 
     ##########################
 
-    def print_coeffs(self, num_coeffs=None):
-        if num_coeffs is None:
-            num_coeffs = _default_values('continued fraction')
-        coeffs = ', '.join(str(x) for x in self.coeffs[:num_coeffs])
-        if num_coeffs < self.length:
-            coeffs += ', ...'
-        if self.periodic:
-            coeffs = coeffs.replace(',', ';', 1)
-        return '[ {} ]'.format(coeffs)
+    def convergents_gen(self):
+        a0, b0 = 1, 0
+        a1, b1 = self.pre_coeff, 1
+        i = 0
+        while True:
+            yield Rational(a1, b1)
+            q = self.coeffs[i]
+            a0, a1 = a1, q*a1 + a0
+            b0, b1 = b1, q*b1 + b0
+            i = (i + 1) % self.period
 
     ##########################
 
+    def _solution_to_element(self, solution):
+        a, b = solution
+        return a + b*self.num
 
+    ##########################
 
-    
+    def _element_to_solution(self, element):
+        y = int((element - element.conjugate())\
+                / (2 * (self.num - self.num.real)))
+        x = int((element + element.conjugate()) / 2 - y * self.num.real)
+        return (x, y)
 
+    ##########################
 
+    def pell_solutions_gen(self, include_minus_one=False):
+        first_solution = self.convergents[-2]
+        first_element = self._solution_to_element(first_solution)
+        if not include_minus_one and self.pell_numbers[-2] != 1:
+            first_element = first_element**2
+            first_solution = self._element_to_solution(first_element)
+        solution = first_solution
+        element = first_element
+        while True:
+            yield solution
+            element = element * first_element
+            solution = self._element_to_solution(element)
+
+############################################################
+############################################################
+#       End
+############################################################
+############################################################

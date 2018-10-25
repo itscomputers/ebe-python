@@ -5,6 +5,7 @@ from numth.main import gcd, mod_inverse
 from numth.polynomial import polyn
 
 import math
+import tabulate
 
 ##############################
 
@@ -15,6 +16,8 @@ def _default_values(cat):
         return 20
     if cat == 'pi_digits':
         return 20
+    if cat == 'continued fraction':
+        return 10
 
 ############################################################
 ############################################################
@@ -42,19 +45,33 @@ class Rational:
         d = gcd(numer, denom)
         self.numer = sgn * abs(numer) // d
         self.denom = abs(denom) // d
+        self.sign = sgn
 
     ##########################
 
     def __repr__(self):
         """Print rational number."""
-        if self.numer * self.denom < 0:
-            sgn = -1
-        else:
-            sgn = 1
         if self.denom == 1:
             return '{}'.format(self.numer)
         else:
             return '{}/{}'.format(self.numer, self.denom)
+
+    ##########################
+
+    def display(self):
+        """Pretty-print rational number."""
+        minus = self.sign == -1
+        numer = abs(self.numer)
+        denom = self.denom
+        numer_length = len(str(numer))
+        denom_length = len(str(denom))
+        length = max(numer_length, denom_length)
+        numer_offset = (length - numer_length + 1) // 2
+        denom_offset = (length - denom_length + 1) // 2
+        numer = ' ' * (minus + numer_offset + 1) + str(numer)
+        denom = ' ' * (minus + denom_offset + 1) + str(denom)
+        line = '-' * minus + ' ' + '\u2500'*length
+        return '{}\n{}\n{}'.format(numer, line, denom)
 
     ##########################
     
@@ -457,6 +474,19 @@ def sqrt(num, num_digits=None, FLOAT=False):
 
 ##############################
 
+def is_square(num):
+    """
+    Determine if a number is a perfect square.
+
+    Args:   int:    num
+
+    Return: bool
+    """
+    return integer_sqrt(num)**2 == num
+
+
+##############################
+
 def pi(num_digits=None):
     """
     Rational approximation of pi.
@@ -722,16 +752,6 @@ def ramanujan_hardy(num_digits):
             mult_term = mult_term * (4*k - j) / 396 / k
         lin_term = lin_term + 26390
         value += mult_term * lin_term
-
-############################################################
-############################################################
-#       Continued fractions
-############################################################
-############################################################
-
-
-
-
 
 ############################################################
 ############################################################
