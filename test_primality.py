@@ -7,7 +7,7 @@ if __name__ == '__main__':
     from random import choice
 
     ##########################
-    #   test miller_rabin_test
+    #   test miller_rabin
     for j in range(10):
         num = randint(2,10**5)
         num += 1 - num%2
@@ -25,7 +25,7 @@ if __name__ == '__main__':
 #           assert( uvk == UV[k] )
 
     ##########################
-    #   test lucas_test
+    #   test lucas
     for j in range(10):
         num = randint(3,10**5)
         num += 1 - num%2

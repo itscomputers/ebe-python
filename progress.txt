@@ -1,21 +1,26 @@
 
 totally transferred:
-	numth,
+	main,
 		including:
 		mod_inverse
 		mod_power
 		jacobi
 	primality
 	polynomial
+	quadratic
+		including:
+			ContinuedFraction
+	quaternion
 	rational
 	factorization
+		including:
+			sum_of_squares
 	modular
+	
 	
 next:
 	add other modular functions to numth
 	tests
-	sums of squares
-	add ContinuedFraction class
 	factorization in rings of integers?
 
 	

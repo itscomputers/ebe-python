@@ -6,10 +6,11 @@ from numth.primality import is_prime, primes_in_range
 from numth.polynomial import polyn
 from numth.rational import integer_sqrt
 from numth.quadratic import gaussian, gaussian_divisor
+from numth.quaternion import prime_as_norm
 
 import math
 from functools import reduce
-from random import randint
+from random import randint, shuffle
 import itertools
 import pebble
 from concurrent.futures import ProcessPoolExecutor, TimeoutError, wait
@@ -612,15 +613,39 @@ class Factorize:
 
     ##########################
 
-    def random_sum_of_squares(self):
+    def two_squares(self, RANDOM=True):
         """Write number as sum of two squares."""
         if self.is_sum_of_squares:
             g = reduce(lambda x, y : x*y, self.primes_three, 1)
             g = gaussian(g, 0)
             for p in self.primes_one:
                 d = gaussian_divisor(p)
-                if randint(0,1) == 1:
-                    d = d.conjugate()
+                if RANDOM:
+                    if randint(0,1) == 1:
+                        d = d.conjugate()
                 g = g * d
             g = g.canonical()
             return (g.real, abs(g.imag))
+
+    ##########################
+
+    def four_squares(self, RANDOM=True):
+        """Write number as sum of four squares."""
+        primes = self.factorization
+        if RANDOM:
+            shuffle(primes)
+        quaternions = []
+        for p in self.factorization:
+            q = prime_as_norm(p)
+            if RANDOM:
+                q = q.shuffle()
+            quaternions.append(q)
+        q = reduce(lambda x, y : x*y, quaternions, 1)
+        r, i, j, k = q.components
+        return tuple(sorted([abs(r), abs(i), abs(j), abs(k)], reverse=True))
+
+############################################################
+############################################################
+#       End
+############################################################
+############################################################

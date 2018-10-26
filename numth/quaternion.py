@@ -1,7 +1,43 @@
 
 #   numth/quaternion.py
 
+from numth.main import jacobi
+from numth.quadratic import gaussian_divisor
 from numth.rational import frac
+
+from random import randint, shuffle
+
+##############################
+
+def prime_as_norm(prime):
+    if prime == 2 or prime % 4 == 1:
+        d = gaussian_divisor(prime)
+        r, i, j, k = d.real, d.imag, 0, 0
+
+    elif prime % 8 == 3:
+        s = pow(2, (prime+1)//4, prime)
+        if 2 * s > prime:
+            s = prime - s
+        r, i, j, k = Quaternion(s, 1, 1, 0).descent(prime).components
+
+    else:
+        t = 2
+        a = 5
+        while jacobi(a, prime) == 1:
+            t += 1
+            a = pow(t, 2, prime) + 1
+        s = pow(a, (prime+1)//4, prime)
+        if 2 * s > prime:
+            s = prime - s
+        r, i, j, k = Quaternion(s, t, 1, 0).descent(prime).components
+
+    return from_array(sorted([abs(r), abs(i), abs(j), abs(k)], reverse=True))
+
+##############################
+
+def from_array(arr):
+    r, i, j, k = arr
+    return Quaternion(r, i, j, k)
 
 ############################################################
 ############################################################
@@ -16,6 +52,7 @@ class Quaternion:
         self.i = i
         self.j = j
         self.k = k
+        self.components = (r, i, j, k)
 
     ##########################
 
@@ -64,6 +101,24 @@ class Quaternion:
 
     def conjugate(self):
         return Quaternion(self.r, -self.i, -self.j, -self.k)
+
+    ##############################
+
+    def descent(self, prime):
+        m = self.norm() // prime
+        if m == 1:
+            return self
+        else:
+            return ((self.conjugate() * (self % m)) // m).descent(prime)
+
+    ##########################
+
+    def shuffle(self):
+        components = list(self.components)
+        shuffle(components)
+        for i in range(4):
+            components[i] *= (1 - 2*randint(0,1))
+        return from_array(components)
 
     ##########################
 
@@ -178,7 +233,11 @@ class Quaternion:
             i = self.i % other
             j = self.j % other
             k = self.k % other
-            return Quaternion(r, i, j, k)
+            return Quaternion(
+                r - other * (2*r > other), 
+                i - other * (2*i > other), 
+                j - other * (2*j > other), 
+                k - other * (2*k > other))
 
     def __rmod__(self, other):
         if not isinstance(other, Quaternion):
