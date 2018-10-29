@@ -472,22 +472,32 @@ class ContinuedFraction:
 
     ##########################
 
-    def print_table(self, display=None, tablefmt='fancy_grid'):
+    def get_table(self, display=None, tablefmt='fancy_grid'):
         table = [ [str(x) for x in row] for row in self.table ]
         table = self._restrict(table, display)
         headers = ['alpha', 'q', 'beta']
-        print('\n' + tabulate.tabulate(table, headers=headers, tablefmt=tablefmt))
+        return tabulate.tabulate(table, headers=headers, tablefmt=tablefmt)
+
+    ##########################
+
+    def print_table(self, display=None, tablefmt='fancy_grid'):
+        print('\n' + self.get_table(display, tablefmt))
+
+    ##########################
+
+    def get_coeffs(self, display=None):
+        coeffs = [str(x) for x in self.coeffs]
+        coeffs = self._restrict(coeffs, display, vertical=False)
+        return '[ {} ; {} ]'.format(self.pre_coeff, ', '.join(coeffs))
 
     ##########################
 
     def print_coeffs(self, display=None):
-        coeffs = [str(x) for x in self.coeffs]
-        coeffs = self._restrict(coeffs, display, vertical=False)
-        print('[ {} ; {} ]'.format(self.pre_coeff, ', '.join(coeffs)))
+        print('\n' + self.get_coeffs(display))
 
     ##########################
 
-    def print_convergents(self, display=None, tablefmt='fancy_grid'):
+    def get_convergents(self, display=None, tablefmt='fancy_grid'):
         convergents = [[
             Rational(c[0], c[1]).display(), 
             Rational(c[0], c[1]).decimal(10)
@@ -495,15 +505,19 @@ class ContinuedFraction:
         convergents = self._restrict(convergents, display)
         headers = ['convergent', 'convergent']
         tabulate.PRESERVE_WHITESPACE=True
-        print('\n' + tabulate.tabulate(
-            convergents,
-            headers=headers,
-            tablefmt=tablefmt,
-            floatfmt='.10f'))
+        return tabulate.tabulate(
+            convergents, headers=headers, tablefmt=tablefmt, floatfmt='.10f')
+
+    ##########################
+
+    def print_convergents(self, display=None, tablefmt='fancy_grid'):
+        print('\n' + self.get_convergents(display, tablefmt))
 
     ##########################
 
     def convergents_gen(self):
+        if not self.is_complete:
+            self.extend()
         a0, b0 = 1, 0
         a1, b1 = self.pre_coeff, 1
         i = 0
@@ -531,6 +545,8 @@ class ContinuedFraction:
     ##########################
 
     def pell_solutions_gen(self, include_minus_one=False):
+        if not self.is_complete:
+            self.extend()
         first_solution = self.convergents[-2]
         first_element = self._solution_to_element(first_solution)
         if not include_minus_one and self.pell_numbers[-2] != 1:

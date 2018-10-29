@@ -9,7 +9,7 @@ from random import randint, shuffle
 
 ##############################
 
-def prime_as_norm(prime):
+def quaternion_divisor(prime):
     if prime == 2 or prime % 4 == 1:
         d = gaussian_divisor(prime)
         r, i, j, k = d.real, d.imag, 0, 0

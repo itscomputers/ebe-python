@@ -5,15 +5,18 @@ from numth.main import gcd, jacobi, padic
 from numth.rational import integer_sqrt
 
 from random import randint
+from functools import reduce
 from concurrent.futures import ProcessPoolExecutor, wait
 
 ##############################
 
-def default_values(cat):
-    if cat is 'mr_wit':
+def _default_values(cat):
+    if cat == 'mr_wit':
         return 20
-    elif cat is 'l_wit':
+    elif cat == 'l_wit':
         return 20
+    elif cat == 'sieve primes':
+        return [2, 3, 5, 7]
 
 ############################################################
 ############################################################
@@ -103,16 +106,21 @@ def next_prime_gen(num, sieve_primes=None, mr_wit=None, l_wit=None):
     Return: generator:  int:    next primes after num
     """
     if num < 1:
-        num == 1
+        num = 1
     if sieve_primes is None:
-        sieve_primes = _choose_primes(num)
+        sieve_primes = _default_values('sieve primes')
     sieve, diam = _generate_block(sieve_primes)
     block = _shift_block(num, sieve, diam)
     preblock = _restrict_block(block, l_bd=num+1)
+
+    for p in [x for x in sieve_primes if num < x]:
+        yield p
+
     if preblock:
         for x in preblock:
             if is_prime(x, mr_wit, l_wit):
                 yield x
+    
     while True:
         block = _next_block(block, diam)
         for x in block:
@@ -168,14 +176,23 @@ def prev_prime_gen(num, sieve_primes=None, mr_wit=None, l_wit=None):
     Return: generator:  int                 previous primes before num
     """
     if sieve_primes is None:
-        sieve_primes = _choose_primes(num)
+        sieve_primes = _default_values('sieve primes')
+
+    if num <= next_prime(max(sieve_primes)):
+        for y in reversed(sieve_primes):
+            if y < num:
+                yield y
+        raise StopIteration('Iterator is empty')
+    
     block, diam = _generate_block(sieve_primes)
     block = _shift_block(num, block, diam)
     preblock = _restrict_block(block, u_bd=num)
+
     if preblock:
         for x in reversed(preblock):
             if is_prime(x, mr_wit, l_wit):
                 yield x
+    
     while True:
         block = _prev_block(block, diam)
         for x in reversed(block):
@@ -239,10 +256,10 @@ def primes_in_range(l_bd, u_bd, sieve_primes=None, mr_wit=None, l_wit=None):
     Return: list:   primes in range(l_bd, u_bd)
     """
     if sieve_primes is None:
-        sieve_primes = _choose_primes( u_bd - l_bd )
+        sieve_primes = _default_values('sieve primes')
     gen = next_prime_gen(l_bd - 1, sieve_primes, mr_wit, l_wit)
     
-    primes = [ p for p in sieve_primes if p >= l_bd and p < u_bd ]
+    primes = []
     while True:
         p = next(gen)
         if p < u_bd:
@@ -254,7 +271,7 @@ def primes_in_range(l_bd, u_bd, sieve_primes=None, mr_wit=None, l_wit=None):
 
 ##############################
 
-def prime_count(yield_values, mr_wit=None, l_wit=None):
+def prime_count_gen(yield_values, sieve_primes=None, mr_wit=None, l_wit=None):
     """
     The prime-counting function pi(x).
     
@@ -266,6 +283,7 @@ def prime_count(yield_values, mr_wit=None, l_wit=None):
     Notes:  1. pi(x) is the number of primes <= x   
             2. the returned generator is (pi(x) for x in yield_values)
     """
+
     start = 1
     count = 0
 
@@ -279,7 +297,7 @@ def prime_count(yield_values, mr_wit=None, l_wit=None):
             yield None
         else:
             count += len(primes_in_range(
-                start, end, mr_wit=mr_wit, l_wit=l_wit))
+                start, end, sieve_primes, mr_wit, l_wit))
             try:
                 yield end, count
                 start, end = end, next(yield_values)
@@ -287,13 +305,19 @@ def prime_count(yield_values, mr_wit=None, l_wit=None):
                 print('Iterator is empty')
                 yield_ability = False
 
+##############################
+
+def prime_count(num, sieve_primes=None, mr_wit=None, l_wit=None):
+    pcg = prime_count_gen((num,), sieve_primes, mr_wit, l_wit)
+    return next(pcg)[1]
+
 ############################################################
 ############################################################
 #       Twin primes
 ############################################################
 ############################################################
 
-def next_twin_primes_gen(num, mr_wit=None, l_wit=None):
+def next_twin_primes_gen(num, sieve_primes=None, mr_wit=None, l_wit=None):
     """
     Generator of next pairs of twin primes.
 
@@ -308,16 +332,18 @@ def next_twin_primes_gen(num, mr_wit=None, l_wit=None):
     if num < 4:
         yield 3, 5
 
-    p = next_prime(num - 2, mr_wit, l_wit)
+    gen = next_prime_gen(num - 2, sieve_primes, mr_wit, l_wit)
+    p = next(gen)
+    q = next(gen)
     while True:
-        while not is_prime(p+2):
-            p = next_prime(p+2, mr_wit, l_wit)
-        yield p, p+2
-        p = next_prime(p+2, mr_wit, l_wit)
+        while q - p > 2:
+            p, q = q, next(gen)
+        yield p, q
+        p, q = q, next(gen)
 
 ##############################
 
-def next_twin_primes(num, mr_wit=None, l_wit=None):
+def next_twin_primes(num, sieve_primes=None, mr_wit=None, l_wit=None):
     """
     Find the next pair of twin primes.
 
@@ -326,12 +352,12 @@ def next_twin_primes(num, mr_wit=None, l_wit=None):
     Return: tuple:  (p, p+2)            p, p+2 both prime
                                         p+1 >= num
     """
-    gen = next_twin_primes_gen(num, mr_wit, l_wit)
+    gen = next_twin_primes_gen(num, sieve_primes, mr_wit, l_wit)
     return next(gen)
 
 ##############################
 
-def prev_twin_primes(num, mr_wit=None, l_wit=None):
+def prev_twin_primes(num, sieve_primes=None, mr_wit=None, l_wit=None):
     """
     Find previous pair of twin primes.
 
@@ -342,11 +368,91 @@ def prev_twin_primes(num, mr_wit=None, l_wit=None):
     """
     if num < 4:
         return None
-    p = prev_prime(num + 2, mr_wit, l_wit)
-    while not is_prime(p-2):
-        p = prev_prime(p-2, mr_wit, l_wit)
+    
+    gen = prev_prime_gen(num + 2, sieve_primes, mr_wit, l_wit)
+    q = next(gen)
+    p = next(gen)
+    while q - p > 2:
+        q, p = p, next(gen)
 
-    return p-2, p
+    return p, q
+
+############################################################
+############################################################
+#       Goldbach partitions
+############################################################
+############################################################
+
+def goldbach_partition(num,
+        sieve_primes=None, mr_wit=None, l_wit=None, RANDOM=True):
+    """
+    Express number as a sum of 2 or 3 primes.
+
+    Args:   int:    num, mr_wit, l_wit
+
+    Return: tuple   (p, q [, r])        num = p + q [+ r]
+    """
+    if num < 4:
+        raise ValueError('num must be at least 4')
+    if num == 5:
+        return 2, 3
+    if num % 2 == 1:
+        return weak_goldbach_partition(num, sieve_primes, mr_wit, l_wit, RANDOM)
+
+    if RANDOM:
+        start = randint(1, num//2 - 1)
+    else:
+        start = num//2 - 1
+
+    p_gen = next_prime_gen(start, sieve_primes, mr_wit, l_wit)
+    p = next(p_gen)
+    q = num - p
+    while not is_prime(q, mr_wit, l_wit):
+        p = next(p_gen)
+        q = num - p
+
+    return tuple(sorted([p, q], reverse=True))
+
+##############################
+
+def weak_goldbach_partition(num,
+        sieve_primes=None, mr_wit=None, l_wit=None, RANDOM=True):
+    """
+    Express number as a sum of 3 primes.
+
+    Args:   int:    num, mr_wit, l_wit
+
+    Return: tuple:  (p, q, r)           num = p + q + r
+    """
+    if num < 6 or num == 8:
+        raise ValueError('number must be at least 6 and not equal to 8')
+
+    if RANDOM:
+        p_start = randint(1, num//3 - 1)
+        q_start = randint(num//3, 2*num//3)
+    else:
+        p_start = num//3 - 1
+        q_start = num//3 + 1
+
+    p_gen = next_prime_gen(p_start, sieve_primes, mr_wit, l_wit)
+    q_gen = prev_prime_gen(q_start, sieve_primes, mr_wit, l_wit)
+    p = next(p_gen)
+    q = next(q_gen)
+    r = num - p - q
+    while not is_prime(r, mr_wit, l_wit):
+        try:
+            p = next(p_gen)
+            r = num - p - q
+            if is_prime(r, mr_wit, l_wit):
+                return p, q, r
+        except StopIteration:
+            pass
+        try:
+            q = next(q_gen)
+            r = num - p - q
+        except StopIteration:
+            pass
+    return tuple(sorted([p,q,r], reverse=True))
 
 ############################################################
 ############################################################
@@ -429,7 +535,7 @@ def _generate_miller_rabin_witnesses(num, num_wit=None):
     max_val = cutoffs[-1][0]
     if num > max_val:
         if num_wit is None:
-            num_wit = default_values('mr_wit')
+            num_wit = _default_values('mr_wit')
         if num_wit > num:
             witnesses = [ x for x in range(2, num-1) ]
         else:
@@ -617,7 +723,7 @@ def _generate_lucas_witness_pairs(num, num_wit=None):
     Return: list    of tuples   (P, Q)
     """
     if num_wit is None:
-        num_wit = default_values('l_wit')
+        num_wit = _default_values('l_wit')
     witnesses = []
 
     if integer_sqrt(num)**2 != num:
@@ -678,25 +784,6 @@ def lucas_test(num, num_wit=None):
 ############################################################
 ############################################################
 
-def _choose_primes(num):
-    """
-    Automatically choose primes to be used for sieving.
-    
-    Args:   int:    num
-    
-    Return: list:   sieve primes
-    """
-    if num < 6:
-        return [2]
-    elif num < 30:
-        return [2,3]
-    elif num < 210:
-        return [2,3,5]
-    else:
-        return [2,3,5,7]
-
-##############################
-
 def _generate_block(sieve_primes):
     """
     Generate a block of offsets for prime searching.
@@ -705,10 +792,7 @@ def _generate_block(sieve_primes):
 
     Return: list:   offsets for sieving
     """
-    diam = 1
-    for p in sieve_primes:
-        diam *= p
-    
+    diam = reduce(lambda x, y : x*y, sieve_primes, 1)
     return prime_to(sieve_primes, mr_wit=5, l_wit=1), diam
 
 ##############################
