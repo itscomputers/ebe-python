@@ -9,7 +9,6 @@ from numth.main import\
 
 from numth.factorization import\
         find_divisor,\
-        find_divisor_mp,\
         trivial_divisors,\
         factor,\
         pollard_rho,\
@@ -55,6 +54,7 @@ from numth.quadratic import\
         ContinuedFraction
 
 from numth.quaternion import\
+        quaternion_divisor
         Quaternion
 
 from numth.rational import\

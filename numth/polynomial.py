@@ -201,12 +201,9 @@ class Polynomial:
         if isinstance(other, int):
             other = Polynomial(other)
         def term(power):
-            coeff = 0
-            for i in range(min(power, self.deg) + 1):
-                j = power - i
-                if j < other.deg + 1:
-                    coeff += self.coeffs[i] * other.coeffs[j]
-            return coeff
+            i_max = min(power, self.deg) + 1
+            return sum(self.coeffs[i] * other.coeffs[power-i]\
+                    for i in range(i_max) if power-i < other.deg + 1)
         new_deg = self.deg + other.deg
         return Polynomial( tuple(term(i) for i in range(new_deg + 1)) )
 
@@ -225,16 +222,17 @@ class Polynomial:
             raise ValueError('Can only divide by monic polynomials')
         if self < other:
             return Polynomial(0)
-        n = self
-        d = other
-        q = []
-        while d <= n:
-            coeff = n.coeffs[-1]
-            power = n.deg - d.deg
-            q = [coeff] + q
-            new_coeffs = tuple([0] * power + [coeff])
-            n = n - d * Polynomial(new_coeffs)
-        return Polynomial( tuple(q) )
+
+        remainder = self
+        divisor = other
+        quotient = Polynomial(0)
+        while divisor <= remainder:
+            coeff = remainder.coeffs[-1]
+            power = remainder.deg - divisor.deg
+            partial_quotient = Polynomial(tuple([0] * power + [coeff]))
+            remainder -= divisor * partial_quotient
+            quotient += partial_quotient
+        return quotient
 
     def __rfloordiv__(self, other):
         return Polynomial(other) // self

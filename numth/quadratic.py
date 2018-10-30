@@ -343,41 +343,6 @@ class Quadratic:
 
 ############################################################
 ############################################################
-#       Gaussian integers/rationals
-############################################################
-############################################################
-
-class Gaussian(Quadratic):
-
-    def __init__(self, real, imag):
-        self.real = real
-        self.imag = imag
-        self.root = -1
-        self.mod = None
-
-    ##########################
-
-    def canonical(self):
-        canon = self
-        if abs(canon.real) < abs(canon.imag):
-            canon = canon * Gaussian(0,1)
-        if abs(canon.real) < 0:
-            canon = -canon
-        return canon
-
-    ##########################
-
-    def gcd(self, other):
-        if isinstance(other, int):
-            other = Gaussian(other, 0)
-
-        if other == 0:
-            return self.canonical()
-        else:
-            return other.gcd(self % other)
-
-############################################################
-############################################################
 #       Quadratic continued fractions
 ############################################################
 ############################################################

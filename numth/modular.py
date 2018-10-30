@@ -2,7 +2,7 @@
 #   numth/modular.py
 
 from numth.main import gcd, jacobi, mod_inverse, mod_sqrt_minus_one, padic
-from numth.factorization import Factorize
+from numth.factorization import factor, Factorize
 from numth.primality import is_prime, prime_to
 from numth.quadratic import Quadratic
 
@@ -111,8 +111,8 @@ class ModRing:
     def __init__(self, mod):
         self.mod = mod
         self.factorize = Factorize(mod)
-        self.euler = self.factorize.euler_phi()
-        self.carmichael = self.factorize.carmichael_lambda()
+        self.euler = self.factorize.euler_phi
+        self.carmichael = self.factorize.carmichael_lambda
         self.is_cyclic = self.euler == self.carmichael
         self.multiplicative_group = None
         self.generator = None
@@ -214,14 +214,14 @@ class ModRing:
         if gcd(elem, self.mod) != 1:
             raise ValueError('{} is not invertible'.format(elem))
 
-        if num % self.mod == 1:
+        if elem % self.mod == 1:
             return 1
-        elif num % self.mod == self.mod - 1:
+        elif elem % self.mod == self.mod - 1:
             return 2
  
         powers = [elem]
         exponents = [1]
-        for p in factorization.factor(self.carmichael):
+        for p in factor(self.carmichael):
             new_powers = [ pow(powers[exponents.index(e)], p, self.mod)\
                             for e in exponents if p*e not in exponents ]
             new_exponents = [ p*e for e in exponents if p*e not in exponents ]
