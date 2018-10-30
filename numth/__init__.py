@@ -54,7 +54,7 @@ from numth.quadratic import\
         ContinuedFraction
 
 from numth.quaternion import\
-        quaternion_divisor
+        quaternion_divisor,\
         Quaternion
 
 from numth.rational import\
