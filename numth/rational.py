@@ -484,6 +484,25 @@ def is_square(num):
     """
     return integer_sqrt(num)**2 == num
 
+##############################
+
+def shape_number_nth(sides, num):
+    return num * (num * (sides - 2) - sides + 4) // 2
+
+##############################
+
+def which_shape_number(num, sides):
+    """
+    Determine if a number is a shape (polygonal) number.
+
+    Args:   int:    num, sides      sides: number of sides of polygon
+    Return: bool
+    """
+    denom = 2 * (sides - 2)
+    root = 8 * (sides - 2) * num + (sides - 4)**2
+    x = frac(sides - 4 + integer_sqrt(root), denom)
+    if is_square(root) and int(x) == x:
+        return x
 
 ##############################
 

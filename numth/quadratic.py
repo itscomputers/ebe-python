@@ -47,6 +47,23 @@ def gaussian_divisor(prime):
 
     return d
 
+##############################
+
+def lucas_sequence_nth(P, Q, x0, x1, n):
+    """
+    Exact formula for nth term of Lucas sequence.
+
+    Args:   int:    P, Q:   parameters x[n+1] = P*x[n] - Q*x[n-1]
+                    x0, x1: initial conditions x[0] = x0, x[1] = x1
+                    n:      term number
+
+    Return: int:    x[n]
+    """
+    D = P**2 - 4*Q
+    r = Quadratic(frac(P,2), frac(1,2), D)
+    A = Quadratic(frac(x0,2), frac(2*x1 - P*x0, 2*D), D)
+    return int((A * r**n).real * 2)
+
 ############################################################
 ############################################################
 #       Quadratic ring class

@@ -5,14 +5,49 @@ from numth.factorization import Factorize
 from numth.primality import\
         is_prime, next_prime, prev_prime,\
         next_twin_primes, prev_twin_primes,\
-        prime_count, goldbach_partition
-from numth.quadratic import ContinuedFraction, Quadratic
-from numth.rational import frac, is_square, integer_sqrt, sqrt
+        prime_count, goldbach_partition,\
+        primes_in_range
+from numth.quadratic import ContinuedFraction, Quadratic, lucas_sequence_nth
+from numth.rational import\
+        frac,\
+        integer_sqrt, sqrt,\
+        is_square, which_shape_number
 
 from random import randint, choice
-from time import time
+from itertools import product
+
+##############################
+
+def shape_dictionary():
+    return {
+        3   :   'triangular',
+        4   :   'square',
+        5   :   'pentagonal',
+        6   :   'hexagonal',
+        7   :   'heptagonal',
+        8   :   'octagonal',
+        9   :   'nonagonal',
+        10  :   'decagonal',
+        11  :   'hendecagonal',
+        12  :   'dodecagonal',
+        13  :   'tridecagonal',
+        14  :   'tetradecagonal',
+        15  :   'pentadecagonal',
+        16  :   'hexadecagonal',
+        17  :   'heptadecagonal',
+        18  :   'octadecagonal',
+        19  :   'enneadecagonal',
+        20  :   'icosogonal'
+    }
+
+############################################################
+############################################################
+#       Interesting number class
+############################################################
+############################################################
 
 class InterestingNumber:
+    """Every number is interesting."""
 
     def __init__(self, num, TIMED=False):
         self.num = num
@@ -40,11 +75,15 @@ class InterestingNumber:
         self.four_squares = self.factorize.four_squares()
         self.fibonacci = self.get_fibonacci()
         self.pythagorean_triple = self.get_pythagorean_triple()
+        self.shapes = self.get_shapes()
+
+    ##########################
 
     def get_fibonacci(self):
         if self.num < 10**5:
-            gamma = Quadratic(frac(1,2), frac(1,2), 5)
-            return int(2 * (gamma**self.num).imag)
+            return lucas_sequence_nth(1, -1, 0, 1, self.num)
+
+    ##########################
 
     def print_fibonacci(self):
         fib_str = str(self.fibonacci)
@@ -52,6 +91,8 @@ class InterestingNumber:
             return (len(fib_str), fib_str)
         else:
             return (len(fib_str), '{}....{}'.format(fib_str[:8], fib_str[-8:]))
+
+    ##########################
 
     def get_pythagorean_triple(self):
         if self.two_squares is not None:
@@ -79,3 +120,18 @@ class InterestingNumber:
 
         return tuple(sorted([a, b, c]))
 
+    ##########################
+
+    def get_shapes(self):
+        shapes = []
+        for s in range(3,21):
+            n = which_shape_number(self.num, s)
+            if n is not None:
+                shapes.append((s,n))
+        return shapes
+
+############################################################
+############################################################
+#       End
+############################################################
+############################################################

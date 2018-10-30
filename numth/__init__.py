@@ -50,6 +50,7 @@ from numth.quadratic import\
         quad,\
         gaussian,\
         gaussian_divisor,\
+        lucas_sequence_nth,\
         Quadratic,\
         ContinuedFraction
 
@@ -65,6 +66,9 @@ from numth.rational import\
         halley_gen,\
         sqrt,\
         pi,\
+        is_square,\
+        shape_number_nth,\
+        which_shape_number,\
         babylonian_sqrt_gen,\
         integer_sqrt,\
         halley_sqrt_gen,\
