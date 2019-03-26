@@ -5,16 +5,14 @@ from numth.main import gcd, padic
 from numth.primality import is_prime, primes_in_range
 from numth.polynomial import polyn
 from numth.rational import integer_sqrt
-from numth.quadratic import gaussian, gaussian_divisor
+from numth.quadratic import Quadratic, gaussian, gaussian_divisor
 from numth.quaternion import Quaternion, quaternion_divisor
 
 import math
 from functools import reduce
 from random import randint, shuffle
 import itertools
-import pebble
 from concurrent.futures import ProcessPoolExecutor, TimeoutError, wait
-import asyncio
 
 ##############################
 
@@ -196,12 +194,18 @@ def pollard_p_minus_one(num, seed):
 ############################################################
 ############################################################
 
-def williams_p_plus_one(num, quad_int):
+def williams_p_plus_one(num, real, imag, root):
     """William's p+1 algorithm for factor-finding."""
-
-    ### NEED A QUADRATIC INTEGER CLASS
-
-    return None
+    z = Quadratic(real, imag, root)
+    power = 1
+    d = gcd(z.norm(), num)
+    while d != 1:
+        #### NEED TO INCLUDE MODULAR ARG in __pow__ ####
+        z = pow(z, i, num)
+        power += 1
+        d = gcd(z.imag, num)
+    
+    return d
 
 ############################################################
 ############################################################
@@ -310,7 +314,7 @@ class Factorize:
                 self.primes_one += [p] * e
             else:
                 if e % 2 == 1:
-                    self.bad_primes += [p]*e
+                    self.bad_primes.append(p)
                     self.is_sum_of_squares = False
                 else:
                     self.primes_three += [p]*(e//2)
@@ -324,7 +328,7 @@ class Factorize:
         """Find all divisors of num."""
         divs = [1]
         for p in self.factorization:
-            divs = divs + [ p * d for d in divs if p * d not in divs ]
+            divs = divs + [ p * d for d in divs if p * d not in divs ]          
         return sorted(divs)
 
     ##########################
@@ -367,7 +371,7 @@ class Factorize:
 
     def two_squares(self, RANDOM=True):
         """Write number as sum of two squares."""
-        if self.norms_one == []:
+        if self.norms_three == []:
             self.get_norms()
         if self.is_sum_of_squares:
             g = reduce(lambda x, y : x*y, self.primes_three, 1)
@@ -384,12 +388,14 @@ class Factorize:
 
     def four_squares(self, RANDOM=True):
         """Write number as sum of four squares."""
-        if self.norms_one == []:
+        if self.norms_three == []:
             self.get_norms()
         quaternions = self.norms_three +\
                 [Quaternion(g.real, g.imag, 0, 0) for g in self.norms_one]
         if RANDOM:
-            shuffle(quaternions)
+            indeces = [i for i in range(len(quaternions))]
+            shuffle(indeces)
+            quaternions = [quaternions[i] for i in indeces]
             for i in range(len(quaternions)):
                 if randint(0,1) == 1:
                     quaternions[i] = quaternions[i].shuffle()

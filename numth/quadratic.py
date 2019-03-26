@@ -6,6 +6,7 @@ from numth.main import\
         mod_sqrt_minus_one,\
         generator_range,\
         generator_nth
+#from numth.modular import mod_sqrt
 from numth.rational import Rational, frac, sqrt, is_square 
 import tabulate
 
@@ -42,7 +43,7 @@ def gaussian_divisor(prime):
     if prime % 4 == 3:
         raise ValueError('{} does not split over Z[i]'.format(prime))
 
-    s = min(mod_sqrt_minus_one(prime))
+    s = min(mod_sqrt(-1, prime))
     d = gaussian(prime, 0).gcd(gaussian(s, 1))
 
     return d
@@ -80,7 +81,7 @@ class Quadratic:
     """
     def __init__(self, real, imag, root, mod=None):
         """Initialize quadratic element."""
-        if (mod is not None) and (isinstance(mod, int) or mod < 2):
+        if (mod is not None) and (not isinstance(mod, int) or mod < 2):
             raise ValueError('Invalid modulus')
         self.mod = mod
         self.real = self.r(real)
@@ -184,7 +185,8 @@ class Quadratic:
             else:
                 return other.gcd(self % other)
         else:
-            raise ValueError('canonical not defined for sqrt({})'.format(self.root))
+            raise ValueError('canonical not defined for sqrt({})'\
+                    .format(self.root))
 
     ##########################
 
@@ -442,7 +444,8 @@ class ContinuedFraction:
     ##########################
 
     def _restrict(self, array, display=None, vertical=True):
-        if not self.is_complete or (display is not None and self.length > display):
+        if not self.is_complete\
+                or (display is not None and self.length > display):
             array_display = array[:display]
             if vertical:
                 array_display.append(('\u22ee',) * len(array[0]))

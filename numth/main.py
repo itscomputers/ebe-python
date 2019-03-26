@@ -3,7 +3,7 @@
 
 from functools import reduce
 
-##############################
+#=============================
 
 def div(num, div, SMALL_REM=False):
     """
@@ -19,17 +19,17 @@ def div(num, div, SMALL_REM=False):
         raise ValueError('Attempted division by zero')
     
     if div > 0 or num == 0:
-        q, r = num//div, num%div
+        q, r = num // div, num % div
     else:
-        q, r = num//div + 1, (num%div) + abs(div)
+        q, r = num // div + 1, (num % div) + abs(div)
 
-    if (SMALL_REM) and (r > abs(div)//2):
+    if (SMALL_REM) and (r > abs(div) // 2):
         q += div // abs(div)
         r -= abs(div)
 
     return q, r
 
-##############################
+#-----------------------------
 
 def euclidean_algorithm(a, b, SMALL_REM=False):
     """
@@ -44,7 +44,7 @@ def euclidean_algorithm(a, b, SMALL_REM=False):
     if r != 0:
         euclidean_algorithm(b, r, SMALL_REM)
 
-##############################
+#-----------------------------
 
 def gcd(a, b):
     """
@@ -57,10 +57,10 @@ def gcd(a, b):
     if (a, b) == (0, 0):
         raise ValueError('gcd(0, 0) is undefined')
     while b != 0:
-        a, b = b, a%b
+        a, b = b, a % b
     return abs(a)
 
-##############################
+#-----------------------------
 
 def lcm(a, b):
     """
@@ -75,7 +75,7 @@ def lcm(a, b):
     
     return abs(a // gcd(a, b) * b)
 
-##############################
+#-----------------------------
 
 def bezout(a, b):
     """
@@ -95,13 +95,13 @@ def bezout(a, b):
             return -1, 0
 
     a_, b_ = a, b
-    q, r = div(a_, b_, SMALL_REM=True)
+    q, r = div(a_, b_)
     xx, x = 0, 1
     yy, y = 1, -q
 
     while r != 0:
         a_, b_ = b_, r
-        q, r = div(a_, b_, SMALL_REM=True)
+        q, r = div(a_, b_)
         xx, x = x, -q*x + xx
         yy, y = y, -q*y + yy
 
@@ -110,7 +110,7 @@ def bezout(a, b):
     else:
         return -xx, -yy
         
-##############################
+#-----------------------------
 
 def padic(num, base):
     """
@@ -131,11 +131,9 @@ def padic(num, base):
         rest //= base
     return exp, rest
 
-############################################################
-############################################################
-#       Modular functions
-############################################################
-############################################################
+#=============================
+#   Modular functions
+#=============================
 
 def mod_inverse(num, mod):
     """
@@ -152,7 +150,7 @@ def mod_inverse(num, mod):
 
     return bezout(num, mod)[0] % mod
 
-##############################
+#-----------------------------
 
 def mod_power(num, exp, mod):
     """
@@ -170,7 +168,7 @@ def mod_power(num, exp, mod):
     else:
         return pow(num, exp, mod) 
 
-##############################
+#-----------------------------
 
 def jacobi(a, b):
     """
@@ -201,7 +199,7 @@ def jacobi(a, b):
             sgn *= -1
         return sgn * jacobi(b, a_)
 
-##############################
+#-----------------------------
 
 def mod_sqrt_minus_one(prime, LEGENDRE=True):
     """
@@ -227,11 +225,9 @@ def mod_sqrt_minus_one(prime, LEGENDRE=True):
 
     return tuple(sorted([val, prime-val]))
 
-############################################################
-############################################################
-#       Shortcut involving generators
-############################################################
-############################################################
+#=============================
+#   Shortcut for generators
+#=============================
 
 def generator_range(f, lower, upper, *args, **kwargs):
     """
@@ -262,8 +258,6 @@ def generator_nth(f, num, *args, **kwargs):
     gen = generator_range(f, num, num+1, *args, **kwargs)
     return next(gen)
 
-############################################################
-############################################################
-#       End
-############################################################
-############################################################
+#=============================
+#   End
+#=============================

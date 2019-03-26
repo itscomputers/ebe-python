@@ -54,8 +54,6 @@ def mod_sqrt(num, prime, METHOD=None):
         raise ValueError('{} is not prime'.format(prime))
     if num % prime == 0:
         return (0, 0)
-    elif num % prime == prime - 1:
-        return mod_sqrt_minus_one(prime)
     elif jacobi(num, prime) != 1:
         return None
 
@@ -70,9 +68,9 @@ def mod_sqrt(num, prime, METHOD=None):
         # Cipolla's method
         for y in range(2, prime-1):
             root = (y**2 - num) % prime
-            if jacobi(root, p) == -1:
+            if jacobi(root, prime) == -1:
                 break
-        val = (Quadratic(y, 1, root)**((p+1)//2)).real
+        val = (Quadratic(y, 1, root, mod=prime)**((prime+1)//2)).real
         return tuple(sorted([val, prime - val]))
 
     else:
