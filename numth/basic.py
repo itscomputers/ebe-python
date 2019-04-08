@@ -115,34 +115,24 @@ def bezout(a, b):
     if b == 0:
         return a // abs(a), 0
 
-    nums = (a, b)
-    q, r = div(*nums)
-    X = (0, 1)
-    Y = (1, -q)
+    x, y = _bezout_helper(a, b)
 
-    def advance(u, v, q):
-        return v, u - q*v
-
-    while r != 0:
-        nums = nums[1], r
-        q, r = div(*nums)
-        X = advance(*X, q)
-        Y = advance(*Y, q)
-        
-    if a*X[0] + b*Y[0] > 0:
+    if a*x + b*y > 0:
         sign = 1
     else:
         sign = -1
-    return sign * X[0], sign * Y[0]
+
+    return sign*x, sign*y
 
 #-----------------------------
 
-def padic(number, base):
+def padic(number, base, exp=0):
     """
     p-adic representation.
 
     Args:   number: int     number != 0
             base:   int     base > 1
+            exp:    int     exponent with initial value 0
 
     Return: exp:    int     num == (base**exp) * rest
             rest:   int     rest % base != 0
@@ -153,17 +143,14 @@ def padic(number, base):
     if base < 2:
         raise ValueError('base must be at least 2')
 
-    exp = 0
-    rest = number
-    while rest % base == 0:
-        exp += 1
-        rest //= base
-    
-    return exp, rest
+    if number % base != 0:
+        return exp, number
+
+    return padic(number // base, base, exp + 1)
 
 #-----------------------------
 
-def integer_sqrt(number):
+def integer_sqrt(number, guess=None):
     """
     Integer part of the square root of a number.
 
@@ -171,12 +158,13 @@ def integer_sqrt(number):
 
     Return: val:    int     val <= sqrt(num) < val + 1
     """
-    val = int(math.sqrt(number))
+    if guess is None:
+        guess = int(math.sqrt(number))
 
-    while val**2 > number or (val+1)**2 <= number:
-        val = (val + number // val) // 2
+    if guess**2 <= number < (guess+1)**2:
+        return guess
 
-    return val
+    return integer_sqrt(number, (guess + number // guess) // 2)
 
 #-----------------------------
 
@@ -200,15 +188,15 @@ def mod_inverse(number, modulus):
     if modulus < 2:
         raise ValueError('Modulus must be at least 2')
 
-    x, y = bezout(number, modulus) 
+    x = bezout(number, modulus)[0]
     
-    if number*x + modulus*y not in [1, -1]:
+    if number*x % modulus not in [1, -1]:
         raise ValueError(
                 '{} is not invertible modulo {}'
                 .format(number, modulus))
 
     if x < 0:
-        x += modulus
+        return x + modulus
 
     return x
 
@@ -229,8 +217,8 @@ def mod_power(number, exponent, modulus):
 
     if exponent < 0:
         return pow(mod_inverse(number, modulus), -exponent, modulus)
-    else:
-        return pow(number, exponent, modulus)
+    
+    return pow(number, exponent, modulus)
 
 #-----------------------------
 
@@ -252,16 +240,62 @@ def jacobi(a, b):
     if gcd(a, b) != 1:
         return 0
 
-    exp, a_ = padic(a % b, 2)
-    if (exp % 2 == 1) and (b % 8 in [3, 5]):
-        sgn = -1
-    else:
-        sgn = 1
+    return _jacobi_helper(a, b)
+
+#-----------------------------
+
+def euler_criterion(a, p):
+    """
+    Euler criterion for (a | p)
+
+    Args:   a:      int
+            p:      int         p: prime, gcd(a, p) == 1
+
+    Return: val:    int         val == 1 if a is a square mod p
+                                val == -1 if a is not a square mod p
+    """
+    result = mod_power(a, (p-1)//2, p)
+
+    if result == p - 1:
+        return -1
     
-    if a_ == 1:
-        return sgn
-    else:
-        if (b % 4 != 1) and (a_ % 4 != 1):
-            sgn *= -1
-        return sgn * jacob(b, a_)
+    return 1
+
+#===========================================================
+
+def _bezout_helper(a, b, X=None, Y=None):
+
+    def advance(u, v, q):
+        return v, u - q*v
+
+    q, r = div(a, b)
+    if X is None:
+        X = (0, 1)
+        Y = (1, -q)
+    
+    if r == 0:
+        return X[0], Y[0]
+
+    q = div(b, r)[0]
+    return _bezout_helper(b, r, advance(*X, q), advance(*Y, q))
+
+#-----------------------------
+
+def _jacobi_helper(a, b):
+    if b == 1:
+        return 1
+
+    e, r = padic(a % b, 2)
+    
+    if (e % 2, r % 4, b % 8) in [
+        (0, 3, 3),
+        (0, 3, 7),
+        (1, 1, 3),
+        (1, 1, 5),
+        (1, 3, 5),
+        (1, 3, 7)
+    ]:
+        return - _jacobi_helper(b, r)
+
+    return _jacobi_helper(b, r)
 

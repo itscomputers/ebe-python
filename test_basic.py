@@ -66,7 +66,7 @@ def test_bezout(a, b):
 
 @given(
     number = st.integers().filter(lambda x: x != 0),
-    base = st.integers().filter(lambda x: x > 1)
+    base = st.integers(min_value=2)
 )
 def test_padic(number, base):
     exp, rest = padic(number, base)
@@ -75,7 +75,7 @@ def test_padic(number, base):
 
 #-----------------------------
 
-@given(st.integers().filter(lambda x: x >= 0))
+@given(st.integers(min_value=0))
 def test_integer_sqrt(number):
     s = integer_sqrt(number)
     assert( s**2 <= number < (s+1)**2 )
@@ -90,7 +90,7 @@ def test_is_square(number):
 
 @given(
     number = st.integers(),
-    modulus = st.integers().filter(lambda x: x > 1)
+    modulus = st.integers(min_value=2)
 )
 def test_mod_inverse(number, modulus):
     assume( gcd(number, modulus) == 1 )
@@ -102,8 +102,8 @@ def test_mod_inverse(number, modulus):
 
 @given(
     number = st.integers(),
-    exponent = st.integers().filter(lambda x: x < 0),
-    modulus = st.integers().filter(lambda x: x > 1)
+    exponent = st.integers(max_value=-1),
+    modulus = st.integers(min_value=2)
 )
 def test_mod_power(number, exponent, modulus):
     assume( gcd(number, modulus) == 1 )
@@ -112,7 +112,13 @@ def test_mod_power(number, exponent, modulus):
     assert( mod_inverse(value, modulus) == inverse )
     assert( mod_power(number, 0, modulus) == 1 )
 
+#-----------------------------
 
-
-
+@given(st.integers())
+def test_jacobi(a):
+    for p in [
+            3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43,
+            47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]:
+        if gcd(a, p) == 1:
+            assert( jacobi(a, p) == euler_criterion(a, p) ) 
 
