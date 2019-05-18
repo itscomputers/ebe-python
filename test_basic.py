@@ -1,10 +1,22 @@
 #   test_basic.py
-
+#===========================================================
 from hypothesis import given, assume, strategies as st
 from itertools import product
 import math
 
 from numth.basic import *
+#===========================================================
+
+@given(st.floats(min_value=0))
+def test_round_down(number):
+    assume( str(number) not in ['-inf', 'inf', 'nan'] )
+    if number <= int(number) + .5:
+        assert( round_down(number) == int(number) )
+    else:
+        assert( round_down(number) == int(number) + 1 )
+    assert( round_down(-number) == - round_down(number) )
+
+#-----------------------------
 
 @given(
     st.integers(),
@@ -33,10 +45,21 @@ def test_div_with_small_remainder(a, b):
     st.integers()
 )
 def test_gcd(a, b):
-    assume( a != 0 or b != 0)
+    assume( (a, b) != (0, 0) )
     d = gcd(a, b)
     assert( a % d == b % d == 0 )
     assert( gcd(a//d, b//d) == 1 )
+
+
+@given(
+    st.integers(min_value=1),
+    st.integers(min_value=1),
+    st.integers(min_value=1)
+)
+def test_gcd_of_multiple(a, b, c):
+    d = gcd(a, b, c)
+    assert( a % d == b % d == c % d == 0 )
+    assert( gcd(a//d, b//d, c//d) == 1 )
 
 #-----------------------------
 
@@ -49,6 +72,18 @@ def test_lcm(a, b):
     m = lcm(a, b)
     assert( m % a == m % b == 0 )
     assert( gcd(m//a, m//b) == 1 )
+
+#-----------------------------
+
+@given(
+    st.integers(min_value=1),
+    st.integers(min_value=1),
+    st.integers(min_value=1)
+)
+def test_lcm_of_multiple(a, b, c):
+    m = lcm(a, b, c)
+    assert( m % a == m % b == m % c == 0 )
+    assert( gcd(m//a, m//b, m//c) == 1 )
 
 #-----------------------------
 
@@ -73,7 +108,7 @@ def test_padic(number, base):
     assert( number == base**exp * rest )
     assert( rest % base != 0 )
 
-#-----------------------------
+#=============================
 
 @given(st.integers(min_value=0))
 def test_integer_sqrt(number):
@@ -86,7 +121,7 @@ def test_integer_sqrt(number):
 def test_is_square(number):
     assert( is_square(number**2) )
 
-#-----------------------------
+#=============================
 
 @given(
     number = st.integers(),

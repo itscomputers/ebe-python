@@ -3,17 +3,22 @@
 import math
 #===========================================================
 
+def round_down(number):
+    if number < 0:
+        return - round_down(-number)
+    if 2 * (number - int(number)) > 1:
+        return int(number) + 1
+    return int(number)
+
+#-----------------------------
+
 def div(number, divisor):
     """
     Division with remainder.
+        (number: int, divisor: int) -> (quotient: int, remainder: int)
 
-    Args:   number:     int
-            divisor:    int != 0
-
-    Return: quotient:   int
-            remainder:  int
-
-    Notes:  0 <= remainder < abs(divisor)
+    Notes:  divisor nonzero
+            0 <= remainder < abs(divisor)
             number = quotient * divisor + remainder
     """
     if divisor == 0:
@@ -32,8 +37,10 @@ def div(number, divisor):
 def div_with_small_remainder(number, divisor):
     """
     Division with (smaller) remainder, similar to `div`.
+        (number: int, divisor: int) -> (quotient: int, remainder: int)
 
-    Note:  -abs(divisor) / 2 < remainder <= abs(divisor) / 2
+    Note:   divisor nonzero
+            -abs(divisor) / 2 < remainder <= abs(divisor) / 2
     """
     quotient, remainder = div(number, divisor)
     
@@ -48,14 +55,10 @@ def div_with_small_remainder(number, divisor):
 def euclidean_algorithm(a, b, division=div):
     """
     Euclidean algorithm.
-
-    Args:   a:          int
-            b:          int != 0
-            [division:  function (either `div` or `div_with_small_remainder)]
-
-    Return: None
-
-    Note: prints a = q * b + r, using division with remainder until r == 0
+        (a: int, b: int, division: func) -> NoneType
+        
+    Note:   b nonzero
+            prints a = q * b + r, using division with remainder until r == 0
     """
     q, r = division(a, b)
     print('{} = {} * {} + {}'.format(a, q, b, r))
@@ -64,50 +67,78 @@ def euclidean_algorithm(a, b, division=div):
 
 #-----------------------------
 
-def gcd(a, b):
+def gcd(*numbers):
     """
     Greatest common divisor.
+        numbers: array(int) -> int
 
-    Args:   a:  int
-            b:  int     (a, b) != (0, 0)
-
-    Return: d:  int     d is the largest positive integer dividing both a and b
+    Note:   at least one nonzero number
+            return_val is the largest positive integer dividing all numbers
     """
-    if (a, b) == (0, 0):
-        raise VAlueError('gcd(0, 0) is undefined')
+    if len(numbers) == 1:
+        return gcd(*numbers, 0)
 
-    if b == 0:
-        return abs(a)
-    else:
-        return gcd(b, a % b)
+    if len(numbers) > 2:
+        return gcd(numbers[0], gcd(*numbers[1:]))
+
+    if numbers == (0, 0):
+        raise ValueError('gcd(0, 0) is undefined')
+
+    a, b = numbers
+    while b != 0:
+        a, b = b, a % b
+
+    return abs(a)
 
 #-----------------------------
 
-def lcm(a, b):
+def lcm(*numbers):
     """
     Least common multiple.
+        (a: int, b: int) -> int
 
-    Args:   a:  int
-            b:  int     a * b != 0
-
-    Return: m:  int     m is the smallest positive integer divisible by both a and b
+    Notes:  a or b nonzero
+            return_val is the smallest positive integer divisible by both
     """
+    if len(numbers) == 1:
+        return abs(numbers[0])
+
+    if len(numbers) > 2:
+        return lcm(numbers[0], lcm(*numbers[1:]))
+
+    a, b = numbers
     if a * b == 0:
         raise ValueError('lcm(_, 0) is undefined')
 
-    return abs(a // gcd(a, b) * b)
+    return abs( a // gcd(a, b) * b)
+
 
 #-----------------------------
+
+def _bezout_helper(a, b):
+    def advance(u, v, q):
+        return v, u - q*v
+
+    q, r = div(a, b)
+    X = (0, 1)
+    Y = (1, -q)
+
+    while r != 0:
+        a, b = b, r
+        q, r = div(a, b)
+        X, Y = advance(*X, q), advance(*Y, q)
+
+    return X[0], Y[0]
+
+# - - - - - - - - - - - - - - 
 
 def bezout(a, b):
     """
     Bezout's Lemma: integer solution (x, y) to a*x + b*y = gcd(a, b)
+        (a: int, b: int) -> (x: int, y: int)
 
-    Args:   a:  int
-            b:  int     (a, b) != (0, 0)
-
-    Return: x:  int
-            y:  int     a*x + b*y == gcd(a, b)
+    Notes:  a or b nonzero
+            a*x + b*y == gcd(a, b)
     """
     if (a, b) == (0, 0):
         raise ValueError('gcd(0, 0) is undefined')
@@ -126,16 +157,15 @@ def bezout(a, b):
 
 #-----------------------------
 
-def padic(number, base, exp=0):
+def padic(number, base):
     """
     p-adic representation.
+        (number: int, base: int) -> (exp: int, rest: int)
 
-    Args:   number: int     number != 0
-            base:   int     base > 1
-            exp:    int     exponent with initial value 0
-
-    Return: exp:    int     num == (base**exp) * rest
-            rest:   int     rest % base != 0
+    Notes:  number nonzero
+            base > 1
+            num == (base ** exp) * rest
+            rest % base != 0
     """
     if number == 0:
         raise ValueError('number must be nonzero')
@@ -143,36 +173,36 @@ def padic(number, base, exp=0):
     if base < 2:
         raise ValueError('base must be at least 2')
 
-    if number % base != 0:
-        return exp, number
+    exp = 0
+    while number % base == 0:
+        number //= base
+        exp += 1
 
-    return padic(number // base, base, exp + 1)
+    return exp, number
 
-#-----------------------------
+#=============================
 
 def integer_sqrt(number, guess=None):
     """
     Integer part of the square root of a number.
-
-    Args:   number: int     number >= 0
-
-    Return: val:    int     val <= sqrt(num) < val + 1
+        (number: int, guess: int) -> int
+    
+    Note:   return_val**2 <= num < (return_val + 1)**2
     """
     if guess is None:
         guess = int(math.sqrt(number))
 
-    if guess**2 <= number < (guess+1)**2:
-        return guess
+    while guess**2 > number or (guess+1)**2 <= number:
+        guess = (guess + number // guess) // 2
 
-    return integer_sqrt(number, (guess + number // guess) // 2)
+    return guess
 
 #-----------------------------
 
 def is_square(number):
     """
-    Args:   number:     int
-
-    Return: is_square:  bool
+    If a number is a perfect square.
+        number: int -> bool
     """
     return integer_sqrt(number)**2 == number
 
@@ -180,10 +210,11 @@ def is_square(number):
 
 def mod_inverse(number, modulus):
     """
-    Args:   number:     int
-            modulus:    int     modulus > 1
+    The inverse of under modular multiplication.
+        (number: int, modulus: int) -> int
 
-    Return: inverse:    int     (number * inverse) % modulus == 1
+    Notes:  modulus > 1
+            (number * return_val) % modulus == 1
     """
     if modulus < 2:
         raise ValueError('Modulus must be at least 2')
@@ -205,12 +236,11 @@ def mod_inverse(number, modulus):
 def mod_power(number, exponent, modulus):
     """
     Power of a number relative to a modulus.
+        (number: int, exponent: int, modulus: int) -> int
 
-    Args:   number:     int
-            exponent:   int     (could be negative)
-            modulus:    int     modulus > 1
-
-    Return: val:        int     val == (num**exp) % mod
+    Notes:  modulus > 1
+            exponent can be negative
+            val == (num**exp) % mod
     """
     if modulus < 2:
         raise ValueError('Modulus must be at least 2')
@@ -220,16 +250,33 @@ def mod_power(number, exponent, modulus):
     
     return pow(number, exponent, modulus)
 
-#-----------------------------
+#=============================
+
+def _jacobi_helper(a, b):
+    sign = 1
+    while b != 1:
+        e, r = padic(a % b, 2)
+        if (e % 2, r % 4, b % 8) in [
+            (0, 3, 3),
+            (0, 3, 7),
+            (1, 1, 3),
+            (1, 1, 5),
+            (1, 3, 5),
+            (1, 3, 7)
+        ]:
+            sign *= -1
+        a, b = b, r
+
+    return sign
+
+# - - - - - - - - - - - - - - 
 
 def jacobi(a, b):
     """
     Jacobi symbol (a | b).
+        (a: int, b: int) -> int
 
-    Args:   a:      int
-            b:      int         b odd
-
-    Return: val:    int         val in [1, 0, -1]
+    Notes:  return_val in [1, 0, -1]
     """
     if b % 2 == 0:
         raise ValueError(
@@ -247,12 +294,11 @@ def jacobi(a, b):
 def euler_criterion(a, p):
     """
     Euler criterion for (a | p)
+        (a: int, p: int) -> int
 
-    Args:   a:      int
-            p:      int         p: prime, gcd(a, p) == 1
-
-    Return: val:    int         val == 1 if a is a square mod p
-                                val == -1 if a is not a square mod p
+    Notes:  p is prime
+            gcd(a, p) == 1
+            return_val == 1 if and only if a is a square modulo p
     """
     result = mod_power(a, (p-1)//2, p)
 
@@ -260,42 +306,4 @@ def euler_criterion(a, p):
         return -1
     
     return 1
-
-#===========================================================
-
-def _bezout_helper(a, b, X=None, Y=None):
-
-    def advance(u, v, q):
-        return v, u - q*v
-
-    q, r = div(a, b)
-    if X is None:
-        X = (0, 1)
-        Y = (1, -q)
-    
-    if r == 0:
-        return X[0], Y[0]
-
-    q = div(b, r)[0]
-    return _bezout_helper(b, r, advance(*X, q), advance(*Y, q))
-
-#-----------------------------
-
-def _jacobi_helper(a, b):
-    if b == 1:
-        return 1
-
-    e, r = padic(a % b, 2)
-    
-    if (e % 2, r % 4, b % 8) in [
-        (0, 3, 3),
-        (0, 3, 7),
-        (1, 1, 3),
-        (1, 1, 5),
-        (1, 3, 5),
-        (1, 3, 7)
-    ]:
-        return - _jacobi_helper(b, r)
-
-    return _jacobi_helper(b, r)
 

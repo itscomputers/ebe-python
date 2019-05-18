@@ -1,9 +1,10 @@
 #   numth/rational.py
 #===========================================================
 from fractions import Fraction
+import math
 import re
 
-from numth.basic import gcd, mod_inverse, integer_sqrt
+from numth.basic import div, gcd, integer_sqrt, is_square, mod_inverse
 #===========================================================
 
 def _default_values(category):
@@ -14,15 +15,15 @@ def _default_values(category):
 
 def frac(number):
     """Shortcut to create Rational"""
-    if isinstance(number, Rational):
+    if type(number) is Rational:
         return number
-    if isinstance(number, int):
+    if type(number) is int:
         return _int_to_rational(number)
-    if isinstance(number, Fraction):
+    if type(number) is Fraction:
         return _fraction_to_rational(number)
-    if isinstance(number, float):
+    if type(number) is float:
         return _float_to_rational(number)
-    if isinstance(number, str):
+    if type(number) is str:
         return _str_to_rational(number)
 
 #===========================================================
@@ -30,9 +31,9 @@ def frac(number):
 class Rational:
     """
     Class for arithmetic of rational numbers.
+        (numer: int, denom: int) -> Rational
 
-    Args:   numer:  int
-            denom:  int
+    Represents: numer / denom
     """
     def __init__(self, numer, denom):
         if denom == 0:
@@ -76,62 +77,43 @@ class Rational:
 
     def decimal(self, num_digits=None):
         """
-        Express rational number as a decimal.
-
-        Args:   num_digits: int
-
-        Return: expression: str
+        Express rational number as a string in decimal form.
+            num_digits: int -> str
         """
-        whole = int(self)
-        
         if num_digits is None:
             num_digits = _default_values('decimal')
+        
+        quotient, remainder = div(self.numer, self.denom)
+        if num_digits == 0:
+            return format(quotient)
+        digits = format(round(Rational(remainder*10**num_digits, self.denom)))
+        num_zeros = num_digits - len(digits)
 
-        remainder = self.numer % self.denom
-
-        digits = []
-        while len(digits) <= num_digits:
-            remainder *= 10
-            digits.append(remainder // self.denom)
-            remainder %= self.denom
-
-        if digits[-1] >= 5:
-            try:
-                digits[-2] += 1
-            except IndexError:
-                whole += 1
-        for i in range(num_digits):
-            if digits[-i-2] == 10:
-                digits[-i-2] = 0
-                try:
-                    digits[-i-3] += 1
-                except IndexError:
-                    whole += 1
-            else:
-                break
-
-        return '{}{}{}'.format(
-                whole,
-                '.'*(num_digits > 0),
-                ''.join(str(d) for d in digits[:-1])
-        )
+        return '{}.{}{}'.format(quotient, '0'*num_zeros, digits)
 
     #=========================
 
+    def compare(self, other):
+        other_ = frac(other)
+        return self.numer * other_.denom - self.denom * other_.numer
+
     def __eq__(self, other):
-        other = frac(other)
-        return self.numer * other.denom == other.numer * self.denom
+        if type(other) in [int, float, Fraction, Rational]:
+            return self.compare(other) == 0
+        return other == self
 
     def __ne__(self, other):
         return not (self == other)
 
     def __lt__(self, other):
-        other = frac(other)
-        return self.numer * other.denom < other.numer * self.denom
+        if type(other) in [int, float, Fraction, Rational]:
+            return self.compare(other) < 0
+        return other > self
 
     def __gt__(self, other):
-        other = frac(other)
-        return self.numer * other.denom > other.numer * self.denom
+        if type(other) in [int, float, Fraction, Rational]:
+            return self.compare(other) > 0
+        return other < self
 
     def __le__(self, other):
         return not (self > other)
@@ -162,60 +144,51 @@ class Rational:
     #=========================
     
     def __add__(self, other):
-        other = frac(other)
-        d = gcd(self.denom, other.denom)
-        self_scalar = other.denom // d
-        other_scalar = self.denom // d
-        numer = (self.numer * self_scalar) + (other.numer * other_scalar)
-        denom = self_scalar * self.denom
-        return Rational(numer, denom)
+        if type(other) in [int, float, Rational]:
+            other_ = frac(other)
+            d = gcd(self.denom, other_.denom)
+            self_scalar = other_.denom // d
+            other_scalar = self.denom // d
+            numer = (self.numer * self_scalar) + (other_.numer * other_scalar)
+            denom = self_scalar * self.denom
+            return Rational(numer, denom)
+        return other + self
 
     def __radd__(self, other):
-        return self + other
-
-    def __iadd__(self, other):
         return self + other
 
     #-------------------------
 
     def __sub__(self, other):
-        other = frac(other)
         return self + (-other)
 
     def __rsub__(self, other):
         return -self + other
 
-    def __isub__(self, other):
-        return self - other
-
     #-------------------------
         
     def __mul__(self, other):
-        other = frac(other)
-        return Rational(self.numer*other.numer, self.denom*other.denom)
+        if type(other) in [int, float, Rational]:
+            return Rational(self.numer*frac(other).numer, self.denom*frac(other).denom)
+        return other * self
 
     def __rmul__(self, other):
-        return self * other
-
-    def __imul__(self, other):
         return self * other
 
     #-------------------------
 
     def __truediv__(self, other):
-        other = frac(other)
+        if type(other) in [int, float, Rational]:
+            return self * frac(other).inverse()
         return self * other.inverse()
 
     def __rtruediv__(self, other):
         return self.inverse() * other
 
-    def __itruediv__(self, other):
-        return self / other
-
-    #=========================
+    #-------------------------
 
     def __pow__(self, other):
-        if not isinstance(other, int):
+        if type(other) is not int:
             raise ValueError('Exponent must be an integer')
 
         if other == 0:
@@ -225,39 +198,31 @@ class Rational:
         else:
             return Rational(pow(self.numer, other), pow(self.denom, other))
 
-    def __ipow__(self, other):
-        return self**other
-
-    #=========================
+    #-------------------------
 
     def __mod__(self, other):
-        if not isinstance(other, int) or other < 2:
+        if type(other) is not int or other < 2:
             raise ValueError('Modulus must an integer greater than 1')
 
         inv_denom = mod_inverse(self.denom, other)
         return (self.numer * inv_denom) % other
-
-    def __imod__(self, other):
-        return self % other
 
     #=========================
 
     def approx_equal(self, other, num_digits=None):
         """
         Determine approximate equality of two rational numbers.
+            (other: Rational, num_digits: int) -> bool
 
-        Args:   other:      Rational
-                num_digits: int             number of digits of accuracy
-
-        Return: bool                        abs(self - other) < 10**(-num_digits)
+        Notes:  abs(self - other) < 10**(-num_digits)
         """
         if num_digits is None:
             num_digits = _default_values('decimal')
 
-        other = frac(other)
-        ad = self.numer * other.denom
-        bc = self.denom * other.numer
-        bd = self.denom * other.denom
+        other_ = frac(other)
+        ad = self.numer * other_.denom
+        bc = self.denom * other_.numer
+        bd = self.denom * other_.denom
 
         return 10**num_digits * abs(ad - bc) < abs(bd)
 
@@ -266,30 +231,63 @@ class Rational:
     def sqrt(self, num_digits=None):
         """
         Calculate or approximate the square root of a rational number.
-        
-        Args:   num_digits: int             number of digits of accuracy
+            num_digits: int -> Rational
 
-        Return: val:        Rational        val**2 == self or 
-                                            self.approx_equal(val**2)
+        Notes:  self == return_val**2 
+                or self.approx_equal(return_val**2)
         """
-        if self == 0:
-            return self
+        if self < 0:
+            raise ValueError('Cannot take square root of negative number')
+
+        numer_integer_sqrt = integer_sqrt(self.numer)
+        denom_integer_sqrt = integer_sqrt(self.denom)
+        guess = Rational(numer_integer_sqrt, denom_integer_sqrt)
+
+        if numer_integer_sqrt**2 == self.numer \
+                and denom_integer_sqrt**2 == self.denom:
+            return guess 
 
         if num_digits is None:
             num_digits = _default_values('decimal')
 
-        val = Rational(integer_sqrt(self.numer), integer_sqrt(self.denom))
-        next_val = (val + self / val) * Rational(1, 2)
+        if self.numer > self.denom:
+            other_guess = self / guess
+            
+            while not guess.approx_equal(other_guess, num_digits):
+                guess = (guess + other_guess) / 2
+                other_guess = self / guess
 
-        while not val.approx_equal(next_val, num_digits):
-            val, next_val = next_val, (next_val + self / next_val) * Rational(1, 2)
+            return guess
 
-        return next_val
+        else:
+            return self.inverse().inverse_sqrt()
+
+    #-------------------------
+
+    def inverse_sqrt(self, num_digits=None):
+        """
+        Approximate the inverse square root of a rational number greater than 1.
+            num_digits: int -> Rational
+
+        Notes:  self.inverse() == return_val**2 
+                or self.inverse().approx_equal(return_val**2)
+        """
+        if self.numer <= self.denom:
+            raise ValueError('Inverse square root only if greater than 1')
+
+        guess = self.sqrt(2).inverse()
+        other_guess = guess * (2 - self * guess**2)
+
+        while not guess.approx_equal(other_guess, num_digits):
+            guess = (guess + other_guess) / 2
+            other_guess = guess * (2 - self * guess**2)
+
+        return guess
 
     #-------------------------
 
     def is_square(self):
-        return self.sqrt()**2 == self
+        return is_square(self.numer) and is_square(self.denom)
 
 #===========================================================
 
@@ -299,7 +297,7 @@ def _int_to_rational(number):
 #-----------------------------
 
 def _split_float_with_decimal_point(number):
-    pattern = re.fullmatch(r'(-?\d+)\.(\d+)', str(number))
+    pattern = re.fullmatch(r'([\+\-]?\d+)\.(\d+)', str(number))
     if pattern is not None:
         whole, decimal = pattern.group(1, 2)
         numer = int(whole + decimal)
@@ -346,7 +344,7 @@ def _fraction_to_rational(number):
 
 def _frac_string_to_rational(number):
     """Convert string of form 'a/b' to Rational."""
-    pattern = re.match(r'(-?\d+) *\/ *(\d+)', str(number))
+    pattern = re.match(r'([\+\-]?\d+)\/(\d+)', ''.join(number.split()))
     if pattern is not None:
         return Rational(*map(int, pattern.group(1, 2)))
 
@@ -354,17 +352,17 @@ def _frac_string_to_rational(number):
 
 def _str_to_rational(number):
     try:
+        return _int_to_rational(int(number))
+    except:
+        pass
+
+    try:
         return _frac_string_to_rational(number)
     except:
         pass
     
     try:
         return _float_to_rational(float(number))
-    except:
-        pass
-
-    try:
-        return _int_to_rational(int(number))
     except Exception as e:
         raise TypeError(e)
 
