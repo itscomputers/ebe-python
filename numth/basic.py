@@ -164,7 +164,7 @@ def padic(number, base):
 
     Notes:  number nonzero
             base > 1
-            num == (base ** exp) * rest
+            number == (base ** exp) * rest
             rest % base != 0
     """
     if number == 0:

@@ -1,6 +1,6 @@
 #   numth/quadratic.py
 #===========================================================
-from .basic import gcd, round_down
+from .basic import gcd, mod_inverse, round_down
 from .rational import frac, Rational
 #===========================================================
 
@@ -204,6 +204,26 @@ class Quadratic:
         return Quadratic(other, 0, self.root) % self
 
     #=========================
+
+    def mod_inverse(self, modulus):
+        norm_inverse = mod_inverse(self.norm(), modulus)
+        return (self.conjugate() * norm_inverse) % modulus
+
+    #-------------------------
+
+    def mod_power(self, exponent, modulus):
+        if other < 0:
+            return self.mod_inverse().mod_power(-exponent, modulus)
+        elif other == 0:
+            return Quadratic(1, 0, self.root)
+        elif other == 1:
+            return self % modulus
+        elif other % 2 == 0:
+            return mod_power(self * self, other//2, modulus)
+        else:
+            return (self * mod_power(self * self, other//2, modulus)) % modulus
+
+    #-------------------------
 
     def canonical(self):
         if self.root != -1:
