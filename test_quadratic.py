@@ -46,6 +46,19 @@ def test_norm_conjugate(real, imag, root):
 
 #-----------------------------
 
+@given(
+    *coords(),
+    st.integers(min_value=2)
+)
+def test_mod_inverse(real, imag, root, modulus):
+    q = Quadratic(real, imag, root)
+    assume( gcd(q.norm(), modulus) == 1 )
+    q_inverse = q.mod_inverse(modulus)
+    assert( (q_inverse * q) % modulus == Quadratic(1, 0, root) )
+    assert( q_inverse == q.inverse(modulus) )
+
+#-----------------------------
+
 @given(*coords())
 def test_inverse(real, imag, root):
     assume( real != 0 and imag != 0 )
@@ -252,6 +265,22 @@ def test_pow(real, imag, root, m, n):
     assert( mth_power * nth_power == sum_power )
     assert( sum_power / mth_power == nth_power )
 
+#-----------------------------
+
+@given(
+    *coords(),
+    st.integers(min_value=0, max_value=20),
+    st.integers(min_value=2)
+)
+def test_mod_power(real, imag, root, exponent, modulus):
+    q = Quadratic(real, imag, root)
+    assume( gcd(q.norm(), modulus) == 1 )
+    mod_power = pow(q, exponent, modulus)
+    mod_inverse_power = pow(q, -exponent, modulus)
+    power = pow(q, exponent)
+    assert( power % modulus == mod_power )
+    assert( mod_inverse_power.inverse(modulus) == mod_power )
+
 #=============================
 
 @given(*double_coords())
@@ -283,6 +312,9 @@ def test_mod_quadratic_and_integer(real, imag, root, integer):
     assert( q == (q // integer) * integer + (q % integer) )
 
 #=============================
+
+
+#-----------------------------
 
 @given(*pair())
 def test_canonical(real, imag):
