@@ -100,7 +100,7 @@ def _tonelli_shanks_helper(m, c, t, val, prime):
 def mod_sqrt_tonelli_shanks(number, prime, *params):
     """
     Square root of a number modulo a prime (Tonelli-Shanks algorithm).
-        (number: int, prime: int, params; tuple) -> (int, int)
+        (number: int, prime: int, params: tuple) -> (int, int)
     Notes:  for each, (return_value ** 2) % prime == number % prime
             params to determine if tonelli-shanks is faster can be passed in
                 so as not to be computed again.

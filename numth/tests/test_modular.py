@@ -2,8 +2,8 @@
 #===========================================================
 from hypothesis import given, assume, strategies as st
 
-from numth.basic import jacobi
-from numth.modular import *
+from ..basic import jacobi
+from ..modular import *
 #===========================================================
 
 def primes():

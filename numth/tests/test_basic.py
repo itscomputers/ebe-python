@@ -4,7 +4,7 @@ from hypothesis import given, assume, strategies as st
 from itertools import product
 import math
 
-from numth.basic import *
+from ..basic import *
 #===========================================================
 
 @given(st.floats(min_value=0))

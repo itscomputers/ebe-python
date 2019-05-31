@@ -3,10 +3,10 @@
 from hypothesis import assume, example, given, strategies as st
 from random import choice
 
-from numth.basic import is_square
-from numth.quadratic import Quadratic
-from numth.polynomial import * 
-from numth.polynomial import \
+from ..basic import is_square
+from ..quadratic import Quadratic
+from ..polynomial import * 
+from ..polynomial import \
     _term_pattern, \
     _term_to_exp_coeff, \
     _exp_coeff_to_term, \

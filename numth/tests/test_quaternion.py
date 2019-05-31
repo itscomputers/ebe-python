@@ -3,9 +3,9 @@
 from hypothesis import given, assume, strategies as st
 import math
 
-from numth.basic import div, is_square
-from numth.quadratic import Quadratic
-from numth.quaternion import * 
+from ..basic import div, is_square
+from ..quadratic import Quadratic
+from ..quaternion import * 
 #===========================================================
 
 def coords():

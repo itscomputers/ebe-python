@@ -4,7 +4,7 @@ from fractions import Fraction
 import math
 from hypothesis import given, assume, strategies as st
 
-from numth.rational import *
+from ..rational import *
 #===========================================================
 
 def coords(flag=None):

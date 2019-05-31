@@ -3,8 +3,8 @@
 from hypothesis import given, assume, strategies as st
 import math
 
-from numth.basic import div, is_square
-from numth.quadratic import * 
+from ..basic import div, is_square
+from ..quadratic import * 
 #===========================================================
 
 def root_filter(x):
