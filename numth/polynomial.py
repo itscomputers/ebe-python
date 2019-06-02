@@ -9,8 +9,8 @@ from .rational import frac, Rational
 #===========================================================
 
 def polyn(*inputs):
-    if len(inputs) == 1 and type(inputs[0]) is str:
-        return _string_to_polyn(inputs[0])
+    if len(inputs) == 1 and type(*inputs) is str:
+        return _string_to_polyn(*inputs)
     if type(inputs[0]) is tuple:
         return _tuples_to_polyn(*inputs)
     return _args_to_polyn(*inputs)
