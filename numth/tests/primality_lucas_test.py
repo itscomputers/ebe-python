@@ -3,8 +3,8 @@
 from hypothesis import assume, example, given, strategies as st
 
 from ..basic import is_prime__naive
-from ..lucas_primality import *
-from ..lucas_primality import \
+from ..primality_lucas import *
+from ..primality_lucas import \
     _generate_witness_pairs, \
     _good_parameters, \
     _get_quadratic_element, \

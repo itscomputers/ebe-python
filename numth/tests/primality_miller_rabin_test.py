@@ -4,8 +4,8 @@ from hypothesis import assume, example, given, strategies as st
 from random import choice
 
 from ..basic import is_prime__naive
-from ..miller_rabin_primality import *
-from ..miller_rabin_primality import \
+from ..primality_miller_rabin import *
+from ..primality_miller_rabin import \
     _miller_rabin_cutoffs, \
     _generate_witnesses
 #===========================================================
