@@ -56,7 +56,7 @@ def test_gcd(a, b):
     st.integers(min_value=1),
     st.integers(min_value=1)
 )
-def test_gcd_of_multiple(a, b, c):
+def test_gcd_of_many(a, b, c):
     d = gcd(a, b, c)
     assert( a % d == b % d == c % d == 0 )
     assert( gcd(a//d, b//d, c//d) == 1 )
@@ -147,13 +147,27 @@ def test_mod_power(number, exponent, modulus):
     assert( mod_inverse(value, modulus) == inverse )
     assert( mod_power(number, 0, modulus) == 1 )
 
+#=============================
+
+def test_prime_sieve():
+    assert( len(prime_sieve(10**2)) == 25 )
+    assert( len(prime_sieve(10**3)) == 168 )
+    assert( len(prime_sieve(10**4)) == 1229 )
+    assert( len(prime_sieve(10**5)) == 9592 )
+
 #-----------------------------
+
+def test_is_prime__naive():
+    for p in prime_sieve(10**3):
+        assert( is_prime__naive(p) )
+
+#=============================
 
 @given(st.integers())
 def test_jacobi(a):
-    for p in [
-            3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43,
-            47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]:
-        if gcd(a, p) == 1:
+    for p in prime_sieve(10**3)[1:]:
+        if a % p == 0:
+            assert( jacobi(a, p) == 0 )
+        else:
             assert( jacobi(a, p) == euler_criterion(a, p) ) 
 

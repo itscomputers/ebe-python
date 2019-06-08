@@ -2,6 +2,7 @@
 #===========================================================
 from hypothesis import assume, example, given, strategies as st
 
+from ..basic import is_prime__naive
 from ..lucas_primality import *
 from ..lucas_primality import \
     _generate_witness_pairs, \
@@ -33,9 +34,15 @@ def test_lucas_witnesses(number, num_witnesses):
 
 #-----------------------------
 
-@given(st.integers(min_value=3))
+@given(st.integers(min_value=3, max_value=10**6))
 def test_lucas_test(number):
-    assert( lucas_test(number, 10) in ['composite', 'probable prime', 'strong probable prime'] )
+    number += 1 - number % 2
+    l_primality = lucas_test(number, 20)
+    number_is_prime = is_prime__naive(number)
+    if l_primality in ['strong probable prime', 'probable prime']:
+        assert( number_is_prime )
+    else:
+        assert( not number_is_prime )
 
 #-----------------------------
 
