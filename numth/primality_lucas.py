@@ -1,4 +1,4 @@
-#   numth/lucas_primality.py
+#   numth/primality_lucas.py
 #===========================================================
 from random import randint
 

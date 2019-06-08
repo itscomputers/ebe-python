@@ -1,4 +1,4 @@
-#   numth/miller_rabin_primality.py
+#   numth/primality_miller_rabin.py
 #===========================================================
 from random import randint
 
@@ -39,7 +39,7 @@ def miller_rabin_witnesses(number, witnesses):
         if miller_rabin_witness(number, witness) == 'composite':
             return 'composite'
 
-    if number < _miller_rabin_cutoffs()[-1][0]:
+    if number < miller_rabin_cutoffs()[-1][0]:
         return 'prime'
 
     return 'probable prime'
@@ -64,7 +64,7 @@ def miller_rabin_test(number, num_witnesses):
 
 #=============================
 
-def _miller_rabin_cutoffs():
+def miller_rabin_cutoffs():
     return ((1, 2),
             (2047, 3),
             (1373653, 5),
@@ -77,7 +77,7 @@ def _miller_rabin_cutoffs():
 #-----------------------------
 
 def _generate_witnesses(number, num_witnesses):
-    cutoffs = _miller_rabin_cutoffs()
+    cutoffs = miller_rabin_cutoffs()
     
     if number > cutoffs[-1][0]:
         if num_witnesses > number:

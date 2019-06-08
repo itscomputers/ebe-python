@@ -253,6 +253,11 @@ def mod_power(number, exponent, modulus):
 #=============================
 
 def prime_sieve(max_value, primes=None, numbers_left=None):
+    """
+    Sieve of Eratosthenes.
+        (max_value: int, primes: list, numbers_left: iterable) -> list
+    Notes:  return_value is list of primes less than max_value
+    """
     if primes is None and numbers_left is None:
         primes = []
         numbers_left = (x for x in range(2, max_value + 1))
@@ -273,6 +278,14 @@ def prime_sieve(max_value, primes=None, numbers_left=None):
 #-----------------------------
 
 def is_prime__naive(number, numbers_left=None):
+    """
+    Primality testing using Sieve of Eratosthenes.
+        (number: int, numbers_left: iterable) -> bool
+    Notes:  return_value is whether number is prime
+    """
+    if number < 2:
+        return False
+
     if numbers_left is None:
         numbers_left = (x for x in range(2, integer_sqrt(number) + 1))
     

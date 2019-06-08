@@ -1,13 +1,11 @@
-#   test_miller_rabin.py
+#   numth/tests/primality_miller_rabin_test.py
 #===========================================================
 from hypothesis import assume, example, given, strategies as st
 from random import choice
 
 from ..basic import is_prime__naive
 from ..primality_miller_rabin import *
-from ..primality_miller_rabin import \
-    _miller_rabin_cutoffs, \
-    _generate_witnesses
+from ..primality_miller_rabin import _generate_witnesses
 #===========================================================
 
 @given(
@@ -19,7 +17,7 @@ def test_miller_rabin_witnesses(number, num_witnesses):
     single_results = set(miller_rabin_witness(number, witness) for witness in witnesses)
     combined_result = miller_rabin_witnesses(number, witnesses)
     if single_results == set(['probable prime']):
-        if number < _miller_rabin_cutoffs()[-1][0]:
+        if number < miller_rabin_cutoffs()[-1][0]:
             assert( combined_result == 'prime' )
         else:
             assert( combined_result == 'probable prime' )
@@ -45,7 +43,7 @@ def test_miller_rabin_test(number):
 )
 def test_generate_witnesses(number, num_witnesses):
     witnesses = _generate_witnesses(number, num_witnesses)
-    cutoffs = _miller_rabin_cutoffs()
+    cutoffs = miller_rabin_cutoffs()
 
     for w in witnesses:
         assert( 2 <= w < number )

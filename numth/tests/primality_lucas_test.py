@@ -1,4 +1,4 @@
-#   test_lucas_primality.py
+#   numth/tests/test_lucas_primality.py
 #===========================================================
 from hypothesis import assume, example, given, strategies as st
 

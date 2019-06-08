@@ -1,4 +1,4 @@
-#   test_basic.py
+#   numth/tests/basic_test.py
 #===========================================================
 from hypothesis import given, assume, strategies as st
 from itertools import product
