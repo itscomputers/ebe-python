@@ -1,5 +1,7 @@
 #   numth/basic.py
 #===========================================================
+from functools import reduce
+from itertools import product
 import math
 #===========================================================
 
@@ -249,6 +251,54 @@ def mod_power(number, exponent, modulus):
         return pow(mod_inverse(number, modulus), -exponent, modulus)
     
     return pow(number, exponent, modulus)
+
+#-----------------------------
+
+def _chinese_remainder_coeffs(moduli, moduli_product):
+    def coeff(modulus):
+        partial = moduli_product // modulus
+        return (partial * mod_inverse(partial, modulus)) % moduli_product
+
+    return map(coeff, moduli)
+
+#-----------------------------
+
+def chinese_remainder_theorem(residues, moduli):
+    """
+    Chinese remainder theorem.
+        (residues: iterable, moduli: iterable) -> int
+    Notes:  return_val is the unique solution to the system
+                x % modulus == residue % modulus 
+                for each pair in zip(residues, moduli)
+            requires that moduli are pair-wise relatively prime
+    """
+    moduli_product = reduce(lambda x, y: x * y, moduli, 1)
+    
+    return sum(map(
+        lambda x, y: (x * y) % moduli_product,
+        _chinese_remainder_coeffs(moduli, moduli_product),
+        residues)
+    ) % moduli_product
+
+#-----------------------------
+
+def prime_to(*primes):
+    """
+    List of numbers which are prime to the given primes.
+        (primes: iterable of int) -> list
+    Notes:  return_val is list of x for x < product of primes
+                such that gcd(x, product) == 1
+    """
+    primes_product = reduce(lambda x, y: x * y, primes, 1)
+    coeffs = list(_chinese_remainder_coeffs(primes, primes_product))
+
+    return sorted(
+        sum(map(
+            lambda x, y: (x * y) % primes_product,
+            _chinese_remainder_coeffs(primes, primes_product),
+            residues)
+        ) % primes_product \
+    for residues in product(*(range(1, x) for x in primes)))
 
 #=============================
 

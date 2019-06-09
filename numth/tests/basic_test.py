@@ -2,6 +2,7 @@
 #===========================================================
 from hypothesis import given, assume, strategies as st
 from itertools import product
+from random import sample
 import math
 
 from ..basic import *
@@ -147,6 +148,27 @@ def test_mod_power(number, exponent, modulus):
     assert( mod_inverse(value, modulus) == inverse )
     assert( mod_power(number, 0, modulus) == 1 )
 
+#-----------------------------
+
+@given(*(3 * [st.integers()]))
+def test_chinese_remainder_theorem(a, b, c):
+    moduli = sample(prime_sieve(10**3), 3)
+    solution = chinese_remainder_theorem([a,b,c], moduli)
+    for (r, m) in zip([a,b,c], moduli):
+        assert( solution % m == r % m )
+
+#-----------------------------
+
+@given(st.integers())
+def test_prime_to(_):
+    primes = sample(prime_sieve(30), 3)
+    m = reduce(lambda x, y: x * y, primes, 1)
+    phi_m = reduce(lambda x, y: x * (y - 1), primes, 1)
+    Zm_star = prime_to(*primes)
+    assert( len(Zm_star) == phi_m )
+    for x in Zm_star:
+        assert( gcd(x, m) == 1 )
+    
 #=============================
 
 def test_prime_sieve():
