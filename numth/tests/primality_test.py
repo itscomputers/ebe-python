@@ -125,7 +125,7 @@ def test_next_twin_primes(number):
 
 @given(st.integers(min_value=6, max_value=10**10))
 def test_goldbach_conjecture(number):
-    partition = weak_goldbach_partition(number)
+    partition = goldbach_partition(number)
     assert( list(partition) == sorted(partition, reverse=True) )
     for p in partition:
         assert( is_prime(p) )
@@ -138,7 +138,7 @@ def test_goldbach_conjecture(number):
 #-----------------------------
 
 def test_goldbach_conjecture_small():
-    assert( weak_goldbach_partition(4) == (2, 2) )
-    assert( weak_goldbach_partition(5) == (3, 2) )
+    assert( goldbach_partition(4) == (2, 2) )
+    assert( goldbach_partition(5) == (3, 2) )
 
     

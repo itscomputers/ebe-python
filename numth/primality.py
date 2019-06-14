@@ -173,6 +173,10 @@ def goldbach_partition(number, sieve_primes=None):
     if number < 4:
         raise ValueError('Must be at least 4')
 
+    if number % 2 == 1 and number > 6:
+        p = prev_prime(number - 4)
+        return tuple(sorted([p, *goldbach_partition(number - p, sieve_primes)], reverse=True))
+
     start = number // 2 - 1
     prime_gen = next_prime_gen(start, sieve_primes)
     p = next(prime_gen)
@@ -181,13 +185,4 @@ def goldbach_partition(number, sieve_primes=None):
         p = next(prime_gen)
 
     return tuple(sorted([p, number - p], reverse=True))
-
-#-----------------------------
-
-def weak_goldbach_partition(number, sieve_primes=None):
-    if number % 2 == 0 or number == 5:
-        return goldbach_partition(number, sieve_primes)
-
-    p = prev_prime(number - 4)
-    return tuple(sorted([p, *goldbach_partition(number - p, sieve_primes)], reverse=True))
 
