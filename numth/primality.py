@@ -114,6 +114,44 @@ def primes_in_range(lower_bound, upper_bound, sieve_primes=None):
 
 #=============================
 
+def prev_prime_gen(number, sieve_primes=None):
+    """
+    Generator that yields primes before given number.
+        (number: int, sieve_primes: list) -> generator
+    """
+    if sieve_primes is None:
+        sieve_primes = _default_values('sieve_primes')
+
+    diameter = reduce(lambda x, y: x * y, sieve_primes, 1)
+    block = [number - number % diameter + x for x in reversed(prime_to(*sieve_primes))]
+
+    shift = 0
+    max_shift = number // diameter
+    while shift <= max_shift:
+        for x in block:
+            y = x - diameter * shift
+            if y < number and is_prime(y):
+                yield y
+        shift += 1
+
+    for p in reversed(sieve_primes):
+        if number > p:
+            yield p
+
+#-----------------------------
+
+def prev_prime(number, sieve_primes=None):
+    """
+    Prev prime before given number.
+        (number: int, sieve_primes: list) -> int
+    """
+    try:
+        return next(prev_prime_gen(number, sieve_primes))
+    except StopIteration:
+        return None
+
+#=============================
+
 def next_twin_primes_gen(number, sieve_primes=None):
     gen = next_prime_gen(number - 2, sieve_primes)
     
@@ -128,4 +166,28 @@ def next_twin_primes_gen(number, sieve_primes=None):
 
 def next_twin_primes(number, sieve_primes=None):
     return next(next_twin_primes_gen(number, sieve_primes))
+
+#=============================
+
+def goldbach_partition(number, sieve_primes=None):
+    if number < 4:
+        raise ValueError('Must be at least 4')
+
+    start = number // 2 - 1
+    prime_gen = next_prime_gen(start, sieve_primes)
+    p = next(prime_gen)
+    
+    while not is_prime(number - p):
+        p = next(prime_gen)
+
+    return tuple(sorted([p, number - p], reverse=True))
+
+#-----------------------------
+
+def weak_goldbach_partition(number, sieve_primes=None):
+    if number % 2 == 0 or number == 5:
+        return goldbach_partition(number, sieve_primes)
+
+    p = prev_prime(number - 4)
+    return tuple(sorted([p, *goldbach_partition(number - p, sieve_primes)], reverse=True))
 

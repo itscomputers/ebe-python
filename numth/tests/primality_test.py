@@ -77,6 +77,41 @@ def test_primes_in_range(lower_bound, difference):
 
 #=============================
 
+@given(st.integers(min_value=-1, max_value=10**4))
+def test_prev_primes_gen(number):
+    g = prev_prime_gen(number)
+    primes = []
+    while True:
+        try:
+            primes = primes + [next(g)]
+        except StopIteration:
+            break
+    assert( list(reversed(primes)) == primes_in_range(1, number) )
+
+#-----------------------------
+
+def test_prev_prime_small():
+    assert( prev_prime(5) == prev_prime(4) == 3 )
+    assert( prev_prime(3) == 2 )
+    assert( prev_prime(2) == prev_prime(1) == prev_prime(0) == None )
+
+#-----------------------------
+
+@given(st.integers(max_value=-1))
+def test_prev_prime_neg(number):
+    assert( prev_prime(number) is None )
+
+#-----------------------------
+
+@given(st.integers(min_value=6, max_value=10**4))
+def test_prev_prime(number):
+    p = prev_prime(number)
+    assert( is_prime(p) )
+    for x in range(p+1, number):
+        assert( not is_prime(x) )
+
+#=============================
+
 @given(st.integers(min_value=-1, max_value=10**10))
 def test_next_twin_primes(number):
     p, q = next_twin_primes(number)
@@ -88,3 +123,22 @@ def test_next_twin_primes(number):
 
 #=============================
 
+@given(st.integers(min_value=6, max_value=10**10))
+def test_goldbach_conjecture(number):
+    partition = weak_goldbach_partition(number)
+    assert( list(partition) == sorted(partition, reverse=True) )
+    for p in partition:
+        assert( is_prime(p) )
+    assert( sum(partition) == number )
+    if number % 2 == 0:
+        assert( len(partition) == 2 )
+    else:
+        assert( len(partition) == 3 )
+
+#-----------------------------
+
+def test_goldbach_conjecture_small():
+    assert( weak_goldbach_partition(4) == (2, 2) )
+    assert( weak_goldbach_partition(5) == (3, 2) )
+
+    
