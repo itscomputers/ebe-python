@@ -39,7 +39,7 @@ def miller_rabin_witnesses(number, witnesses):
         if miller_rabin_witness(number, witness) == 'composite':
             return 'composite'
 
-    if number < miller_rabin_cutoffs()[-1][0]:
+    if number < miller_rabin_max_cutoff():
         return 'prime'
 
     return 'probable prime'
@@ -64,6 +64,11 @@ def miller_rabin_test(number, num_witnesses):
 
 #=============================
 
+def miller_rabin_max_cutoff():
+    return 341550071728321
+
+#- - - - - - - - - - - - - - -
+
 def miller_rabin_cutoffs():
     return ((1, 2),
             (2047, 3),
@@ -71,15 +76,12 @@ def miller_rabin_cutoffs():
             (25326001, 7),
             (3215031751, 11),
             (2152302898747, 13),
-            (3474749660383, 17),
-            (341550071728321, None))
+            (3474749660383, 17))
 
 #-----------------------------
 
 def _generate_witnesses(number, num_witnesses):
-    cutoffs = miller_rabin_cutoffs()
-    
-    if number > cutoffs[-1][0]:
+    if number > miller_rabin_max_cutoff():
         if num_witnesses > number:
             witnesses = set(x for x in range(2, number-1))
         else:
@@ -88,7 +90,7 @@ def _generate_witnesses(number, num_witnesses):
                 witnesses = witnesses | set([randint(2, number - 1)])
 
     else:
-        witnesses = set(p for val, p in cutoffs[:-1] if number >= val)
+        witnesses = set(p for val, p in miller_rabin_cutoffs() if number >= val)
 
     return witnesses
 

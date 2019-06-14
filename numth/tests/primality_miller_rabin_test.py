@@ -17,7 +17,7 @@ def test_miller_rabin_witnesses(number, num_witnesses):
     single_results = set(miller_rabin_witness(number, witness) for witness in witnesses)
     combined_result = miller_rabin_witnesses(number, witnesses)
     if single_results == set(['probable prime']):
-        if number < miller_rabin_cutoffs()[-1][0]:
+        if number < miller_rabin_max_cutoff():
             assert( combined_result == 'prime' )
         else:
             assert( combined_result == 'probable prime' )
@@ -43,16 +43,15 @@ def test_miller_rabin_test(number):
 )
 def test_generate_witnesses(number, num_witnesses):
     witnesses = _generate_witnesses(number, num_witnesses)
-    cutoffs = miller_rabin_cutoffs()
 
     for w in witnesses:
         assert( 2 <= w < number )
 
-    if number > cutoffs[-1][0] and num_witnesses > number:
+    if number > miller_rabin_max_cutoff() and num_witnesses > number:
         assert( len(witnesses) == number - 3 )
     
-    elif number <= cutoffs[-1][0]:
-        assert( witnesses <= set(p for (val, p) in cutoffs[:-1]) )
+    elif number <= miller_rabin_max_cutoff():
+        assert( witnesses <= set(p for (val, p) in miller_rabin_cutoffs()) )
 
     else:
         assert( len(witnesses) == num_witnesses )

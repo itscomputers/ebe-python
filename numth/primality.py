@@ -3,7 +3,7 @@
 from functools import reduce
 
 from .basic import prime_to 
-from .primality_miller_rabin import miller_rabin_test, miller_rabin_cutoffs
+from .primality_miller_rabin import miller_rabin_test, miller_rabin_max_cutoff
 from .primality_lucas import lucas_test
 #===========================================================
 
@@ -33,7 +33,7 @@ def is_prime(number, mr_wit=None, l_wit=None):
     if number < 2:
         return False
 
-    if number < miller_rabin_cutoffs()[-1][0]:
+    if number < miller_rabin_max_cutoff():
         return miller_rabin_test(number, 1) == 'prime'
 
     if mr_wit is None:
@@ -153,6 +153,10 @@ def prev_prime(number, sieve_primes=None):
 #=============================
 
 def next_twin_primes_gen(number, sieve_primes=None):
+    """
+    Generator that yields twin primes after given number.
+        (number: int, sieve_primes: list) -> generator
+    """
     gen = next_prime_gen(number - 2, sieve_primes)
     
     p, q = next(gen), next(gen)
@@ -165,17 +169,30 @@ def next_twin_primes_gen(number, sieve_primes=None):
 #-----------------------------
 
 def next_twin_primes(number, sieve_primes=None):
+    """
+    Next pair of twin primes after given number.
+        (number: int, sieve_primes: list) -> tuple
+    Notes:  return_val is pair of primes with difference of 2
+    """
     return next(next_twin_primes_gen(number, sieve_primes))
 
 #=============================
 
 def goldbach_partition(number, sieve_primes=None):
+    """
+    Goldbach partition of a number into a sum of two or three primes.
+        (number: int, sieve_primes: list) -> tuple
+    Notes:  return_val is a tuple of primes that sum to number
+            two primes if number is 5 or even, otherwise three primes
+    """
     if number < 4:
         raise ValueError('Must be at least 4')
 
     if number % 2 == 1 and number > 6:
         p = prev_prime(number - 4)
-        return tuple(sorted([p, *goldbach_partition(number - p, sieve_primes)], reverse=True))
+        return tuple(sorted(
+            [p, *goldbach_partition(number - p, sieve_primes)],
+            reverse=True))
 
     start = number // 2 - 1
     prime_gen = next_prime_gen(start, sieve_primes)
