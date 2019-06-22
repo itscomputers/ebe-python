@@ -54,7 +54,7 @@ def div_with_small_remainder(dividend, divisor):
     
     if 2 * remainder > abs(divisor):
         remainder -= abs(divisor)
-        quotient = (number - remainder) // divisor
+        quotient = (dividend - remainder) // divisor
 
     return quotient, remainder 
 

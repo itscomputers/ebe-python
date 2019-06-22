@@ -17,10 +17,7 @@ def test_miller_rabin_witnesses(number, num_witnesses):
     single_results = set(miller_rabin_witness(number, witness) for witness in witnesses)
     combined_result = miller_rabin_witnesses(number, witnesses)
     if single_results == set(['probable prime']):
-        if number < miller_rabin_max_cutoff():
-            assert( combined_result == 'prime' )
-        else:
-            assert( combined_result == 'probable prime' )
+        assert( combined_result == 'probable prime' )
     else:
         assert( combined_result == 'composite' )
 

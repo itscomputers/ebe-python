@@ -27,7 +27,7 @@ def mod_sqrt(number, prime):
         raise ValueError('{} is not a square modulo {}'.format(number, prime))
 
     if prime % 4 == 3:
-        return mod_sqrt_minus_one_three_mod_four(number, prime)
+        return mod_sqrt_when_three_mod_four(number, prime)
 
     s, q = padic(prime - 1, 2)
     m = len(bin(prime)[2:])
