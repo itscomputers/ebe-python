@@ -10,9 +10,20 @@ from .rational import Rational
 def lucas_witness_pair(number, P, Q):
     """
     Lucas sequence witness for primality.
-        (number: int, P: int, Q: int) -> str, bool
-    Notes:  return_value is whether witness pair thinks number is
-                'composite' or '(strong) probable prime'
+
+    Determines if number is composite or probably prime, 
+    according to a witness pair.
+
+    params
+    + number : int
+    + P : int
+    + Q : int
+
+    return
+    (primality, strong) : (str, bool)
+        * ('composite', _) means number is composite
+        * ('probable prime', false) means P, Q think number is prime
+        * ('probable prime', true) means P, Q strongly think number is priem
     """
     D = P**2 - 4*Q
 
@@ -49,7 +60,17 @@ def lucas_witness_pair(number, P, Q):
 def lucas_witness_pairs(number, witness_pairs):
     """
     Combination of Lucas sequence witnesses for primality
-        (number: int, witness_pairs: iterable) -> str, bool
+
+    params
+    + number : int
+    + witness_pairs : iterable of witness pairs
+
+    return
+    (primality, strong) : (str, bool)
+        * ('composite', _) if any pair thinks number is composite
+        * ('probable prime', false) if all pairs think number is probable prime
+        * ('probable prime', true) if all pairs think number is probable prime
+        with at least one strong opinion
     """
     strong = False
     for pair in witness_pairs:
@@ -66,10 +87,18 @@ def lucas_witness_pairs(number, witness_pairs):
 def lucas_test(number, num_witnesses):
     """
     Lucas test for primality.
-        (number: int, num_witnesses: int) -> str
-    Notes:  'composite' is deterministic 
-            '(strong) probable prime' is probablistic
-                and incorrect with probability < (4/15)**num_witnesses
+
+    Probabilistic primality test using Lucas sequences.
+
+    params
+    + number : int
+    + num_witnesses : int
+
+    return
+    str
+        * 'composite' is deterministic
+        * 'probable prime' and 'strong probable prime' are probabilistic
+        and incorrect with probability < (4/15) ** num_witnesses
     """
     if number < 3:
         raise ValueError('Number should be at least 3')

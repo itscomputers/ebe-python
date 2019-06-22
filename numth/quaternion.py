@@ -13,6 +13,15 @@ def quaternion(number):
 #=============================
 
 class Quaternion:
+    """
+    Quaternion number class.
+
+    params
+    + components = (a, b, c, d) : (int, int, int, int)
+
+    represents
+    a + b*i + c*j + d*k
+    """
 
     def __init__(self, *components):
         self.components = components

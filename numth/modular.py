@@ -9,8 +9,16 @@ from .quadratic import Quadratic
 def mod_sqrt(number, prime):
     """
     Square root of a number modulo a prime.
-        (number: int, prime: int) -> (int, int)
-    Notes:  for each, (return_value ** 2) % prime == number % prime
+
+    Computes two sqrts such that each ``sqrt**2 % prime == number``.
+
+    params
+    + number : int
+    + prime : int
+        prime number
+
+    return
+    (int, int)
     """
     if prime == 2 or number % prime == 0:
         return (number, number)
@@ -34,8 +42,15 @@ def mod_sqrt(number, prime):
 def mod_sqrt_minus_one_wilson(prime):
     """
     Square root of -1 modulo a prime (Wilson's Theorem).
-        prime: int -> (int, int)
-    Notes:  for each, (return_value ** 2) % prime == p - 1
+
+    Computes two sqrts such that each ``sqrt**2 % prime == prime - 1``.
+
+    params
+    + prime : int
+        prime number
+
+    return
+    (int, int)
     """
     if prime == 2:
         return (1, 1)
@@ -51,8 +66,15 @@ def mod_sqrt_minus_one_wilson(prime):
 def mod_sqrt_minus_one_legendre(prime):
     """
     Square root of -1 modulo a prime (Legendre's method).
-        prime: int -> (int, int)
-    Notes:  for each, (return_value ** 2) % prime == p - 1
+
+    Computes two sqrts such that each ``sqrt**2 % prime == prime - 1``.
+
+    params
+    + prime : int
+        prime number
+
+    return
+    (int, int)
     """
     if prime == 2:
         return (1, 1)
@@ -67,11 +89,20 @@ def mod_sqrt_minus_one_legendre(prime):
 
 #-----------------------------
 
-def mod_sqrt_minus_one_three_mod_four(number, prime):
+def mod_sqrt_when_three_mod_four(number, prime):
     """
     Square root of a number modulo a prime congruent to 3 modulo 4.
-        (number: int, prime: int) -> (int, int)
-    Notes:  for each, (return_value ** 2) % prime == number % prime
+
+    Computes two sqrts such that each ``sqrt**2 % prime == number``.
+
+    params
+    + number : int
+    + prime : int
+        prime number % 4 == 3
+
+    return
+    (int, int)
+
     """
     if prime % 4 != 3:
         raise ValueError('Use a different mod_sqrt function')
@@ -100,10 +131,18 @@ def _tonelli_shanks_helper(m, c, t, val, prime):
 def mod_sqrt_tonelli_shanks(number, prime, *params):
     """
     Square root of a number modulo a prime (Tonelli-Shanks algorithm).
-        (number: int, prime: int, params: tuple) -> (int, int)
-    Notes:  for each, (return_value ** 2) % prime == number % prime
-            params to determine if tonelli-shanks is faster can be passed in
-                so as not to be computed again.
+
+    Computes two sqrts such that each ``sqrt**2 % prime == number``.
+
+    params
+    + number : int
+    + prime : int
+        prime number
+    + params : list(int)
+        s, q, m can be passed in if already computed    
+
+    return
+    (int, int)
     """
     if params == ():
         s, q = padic(prime-1, 2)
@@ -130,8 +169,16 @@ def mod_sqrt_tonelli_shanks(number, prime, *params):
 def mod_sqrt_cipolla(number, prime):
     """
     Square root of a number modulo a prime (Cipolla's algorithm).
-        (number: int, prime: int) -> (int, int)
-    Notes:  for each, (return_value ** 2) % prime == number % prime
+
+    Computes two sqrts such that each ``sqrt**2 % prime == number``.
+
+    params
+    + number : int
+    + prime : int
+        prime number
+
+    return
+    (int, int)
     """
     for y in range(2, prime):
         root = (y**2 - number) % prime

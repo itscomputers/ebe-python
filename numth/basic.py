@@ -5,15 +5,6 @@ from itertools import product
 import math
 #===========================================================
 
-def round_down(number):
-    if number < 0:
-        return - round_down(-number)
-    if 2 * (number - int(number)) > 1:
-        return int(number) + 1
-    return int(number)
-
-#-----------------------------
-
 def div(dividend, divisor):
     """
     Division with remainder.
@@ -528,4 +519,26 @@ def euler_criterion(a, p):
         return -1
     
     return 1
+
+#=============================
+
+def round_down(number):
+    """
+    Modified rounding function.
+
+    Rounds toward zero if fractional part is less than or equal to half.
+
+    params
+    number : int, float, Rational, Quadratic
+        any numerical type that can be compared to integers 
+        and has an __int__ method
+    
+    return
+    int
+    """
+    if number < 0:
+        return - round_down(-number)
+    if 2 * (number - int(number)) > 1:
+        return int(number) + 1
+    return int(number)
 

@@ -30,10 +30,15 @@ def frac(number):
 
 class Rational:
     """
-    Class for arithmetic of rational numbers.
-        (numer: int, denom: int) -> Rational
+    Rational number class.
 
-    Represents: numer / denom
+    params
+    + numer : int
+    + denom : int
+        nonzero
+    
+    represents
+    numer / denom
     """
     def __init__(self, numer, denom):
         if denom == 0:
@@ -78,7 +83,13 @@ class Rational:
     def decimal(self, num_digits=None):
         """
         Express rational number as a string in decimal form.
-            num_digits: int -> str
+
+        params
+        + num_digits : int
+
+        return
+        str
+            decimal representation of self
         """
         if num_digits is None:
             num_digits = _default_values('decimal')
@@ -211,10 +222,17 @@ class Rational:
 
     def approx_equal(self, other, num_digits=None):
         """
-        Determine approximate equality of two rational numbers.
-            (other: Rational, num_digits: int) -> bool
+        Approximate equality of two rational numbers.
 
-        Notes:  abs(self - other) < 10**(-num_digits)
+        Determines if ``abs(self - other) < 10**(-num_digits)``.
+
+        params
+        + other : Rational
+            or type that can be converted to Rational using frac
+        + num_digits : int
+
+        return
+        bool
         """
         if num_digits is None:
             num_digits = _default_values('decimal')
@@ -230,11 +248,16 @@ class Rational:
 
     def sqrt(self, num_digits=None):
         """
-        Calculate or approximate the square root of a rational number.
-            num_digits: int -> Rational
+        Square root (or approximation of square root) of a rational number.
 
-        Notes:  self == return_val**2 
-                or self.approx_equal(return_val**2)
+        Computes sqrt such that ``sqrt**2 == self``,
+        or up to desired accuracy if not a perfect square.
+
+        params
+        + num_digits : int
+
+        return
+        Rational
         """
         if self < 0:
             raise ValueError('Cannot take square root of negative number')
@@ -266,11 +289,16 @@ class Rational:
 
     def inverse_sqrt(self, num_digits=None):
         """
-        Approximate the inverse square root of a rational number greater than 1.
-            num_digits: int -> Rational
+        Inverse square root (or approximation) of a rational number greater than 1.
 
-        Notes:  self.inverse() == return_val**2 
-                or self.inverse().approx_equal(return_val**2)
+        Computes sqrt such that ``sqrt**2 == self.inverse()``,
+        or up to desired accuracy if not a perfect square.
+
+        params
+        + num_digits : int
+
+        return
+        Rational
         """
         if self.numer <= self.denom:
             raise ValueError('Inverse square root only if greater than 1')

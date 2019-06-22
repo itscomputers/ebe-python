@@ -8,17 +8,6 @@ import math
 from ..basic import *
 #===========================================================
 
-@given(st.floats(min_value=0))
-def test_round_down(number):
-    assume( str(number) not in ['-inf', 'inf', 'nan'] )
-    if number <= int(number) + .5:
-        assert( round_down(number) == int(number) )
-    else:
-        assert( round_down(number) == int(number) + 1 )
-    assert( round_down(-number) == - round_down(number) )
-
-#-----------------------------
-
 @given(
     st.integers(),
     st.integers().filter(lambda x: x != 0)
@@ -192,4 +181,15 @@ def test_jacobi(a):
             assert( jacobi(a, p) == 0 )
         else:
             assert( jacobi(a, p) == euler_criterion(a, p) ) 
+
+#=============================
+
+@given(st.floats(min_value=0))
+def test_round_down(number):
+    assume( str(number) not in ['-inf', 'inf', 'nan'] )
+    if number <= int(number) + .5:
+        assert( round_down(number) == int(number) )
+    else:
+        assert( round_down(number) == int(number) + 1 )
+    assert( round_down(-number) == - round_down(number) )
 

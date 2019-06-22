@@ -9,6 +9,7 @@ from .rational import frac, Rational
 #===========================================================
 
 def polyn(*inputs):
+    """Shortcut to create Polynomial from string or tuple of coeffs"""
     if len(inputs) == 1 and type(*inputs) is str:
         return _string_to_polyn(*inputs)
     if type(inputs[0]) is tuple:
@@ -33,6 +34,7 @@ def polyn_div(a, b, coeff_type=int):
 #=============================
 
 class Polynomial:
+    """Polynomial class with polynomial arithmetic"""
 
     def __init__(self, coeffs):
         self.coeffs = {e : c for (e, c) in coeffs.items() \

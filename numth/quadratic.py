@@ -7,9 +7,14 @@ from .rational import frac, Rational
 class Quadratic:
     """
     Quadratic number class.
-        (real: number, imag: number, root: number) -> Quadratic
 
-    Represents: real + imag * sqrt(root)
+    params
+    + real : int (or numerical type)
+    + imag : int (or numerical type)
+    + root : int (or numerical type)
+
+    represents
+    real + imag * sqrt(root)
     """
 
     def __init__(self, real, imag, root):

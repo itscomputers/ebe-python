@@ -8,8 +8,17 @@ from .basic import padic
 def miller_rabin_witness(number, witness):
     """
     Miller-Rabin witness for primality.
-        (number: int, witness: int) -> str
-    Notes:  return_value is whether witness thinks number is prime or composite
+
+    Determines if number is composite or probably prime according to a witness.
+
+    params
+    + number : int
+    + witness : int
+
+    return
+    str
+        * 'composite' is deterministic
+        * 'probable prime' is probabilistic
     """
     exp, rest  = padic(number - 1, 2)
     x = pow(witness, rest, number)
@@ -33,14 +42,19 @@ def miller_rabin_witness(number, witness):
 def miller_rabin_witnesses(number, witnesses):
     """
     Combination of Miller-Rabin witnesses for primality.
-        (number: int, witnesses: iterable) -> str
+
+    params
+    + number : int
+    + witnesses : iterable of int
+
+    return
+    str
+        * 'composite' if any think number is composite (deterministic)
+        * 'probable prime' if all think number is prime (probabalistic)
     """
     for witness in witnesses:
         if miller_rabin_witness(number, witness) == 'composite':
             return 'composite'
-
-    if number < miller_rabin_max_cutoff():
-        return 'prime'
 
     return 'probable prime'
 
@@ -49,18 +63,30 @@ def miller_rabin_witnesses(number, witnesses):
 def miller_rabin_test(number, num_witnesses):
     """
     Miller-Rabin test for primality.
-        (number: int, num_witnesses: int) -> str
-    Notes:  'composite' is definitive
-            'prime' is definitive and only returned if number < 341550071728321
-            'strong probable prime' is probabalistic
-                and incorrect with probability < (.25) ** num_witnesses
+
+    Probabalistic primality test 
+    using Fermat's Little Theorem and Lagrange's Theorem.
+
+    params
+    + number : int
+    + num_witnesses : int
+
+    return
+    str
+        * 'composite' is deterministic
+        * 'prime' is deterministic (and only occurs for number < 341550071728321
+        * 'probable prime' is probabalistic and
+        incorrect with probabilty < (1/4) ** num_witnesses
     """
     if number < 2:
         raise ValueError('Number should be at least 2')
     if number == 2:
         return 'prime'
     
-    return miller_rabin_witnesses(number, _generate_witnesses(number, num_witnesses))
+    primality = miller_rabin_witnesses(number, _generate_witnesses(number, num_witnesses))
+    if primality == 'probable prime' and number < miller_rabin_max_cutoff():
+        return 'prime'
+    return primality
 
 #=============================
 

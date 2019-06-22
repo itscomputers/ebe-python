@@ -20,15 +20,20 @@ def _default_values(category):
 def is_prime(number, mr_wit=None, l_wit=None):
     """
     Primality test.
-        (number: int, mr_wit: int, l_wit: int) -> bool
-    Notes:  return_val is whether number is prime
-            mr_wit is number of witnesses for miller_rabin_test
-            l_wit is number of witness pairs for lucas_test
-            if number < 341_550_071_728_321:
-                a. only pre-designated Miller-Rabin witnesses are used
-                b. the result is deterministic
-            otherwise, the result is probabilistic
-                incorrect with probability < (1/4)**mr_wit * (4/15)**l_wit
+
+    params
+    + number : int
+    + mr_wit : int
+        number of Miller-Rabin witnesses
+    + l_wit : int
+        number of Lucas witness pairs
+
+    return
+    bool
+        * if number < 341_550_071_728_321, only pre-determined Miller-Rabin
+        witnesses are used and result is deterministic
+        * otherwise, the result is probabalistic
+        incorrect with probability < (1/4) ** mr_wit * (4/15) ** l_wit
     """
     if number < 2:
         return False
@@ -53,7 +58,15 @@ def is_prime(number, mr_wit=None, l_wit=None):
 def next_prime_gen(number, sieve_primes=None):
     """
     Generator that yields primes after given number.
-        (number: int, sieve_primes: list) -> generator
+
+    params
+    number : int
+    sieve_primes : list(int)
+        list of primes used to make a sieving block
+
+    return
+    generator -> int
+        yields next prime number
     """
     if sieve_primes is None:
         sieve_primes = _default_values('sieve_primes')
@@ -79,7 +92,13 @@ def next_prime_gen(number, sieve_primes=None):
 def next_prime(number, sieve_primes=None):
     """
     Next prime after given number.
-        (number: int, sieve_primes: list) -> int
+
+    params
+    number : int
+    sieve_primes : list(int)
+    
+    return
+    int
     """
     return next(next_prime_gen(number, sieve_primes))
 
@@ -88,7 +107,15 @@ def next_prime(number, sieve_primes=None):
 def next_primes(number, k, sieve_primes=None):
     """
     List of next k primes after given number.
-        (number: int, k: int, sieve_primes: list) -> list
+
+    params
+    + number : int
+    + k : int
+        number of primes to generate
+    + sieve_primes : list(int)
+
+    return
+    list(int)
     """
     gen = next_prime_gen(number, sieve_primes)
     return [next(gen) for _ in range(k)]
@@ -98,8 +125,16 @@ def next_primes(number, k, sieve_primes=None):
 def primes_in_range(lower_bound, upper_bound, sieve_primes=None):
     """
     Primes in a range.
-        (lower_bound: int, upper_bound: int, sieve_primes: list) -> list
-    Notes:  return_val is primes in range(lower_bound, upper_bound)
+
+    Finds prime numbers in range(lower_bound, upper_bound).
+
+    params
+    + lower_bound : int
+    + upper_bound : int
+    + sieve_primes : list(int)
+
+    return
+    list(int)
     """
     gen = next_prime_gen(lower_bound - 1, sieve_primes)
     
@@ -118,7 +153,15 @@ def primes_in_range(lower_bound, upper_bound, sieve_primes=None):
 def prev_prime_gen(number, sieve_primes=None):
     """
     Generator that yields primes before given number.
-        (number: int, sieve_primes: list) -> generator
+
+    params
+    number : int
+    sieve_primes : list(int)
+        list of primes used to make a sieving block
+
+    return
+    generator -> int
+        yields previous prime number
     """
     if sieve_primes is None:
         sieve_primes = _default_values('sieve_primes')
@@ -144,7 +187,13 @@ def prev_prime_gen(number, sieve_primes=None):
 def prev_prime(number, sieve_primes=None):
     """
     Prev prime before given number.
-        (number: int, sieve_primes: list) -> int
+
+    params
+    + number : int
+    + sieve_primes : list(int)
+
+    return
+    int
     """
     try:
         return next(prev_prime_gen(number, sieve_primes))
@@ -156,7 +205,16 @@ def prev_prime(number, sieve_primes=None):
 def next_twin_primes_gen(number, sieve_primes=None):
     """
     Generator that yields twin primes after given number.
-        (number: int, sieve_primes: list) -> generator
+
+    Produce twin primes (primes that differ by two)
+
+    params
+    + number : int
+    + sieve_primes : list(int)
+
+    return
+    generator -> (int, int)
+        yields next pair of twin primes
     """
     gen = next_prime_gen(number - 2, sieve_primes)
     
@@ -172,8 +230,13 @@ def next_twin_primes_gen(number, sieve_primes=None):
 def next_twin_primes(number, sieve_primes=None):
     """
     Next pair of twin primes after given number.
-        (number: int, sieve_primes: list) -> tuple
-    Notes:  return_val is pair of primes with difference of 2
+
+    params
+    + number : int
+    + sieve_primes : list(int)
+
+    return
+    (int, int)
     """
     return next(next_twin_primes_gen(number, sieve_primes))
 
@@ -181,10 +244,18 @@ def next_twin_primes(number, sieve_primes=None):
 
 def goldbach_partition(number, sieve_primes=None):
     """
-    Goldbach partition of a number into a sum of two or three primes.
-        (number: int, sieve_primes: list) -> tuple
-    Notes:  return_val is a tuple of primes that sum to number
-            two primes if number is 5 or even, otherwise three primes
+    Goldbach partition of a number.
+
+    Compute pair or triple of primes that sum to number.
+
+    params
+    + number : int
+    + sieve_primes : list(int)
+
+    return
+    tuple(int)
+        * tuple has two primes if number is 5 or even
+        * otherwise, tuple has three primes
     """
     if number < 4:
         raise ValueError('Must be at least 4')
