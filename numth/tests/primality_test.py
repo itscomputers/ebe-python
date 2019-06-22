@@ -54,7 +54,7 @@ def test_next_prime(number):
 )
 def test_next_primes(number, number_of_primes):
     primes = next_primes(number, number_of_primes) 
-    assert( len(primes) == number_of_primes )
+    assert( len(set(primes)) == number_of_primes )
     for i in range(len(primes) - 1):
         assert( is_prime(primes[i]) )
         for x in range(primes[i] + 1, primes[i+1]):

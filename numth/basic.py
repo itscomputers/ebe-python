@@ -33,8 +33,8 @@ def div(dividend, divisor):
     if divisor == 0:
         raise ValueError('Attempted division by zero')
 
-    quotient = number // divisor
-    remainder = number % divisor
+    quotient = dividend // divisor
+    remainder = dividend % divisor
     if divisor < 0 and remainder != 0:
         quotient += 1
         remainder -= divisor
@@ -43,7 +43,7 @@ def div(dividend, divisor):
 
 #-----------------------------
 
-def div_with_small_remainder(number, divisor):
+def div_with_small_remainder(dividend, divisor):
     """
     Division with (smaller) remainder, similar to ``div``.
 
@@ -59,7 +59,7 @@ def div_with_small_remainder(number, divisor):
     return
     (quotient, remainder) : (int, int)
     """
-    quotient, remainder = div(number, divisor)
+    quotient, remainder = div(dividend, divisor)
     
     if 2 * remainder > abs(divisor):
         remainder -= abs(divisor)

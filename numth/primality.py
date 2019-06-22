@@ -90,7 +90,8 @@ def next_primes(number, k, sieve_primes=None):
     List of next k primes after given number.
         (number: int, k: int, sieve_primes: list) -> list
     """
-    return [next(next_prime_gen(number, sieve_primes)) for _ in range(k)]
+    gen = next_prime_gen(number, sieve_primes)
+    return [next(gen) for _ in range(k)]
 
 #-----------------------------
 
