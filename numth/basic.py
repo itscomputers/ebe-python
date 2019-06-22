@@ -14,14 +14,21 @@ def round_down(number):
 
 #-----------------------------
 
-def div(number, divisor):
+def div(dividend, divisor):
     """
     Division with remainder.
-        (number: int, divisor: int) -> (quotient: int, remainder: int)
+    
+    Computes quotient and remainder such that
+        * ``0 <= remainder < abs(divisor)``
+        * ``number == quotient * divisor + remainder``
 
-    Notes:  divisor nonzero
-            0 <= remainder < abs(divisor)
-            number = quotient * divisor + remainder
+    params
+    + dividend : int
+    + divisor : int
+        nonzero
+
+    return
+    (quotient, remainder) : (int, int)
     """
     if divisor == 0:
         raise ValueError('Attempted division by zero')
@@ -38,11 +45,19 @@ def div(number, divisor):
 
 def div_with_small_remainder(number, divisor):
     """
-    Division with (smaller) remainder, similar to `div`.
-        (number: int, divisor: int) -> (quotient: int, remainder: int)
+    Division with (smaller) remainder, similar to ``div``.
 
-    Note:   divisor nonzero
-            -abs(divisor) / 2 < remainder <= abs(divisor) / 2
+    Computes quotient and remainder such that
+        * ``-abs(divisor) / 2 < remainder <= abs(divisor) / 2``
+        * ``number == quotient * divisor + remainder``
+
+    params
+    + dividend : int
+    + divisor : int
+        nonzero
+
+    return
+    (quotient, remainder) : (int, int)
     """
     quotient, remainder = div(number, divisor)
     
@@ -54,13 +69,20 @@ def div_with_small_remainder(number, divisor):
 
 #-----------------------------
 
-def euclidean_algorithm(a, b, division=div):
+def euclidean_algorithm(a, b, division_func=div):
     """
     Euclidean algorithm.
-        (a: int, b: int, division: func) -> NoneType
-        
-    Note:   b nonzero
-            prints a = q * b + r, using division with remainder until r == 0
+    
+    Prints ``a = q * b + r`` using division with remainder until r is zero.
+
+    params
+    + a : int
+    + b : int
+    + division_func : function
+        either ``div`` or ``div_with_small_remainder``
+
+    return
+    None
     """
     q, r = division(a, b)
     print('{} = {} * {} + {}'.format(a, q, b, r))
@@ -72,10 +94,15 @@ def euclidean_algorithm(a, b, division=div):
 def gcd(*numbers):
     """
     Greatest common divisor.
-        numbers: array(int) -> int
 
-    Note:   at least one nonzero number
-            return_val is the largest positive integer dividing all numbers
+    Computes largest positive integer dividing all numbers.
+
+    params
+    + numbers : list(int)
+        at least one of the numbers is nonzero
+
+    return
+    int
     """
     if len(numbers) == 1:
         return gcd(*numbers, 0)
@@ -97,10 +124,15 @@ def gcd(*numbers):
 def lcm(*numbers):
     """
     Least common multiple.
-        (a: int, b: int) -> int
 
-    Notes:  a or b nonzero
-            return_val is the smallest positive integer divisible by both
+    Computes smallest positive integer divisible by all numbers.
+
+    params
+    + numbers : list(int)
+        all numbers are nonzero
+
+    return
+    int
     """
     if len(numbers) == 1:
         return abs(numbers[0])
@@ -136,11 +168,17 @@ def _bezout_helper(a, b):
 
 def bezout(a, b):
     """
-    Bezout's Lemma: integer solution (x, y) to a*x + b*y = gcd(a, b)
-        (a: int, b: int) -> (x: int, y: int)
+    Solution to Bezout's Lemma.
+    
+    Finds an integer solution (x, y) to ``a*x + b*y = gcd(a, b)``.
+    
+    params
+    + a : int
+    + b : int
+        at least one of a or b is nonzero
 
-    Notes:  a or b nonzero
-            a*x + b*y == gcd(a, b)
+    return
+    (x, y) : (int, int)
     """
     if (a, b) == (0, 0):
         raise ValueError('gcd(0, 0) is undefined')
@@ -162,12 +200,17 @@ def bezout(a, b):
 def padic(number, base):
     """
     p-adic representation.
-        (number: int, base: int) -> (exp: int, rest: int)
 
-    Notes:  number nonzero
-            base > 1
-            number == (base ** exp) * rest
-            rest % base != 0
+    Computes exp and rest such that ``number == (base ** exp) * rest``.
+
+    params
+    + number : int
+        nonzero
+    + base : int
+        base > 1
+
+    return
+    (exp, rest) : (int, int)
     """
     if number == 0:
         raise ValueError('number must be nonzero')
@@ -176,20 +219,29 @@ def padic(number, base):
         raise ValueError('base must be at least 2')
 
     exp = 0
-    while number % base == 0:
-        number //= base
+    rest = number
+    while rest % base == 0:
+        rest //= base
         exp += 1
 
-    return exp, number
+    return exp, rest
 
 #=============================
 
 def integer_sqrt(number, guess=None):
     """
     Integer part of the square root of a number.
-        (number: int, guess: int) -> int
-    
-    Note:   return_val**2 <= num < (return_val + 1)**2
+
+    Computes largest integer whose square is less than or equal to number.
+
+    params
+    + number : int
+        nonnegative
+    + guess : int
+        nonnegative
+
+    return
+    int
     """
     if guess is None:
         guess = int(math.sqrt(number))
@@ -204,7 +256,12 @@ def integer_sqrt(number, guess=None):
 def is_square(number):
     """
     If a number is a perfect square.
-        number: int -> bool
+
+    params
+    number : int
+
+    return
+    bool
     """
     return integer_sqrt(number)**2 == number
 
@@ -213,36 +270,49 @@ def is_square(number):
 def mod_inverse(number, modulus):
     """
     The inverse of under modular multiplication.
-        (number: int, modulus: int) -> int
 
-    Notes:  modulus > 1
-            (number * return_val) % modulus == 1
+    Computes inverse such that ``number * inverse % modulus == 1``
+
+    params
+    + number : int
+        relatively prime to modulus
+    + modulus : int
+        greater than 1
+
+    return
+    int
     """
     if modulus < 2:
         raise ValueError('Modulus must be at least 2')
 
-    x = bezout(number, modulus)[0]
+    inverse = bezout(number, modulus)[0]
     
-    if number*x % modulus not in [1, -1]:
+    if number * inverse % modulus not in [1, -1]:
         raise ValueError(
                 '{} is not invertible modulo {}'
                 .format(number, modulus))
 
-    if x < 0:
-        return x + modulus
+    if inverse < 0:
+        inverse += modulus
 
-    return x
+    return inverse
 
 #-----------------------------
 
 def mod_power(number, exponent, modulus):
     """
     Power of a number relative to a modulus.
-        (number: int, exponent: int, modulus: int) -> int
+    
+    Computes ``number ** exponent % modulus``, even for negative exponent.
 
-    Notes:  modulus > 1
-            exponent can be negative
-            val == (num**exp) % mod
+    params
+    + number : int
+    + exponent : int
+    + modulus : int
+        greater than 1
+
+    return
+    int
     """
     if modulus < 2:
         raise ValueError('Modulus must be at least 2')
@@ -266,11 +336,18 @@ def _chinese_remainder_coeffs(moduli, moduli_product):
 def chinese_remainder_theorem(residues, moduli):
     """
     Chinese remainder theorem.
-        (residues: iterable, moduli: iterable) -> int
-    Notes:  return_val is the unique solution to the system
-                x % modulus == residue % modulus 
-                for each pair in zip(residues, moduli)
-            requires that moduli are pair-wise relatively prime
+
+    Computes the unique solution modulo product of moduli to the system 
+        ``x % modulus == residue % modulus``
+        for each pair in ``zip(residues, moduli)``
+
+    params
+    residues : iterable(int)
+    moduli : interable(int)
+        all greater than 1 and pair-wise relatively prime
+
+    return
+    int
     """
     moduli_product = reduce(lambda x, y: x * y, moduli, 1)
     
@@ -284,10 +361,17 @@ def chinese_remainder_theorem(residues, moduli):
 
 def prime_to(*primes):
     """
-    List of numbers which are prime to the given primes.
-        (primes: iterable of int) -> list
-    Notes:  return_val is list of x for x < product of primes
-                such that gcd(x, product) == 1
+    List of numbers which are relatively prime to list of given primes.
+
+    Computes list of x for x < product of primes such that 
+    ``gcd(x, product) == 1``.
+
+    params
+    primes : list(int)
+        primes must be distinct primes
+
+    return
+    list(int)
     """
     primes_product = reduce(lambda x, y: x * y, primes, 1)
     coeffs = list(_chinese_remainder_coeffs(primes, primes_product))
@@ -305,8 +389,18 @@ def prime_to(*primes):
 def prime_sieve(max_value, primes=None, numbers_left=None):
     """
     Sieve of Eratosthenes.
-        (max_value: int, primes: list, numbers_left: iterable) -> list
-    Notes:  return_value is list of primes less than max_value
+
+    Computes primes up to max_value.
+
+    params
+    + max_value : int
+    + primes : list(int)
+        primes so far
+    + numbers_left : list(int)
+        numbers left to check
+
+    return
+    list(int)
     """
     if primes is None and numbers_left is None:
         primes = []
@@ -330,8 +424,16 @@ def prime_sieve(max_value, primes=None, numbers_left=None):
 def is_prime__naive(number, numbers_left=None):
     """
     Primality testing using Sieve of Eratosthenes.
-        (number: int, numbers_left: iterable) -> bool
-    Notes:  return_value is whether number is prime
+
+    Determines if a number is prime by computing all primes up to its square root.
+
+    params:
+    + number : int
+    + numbers_left : list(int)
+        numbers left to check
+
+    return
+    bool
     """
     if number < 2:
         return False
@@ -375,10 +477,18 @@ def _jacobi_helper(a, b):
 
 def jacobi(a, b):
     """
-    Jacobi symbol (a | b).
-        (a: int, b: int) -> int
+    Jacobi symbol.
+    
+    Computes the Jacobi symbol (a | b), generalization of Lagrange symbol.
 
-    Notes:  return_val in [1, 0, -1]
+    params:
+    + a : int
+    + b : int
+        odd
+
+    return
+    int
+        1, 0, or -1
     """
     if b % 2 == 0:
         raise ValueError(
@@ -395,12 +505,22 @@ def jacobi(a, b):
 
 def euler_criterion(a, p):
     """
-    Euler criterion for (a | p)
-        (a: int, p: int) -> int
+    Euler criterion.
 
-    Notes:  p is prime
-            gcd(a, p) == 1
-            return_val == 1 if and only if a is a square modulo p
+    Computes the Lagrange symbol (a | p) for p prime.
+        * same as jacobi(a | p)
+        * jacobi symbol is faster, this is primarily for testing purposes
+
+    params:
+    + a : int
+        relatively prime to p
+    + p : int
+        prime
+
+    return
+    int
+        * 1 if a is a square modulo p
+        * -1 if a is not a square modulo p
     """
     result = mod_power(a, (p-1)//2, p)
 
