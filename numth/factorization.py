@@ -1,410 +1,242 @@
-
 #   numth/factorization.py
-
-from numth.main import gcd, padic
-from numth.primality import is_prime, primes_in_range
-from numth.polynomial import polyn
-from numth.rational import integer_sqrt
-from numth.quadratic import Quadratic, gaussian, gaussian_divisor
-from numth.quaternion import Quaternion, quaternion_divisor
-
-import math
+#===========================================================
+from random import randint
+from collections import Counter 
 from functools import reduce
-from random import randint, shuffle
-import itertools
-from concurrent.futures import ProcessPoolExecutor, TimeoutError, wait
 
-##############################
+from numth.basic import (
+    integer_sqrt,
+    padic
+)
+from numth.primality import (
+    is_prime,
+    next_prime,
+    primes_in_range
+)
+from numth.factorization_algorithms import (
+    pollard_rho_gen,
+    pollard_p_minus_one_gen
+)
+#===========================================================
 
-def _default_values(cat):
-    if cat == 'rho seeds':
-        return [2, 3] + [ randint(4,10**10) for j in range(2) ]
-    if cat == 'rho polyns':
-        return [(1,0,1), (1,0,0,0,1)]
-    if cat == 'p-1 seeds':
-        return [2, 3] + [ randint(4,10**10) for j in range(2) ]
-    if cat == 'prime base':
-        return primes_in_range(2,1000)
+def _default(key):
+    return {
+        'rho_seeds' : [2, 3, 4, 6, 7, 8, 9, randint(10, 10**5)],
+        'minus_seeds' : [2],
+        'prime_base' : primes_in_range(1, 1000)
+    }[key]
 
-############################################################
-############################################################
-#       Total Factorization
-############################################################
-############################################################
+#=============================
 
-def find_divisor(num, rs=[], rp=[], ms=[]):
+def find_divisor(number, rho_seeds=None, minus_seeds=None):
     """
     Find a divisor of a number.
-    
-    Args:   int:    num
-            list:   rs          seeds for pollard_rho
-                    rp          polynomials for pollard_rho
-                    ms          seeds for pollard_p_minus_one
 
-    Return: int:    divisor of num
+    params
+    + number : int
+        composite number
+    + rho_seeds : list
+    + minus_seeds : list
+
+    return
+    set
+        set of first divisors found using all given seeds
     """
-    if rs == []:
-        rs = _default_values('rho seeds')
-    if rp == []:
-        rp = _default_values('rho polyns')
-    if ms == []:
-        ms = _default_values('p-1 seeds')
+    divisor_search = _divisor_search_generators(number, rho_seeds, minus_seeds)
 
-    for p, s in itertools.product(rp, rs):
-        d = pollard_rho(num, s, p)
-        if d < num:
-            return d
-    for s in ms:
-        d = pollard_p_minus_one(num, s)
-        if d < num:
-            return d
+    divisor_found = False
+    while not divisor_found:
+        divisor_search, divisor_found = \
+            _advance_to_next(number, divisor_search, divisor_found)
 
-##############################
+    return {value['divisor'] for value in divisor_search.values() \
+            if value['divisor'] != 1}
 
-def trivial_divisors(num, pb):
+#=============================
+
+def factor_trivial(number, prime_base=None):
     """
-    Find prime divisors of a number from a prime base.
-    
-    Args:   int:    num
-            list:   pb          prime base
+    Factor out the trivial primes.
 
-    Return: list:   primes      prime divisors of num from pb
-            int:    rest        leftover after dividing num by prime divisors
+    params
+    + number : int
+    + prime_base : list
+
+    return
+    + remaining : int
+        number leftover after division by trivial primes
+    + prime_divisors : dict
+        prime divisors of number from prime base with multiplicity
     """
-    primes = []
-    rest = num
-    for p in pb:
-        if rest % p == 0:
-            exp, rest = padic(rest, p)
-            primes = primes + [p] * exp
-    
-    return primes, rest
+    prime_base = prime_base or _default('prime_base')
+    remaining = number
+    prime_divisors = dict()
+    for prime in prime_base:
+        if remaining % prime == 0:
+            exp, remaining = padic(remaining, prime)
+            _combine_counters(prime_divisors, {prime : exp})
 
-##############################
+    return remaining, prime_divisors
 
-def nontrivial_divisors(num, rs=[], rp=[], ms=[]):
+#-----------------------------
+
+def factor_nontrivial(
+    number,
+    rho_seeds=None,
+    minus_seeds=None
+):
     """
-    Find nontrivial prime divisors of a number.
+    Factor out the nontrivial primes.
 
-    Args:   int:    num
-            list:   rs, rp, ms
+    params
+    + number : int
+    + rho_seeds : list
+    + minus_seeds : list
 
-    Return: list:   primes      prime divisors of num
+    return
+    dict
+        nontrivial prime divisors with multiplicity
     """
-    if is_prime(num):
-        return [num]
-    sqrt = integer_sqrt(num)
-    if sqrt**2 == num:
-        primes = nontrivial_divisors(sqrt, rs, rp, ms)
-        return 2*primes
-    else:
-        divisor = find_divisor(num, rs, rp, ms)
-        primes = []
-        for n in [divisor, num // divisor]:
-            primes = primes + nontrivial_divisors(n, rs, rp, ms)
-        
-        return primes
+    if number == 1:
+        return dict()
 
-##############################
+    if is_prime(number):
+        return {number : 1}
 
-def factor(num, pb=None, rs=[], rp=[], ms=[]):
+    sqrt_number = integer_sqrt(number)
+    if sqrt_number**2 == number:
+        return _apply_multiplicity(factor_nontrivial(sqrt_number), 2)
+
+    remaining = number
+    prime_divisors = dict()
+
+    divisors = find_divisor(remaining, rho_seeds, minus_seeds)
+    for d in divisors:
+        exp, remaining = padic(remaining, d)
+        prime_divisors = _combine_counters(
+            prime_divisors,
+            factor_nontrivial(d),
+            exp
+        )
+
+    return _combine_counters(prime_divisors, factor_nontrivial(remaining))
+
+#-----------------------------
+
+def factor(number, prime_base=None, rho_seeds=None, minus_seeds=None):
     """
-    Factor a number into prime divisors.
-    
-    Args:   int:    num
-            list:   pb, rs, rp, ms
+    Factor number into its prime divisors with multiplicity.
 
-    Return: list:   primes      prime divisors of num, sorted
+    For example, ``{2 : 4, 3 : 1, 5 : 2}`` means ``2**4 * 3**1 * 5**2 == 1200``
+
+    params
+    + number : int
+        number to factor
+    + prime_base : list
+        list of primes to factor by trial division
+    + rho_seeds : list
+        list of seeds to use in Pollard's rho algorithm
+    + minus_seeds : list
+        list of seeds to use in Pollard's p-1 algorithm
+
+    return
+    dict
+        prime divisors of number with multiplicity
     """
-    if num < 2:
-        return None
-    if is_prime(num):
-        return [num]
+    remaining, trivial_divisors = factor_trivial(number, prime_base)
+    nontrivial_divisors = factor_nontrivial(remaining, rho_seeds, minus_seeds)
 
-    if pb is None:
-        pb = _default_values('prime base')
-    small_primes, num = trivial_divisors(num, pb)
-    if num == 1:
-        return sorted(small_primes)
-    
-    return sorted(small_primes + nontrivial_divisors(num, rs, rp, ms))
+    return {**trivial_divisors, **nontrivial_divisors}
 
-############################################################
-############################################################
-#       Pollard's rho algorithm
-############################################################
-############################################################
+#=============================
 
-def pollard_rho(num, s, p):
+def _divisor_search_generators(number, rho_seeds, minus_seeds):
     """
-    Pollard's rho algorithm for factor-finding.
-    
-    Args:   int:        num, s          s: initial value of sequence
-            list/tuple: p               polynomial used to determine sequence
-                                        eg. (1,2,0,3) represents the
-                                        polynomial 1 + 2*x + 3*x^3
+    Build generators to search for a divisor.
 
-    Return: int:        divisor of num or num itself
+    params
+    + number : int
+    + rho_seeds : list
+    + minus_seeds : list
+
+    return
+    dict
+        * key is a tuple of the seed and the type of seed
+        * value is a dict with key 'generator' and value the generator
     """
-    def f(x):
-        return polyn(p).mod_eval(x, num)
-    xi = f(s % num)
-    x2i = f(xi)
-    d = gcd(x2i - xi, num)
+    divisor_search = dict()
+    for seed in (rho_seeds or _default('rho_seeds')):
+        divisor_search[(seed, 'rho')] = {
+            'generator' : pollard_rho_gen(number, seed, lambda x: x**2 + 1)
+        }
+    for seed in (minus_seeds or _default('minus_seeds')):
+        divisor_search[(seed, 'p-1')] = {
+            'generator' : pollard_p_minus_one_gen(number, seed)
+        }
+    return divisor_search
 
-    while d == 1:
-        xi = f(xi)
-        x2i = f( f(x2i) )
-        d = gcd(x2i - xi, num)
+#-----------------------------
 
-    return d
-
-############################################################
-############################################################
-#       Pollard's p-1 algorithm
-############################################################
-############################################################
-
-def pollard_p_minus_one(num, seed):
+def _advance_to_next(number, divisor_search, divisor_found):
     """
-    Pollard's p-1 algorithm for factor-finding.
-    
-    Args:   int:    num, seed       seed: initial value of sequence
+    Advance the divisor search to the next step.
 
-    Return: int:    divisor of num, or num itself
+    Transforms data as follows:
+    ``
+    { (seed, 'rho') : { 'generator' : gen, 'divisor' : d } }
+        ->  { (seed, 'rho') : { 'generator' : gen, 'divisor' : next(gen) } }
+    ``
+
+    params
+    + number : int
+    + divisor_search : dict
+    + divisor_found : bool
+
+    return
+    + divisor_search : dict
+    + divisor_found : bool
     """
-    d = gcd(num, seed)
-    if d > 1:
-        return d
+    for key in divisor_search:
+        divisor = next(divisor_search[key]['generator'])
+        if divisor == number:
+            divisor_search[key]['generator'] = _trivial_generator()
+        else:
+            if divisor > 1:
+                divisor_found = True
+            divisor_search[key]['divisor'] = divisor
+    return divisor_search, divisor_found
 
-    xi = seed % num
-    d = gcd(xi - 1, num)
-    index = 1
+#=============================
 
-    while d == 1:
-        index += 1
-        xi = pow(xi, index, num)
-        d = gcd(xi - 1, num)
-
-    return d
-
-############################################################
-############################################################
-#       Williams' p+1 algorithm
-############################################################
-############################################################
-
-def williams_p_plus_one(num, real, imag, root):
-    """William's p+1 algorithm for factor-finding."""
-    z = Quadratic(real, imag, root)
-    power = 1
-    d = gcd(z.norm(), num)
-    while d != 1:
-        #### NEED TO INCLUDE MODULAR ARG in __pow__ ####
-        z = pow(z, i, num)
-        power += 1
-        d = gcd(z.imag, num)
-    
-    return d
-
-############################################################
-############################################################
-#       Rational quadratic sieve
-############################################################
-############################################################
-
-def add(v1, v2):
-    """Add two arrays modulo 2."""
-    return [ b1 ^ b2 for b1, b2 in zip(v1, v2) ]
-
-##############################
-
-def append_new_row(new_row, nums):
+def _combine_counters(counter_1, counter_2, m_2=1):
     """
-    Append a new dict to a list of dicts.
-    
-    This is for finding relations among the exponent vectors.
+    Combine two dictionaries with integer values to sum across keys.
+
+    params
+    + counter_1 : dict
+    + counter_2 : dict
+    + m_2 : int
+        multiplicity to be applied to counter_2
+
+    return
+    dict
     """
-    num, vector = new_row
-    relation = [0] * len(nums)
-    reduced = list(vector)
-    
-    nums_copy = [row for row in nums]
-    for row in nums_copy:
-        if row['pivot'] is not None and vector[row['pivot']] == 1:
-            reduced = add(reduced, row['reduced'])
-            relation = add(relation, row['relation'])
-    relation.append(1)
+    new_counter = counter_1
+    for k, v in _apply_multiplicity(counter_2, m_2).items():
+        if k in new_counter:
+            new_counter[k] += v
+        else:
+            new_counter[k] = v
+    return new_counter
 
-    try:
-        pivot = reduced.index(1)
-    except ValueError:
-        pivot = None
+#-----------------------------
 
-    for row in nums_copy:
-        row['relation'].append(0)
-        if pivot is not None\
-                and row['pivot'] is not None\
-                and row['pivot'] < pivot\
-                and row['reduced'][pivot] == 1:
-            row['relation'] = add(row['relation'], relation)
-            row['reduced'] = add(row['reduced'], reduced)
-    
-    nums_copy.append({
-        'number'    :   num,
-        'vector'    :   vector,
-        'reduced'   :   reduced,
-        'pivot'     :   pivot,
-        'relation'  :   relation,
-    })
+def _apply_multiplicity(counter, multiplicity):
+    return {k : multiplicity * v for k, v in counter.items()}
 
-    return nums_copy
+#-----------------------------
 
-############################################################
-############################################################
-#       Factorize class
-############################################################
-############################################################
+def _trivial_generator():
+    while True:
+        yield 1
 
-class Factorize:
-    """Factorize class."""
-
-    def __init__(self, num):
-        """Initialize with number."""
-        self.num = num
-        self.factorization = factor(num)
-        self.multiplicity = self._multiplicity() 
-        self.euler_phi = self._euler_phi()
-        self.carmichael_lambda = self._carmichael_lambda()
-        self.square_part = []
-        self.square_free = []
-        self.primes_one = []
-        self.primes_three = []
-        self.norms_one = []
-        self.norms_three = []
-        self.bad_primes = []
-        self.is_sum_of_squares = True
-        self.classify_primes()
-        
-    ##########################
-
-    def __repr__(self):
-        """Print the factorization of num."""
-        factors = []
-        for prime, exp in sorted( self.multiplicity.items() ):
-            if exp == 1:
-                factors.append(str(prime))
-            else:
-                factors.append('{}^{}'.format(prime, exp))
-        return ' * '.join(factors)
-
-    ##########################
-
-    def _multiplicity(self):
-        """Find factorization of num with multiplicity."""
-        return { prime : self.factorization.count(prime)\
-                    for prime in sorted(set(self.factorization)) }
-
-    ##########################
-
-    def classify_primes(self):
-        """Split primes into classifications."""
-        for p, e in self.multiplicity.items():
-            if p == 2 or p % 4 == 1:
-                self.primes_one += [p] * e
-            else:
-                if e % 2 == 1:
-                    self.bad_primes.append(p)
-                    self.is_sum_of_squares = False
-                else:
-                    self.primes_three += [p]*(e//2)
-            if e % 2 == 1:
-                self.square_free.append(p)
-            self.square_part += [p] * (e - (e % 2))
-
-    ##########################
-
-    def divisors(self):
-        """Find all divisors of num."""
-        divs = [1]
-        for p in self.factorization:
-            divs = divs + [ p * d for d in divs if p * d not in divs ]          
-        return sorted(divs)
-
-    ##########################
-
-    def _euler_phi(self):
-        """Euler's phi function (totient)."""
-        def e(pair):
-            p, e = pair
-            return p**(e-1) * (p - 1)
-        def p(x, y):
-            return x * y
-        return reduce(p, map(e, self.multiplicity.items()), 1)
-
-    ##########################
-
-    def _carmichael_lambda(self):
-        """Carmichael's lambda function."""
-        result = 1
-        for p, e in self.multiplicity.items():
-            result *= (p-1) // gcd(result, p-1)
-            if p == 2:
-                if e == 2:
-                    result *= p
-                elif e > 2:
-                    result *= p**(e-2)
-            else:
-                result *= p**(e-1)
-        return result
-
-    ##########################
-
-    def get_norms(self):
-        for p, e in self.multiplicity.items():
-            if p == 2 or p % 4 == 1:
-                self.norms_one += [gaussian_divisor(p)] * e
-            else:
-                self.norms_three += [quaternion_divisor(p)] * e
-
-    ##########################
-
-    def two_squares(self, RANDOM=True):
-        """Write number as sum of two squares."""
-        if self.norms_three == []:
-            self.get_norms()
-        if self.is_sum_of_squares:
-            g = reduce(lambda x, y : x*y, self.primes_three, 1)
-            g = gaussian(g, 0)
-            for d in self.norms_one:
-                if RANDOM and randint(0,1) == 1:
-                    g = g * d.conjugate()
-                else:
-                    g = g * d
-            g = g.canonical()
-            return (g.real, abs(g.imag))
-
-    ##########################
-
-    def four_squares(self, RANDOM=True):
-        """Write number as sum of four squares."""
-        if self.norms_three == []:
-            self.get_norms()
-        quaternions = self.norms_three +\
-                [Quaternion(g.real, g.imag, 0, 0) for g in self.norms_one]
-        if RANDOM:
-            indeces = [i for i in range(len(quaternions))]
-            shuffle(indeces)
-            quaternions = [quaternions[i] for i in indeces]
-            for i in range(len(quaternions)):
-                if randint(0,1) == 1:
-                    quaternions[i] = quaternions[i].shuffle()
-        q = reduce(lambda x, y : x*y, quaternions, 1)
-        r, i, j, k = q.components
-        return tuple(sorted([abs(r), abs(i), abs(j), abs(k)], reverse=True))
-
-############################################################
-############################################################
-#       End
-############################################################
-############################################################
