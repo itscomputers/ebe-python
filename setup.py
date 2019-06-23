@@ -25,9 +25,6 @@ setup(
         'Natural Language :: English',
     ],
     packages = ['numth'],
-    install_requires = [
-        'concurrent.futures', 
-        'pebble',
-    ],
+    install_requires = [],
     python_requires = '>=3',
 )

@@ -1,22 +1,12 @@
 #   numth/factorization.py
 #===========================================================
-from random import randint
 from collections import Counter 
 from functools import reduce
+from random import randint
 
-from numth.basic import (
-    integer_sqrt,
-    padic
-)
-from numth.primality import (
-    is_prime,
-    next_prime,
-    primes_in_range
-)
-from numth.factorization_algorithms import (
-    pollard_rho_gen,
-    pollard_p_minus_one_gen
-)
+from .basic import integer_sqrt, padic
+from .factorization_algorithms import pollard_rho_gen, pollard_p_minus_one_gen
+from .primality import is_prime, next_prime, primes_in_range
 #===========================================================
 
 def _default(key):

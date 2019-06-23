@@ -1,10 +1,10 @@
 #   numth/polynomial.py
 #===========================================================
-import re
 from collections import defaultdict
 from functools import reduce
+import re
 
-from .basic import gcd, lcm, mod_power, mod_inverse
+from .basic import gcd, lcm, mod_inverse, mod_power
 from .rational import frac, Rational
 #===========================================================
 
