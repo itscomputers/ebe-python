@@ -60,13 +60,13 @@ def factor_trivial(number, prime_base=None):
     """
     prime_base = prime_base or _default('prime_base')
     remaining = number
-    prime_divisors = dict()
+    factorization = dict()
     for prime in prime_base:
         if remaining % prime == 0:
             exp, remaining = padic(remaining, prime)
-            _combine_counters(prime_divisors, {prime : exp})
+            factorization = _combine_counters(factorization, {prime : exp})
 
-    return remaining, prime_divisors
+    return remaining, factorization
 
 #-----------------------------
 
@@ -98,18 +98,18 @@ def factor_nontrivial(
         return _apply_multiplicity(factor_nontrivial(sqrt_number), 2)
 
     remaining = number
-    prime_divisors = dict()
+    factorization = dict()
 
     divisors = find_divisor(remaining, rho_seeds, minus_seeds)
     for d in divisors:
         exp, remaining = padic(remaining, d)
-        prime_divisors = _combine_counters(
-            prime_divisors,
+        factorization = _combine_counters(
+            factorization,
             factor_nontrivial(d),
             exp
         )
 
-    return _combine_counters(prime_divisors, factor_nontrivial(remaining))
+    return _combine_counters(factorization, factor_nontrivial(remaining))
 
 #-----------------------------
 
@@ -139,6 +139,88 @@ def factor(number, prime_base=None, rho_seeds=None, minus_seeds=None):
     return {**trivial_divisors, **nontrivial_divisors}
 
 #=============================
+
+def divisors_from_factorization(factorization):
+    """
+    Compute the divisors of a number using its factorization.
+
+    params
+    + factorization : dict
+        prime divisors with multiplicity
+
+    return
+    list
+    """
+    divs = set([1])
+    for p in Counter(factorization).elements():
+        divs = divs | set(p * d for d in divs)
+    return sorted(divs)
+
+#-----------------------------
+
+def divisors(number):
+    """
+    Compute the divisors of a number.
+
+    params
+    + number : int
+
+    return
+    list
+    """
+    return divisors_from_factorization(factor(number))
+
+#=============================
+
+def square_part(factorization):
+    """
+    Square part of a factorization.
+
+    Computes factorization of largest square number that divides the number.
+
+    params
+    + factorization : dict
+        prime divisors with multiplicity
+
+    return
+    dict
+    """
+    return {k : v - v % 2 for k, v in factorization.items() if v > 1}
+
+#-----------------------------
+
+def square_free_part(factorization):
+    """
+    Square free part of a factorization.
+
+    Computes the factorization of a number divided by its square part.
+
+    params
+    + factorization : dict
+        prime divisors with multiplicity
+
+    return
+    dict
+    """
+    return {k : 1 for k, v in factorization.items() if v % 2 == 1}
+
+#=============================
+
+def number_from_factorization(factorization):
+    """
+    Compute number from its factorization.
+    
+    params
+    + factorization : dict
+        prime divisors with multiplicty
+
+    return
+    int
+        product of prime divisors
+    """
+    return reduce(lambda x, y: x * y, Counter(factorization).elements(), 1)
+
+#===========================================================
 
 def _divisor_search_generators(number, rho_seeds, minus_seeds):
     """
@@ -211,8 +293,8 @@ def _combine_counters(counter_1, counter_2, m_2=1):
     return
     dict
     """
-    new_counter = counter_1
-    for k, v in _apply_multiplicity(counter_2, m_2).items():
+    new_counter = _apply_multiplicity(counter_2, m_2)
+    for k, v in counter_1.items():
         if k in new_counter:
             new_counter[k] += v
         else:

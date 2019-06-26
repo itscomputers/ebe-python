@@ -3,8 +3,10 @@
 from functools import reduce
 from hypothesis import assume, example, given, strategies as st
 
+from ..basic import is_square
 from ..primality import is_prime, next_prime
 from ..factorization import *
+from ..factorization import _combine_counters
 #===========================================================
 
 def build_composite(*numbers):
@@ -31,30 +33,52 @@ def test_find_divisor(a, b, c, d):
 @given(*coordinates(4, 0, 5))
 def test_factor_trivial(a, b, c, d):
     number = build_composite(a, b, c, d)
-    remaining, divisors = factor_trivial(number)
-    for d in divisors.keys():
+    remaining, factorization = factor_trivial(number)
+    for d in factorization.keys():
         assert( is_prime(d) )
-    product = reduce(lambda x, y: x * y[0]**y[1], divisors.items(), remaining)
-    assert( product == number )
+    assert( number_from_factorization(factorization) == number // remaining )
 
 #-----------------------------
 
 @given(*coordinates(4, 2, 5))
 def test_factor_nontrivial(a, b, c, d):
     number = build_composite(a, b, c, d)
-    divisors = factor_nontrivial(number)
-    for d in divisors.keys():
+    factorization = factor_nontrivial(number)
+    for d in factorization.keys():
         assert( is_prime(d) )
-    product = reduce(lambda x, y: x * y[0]**y[1], divisors.items(), 1)
-    assert( product == number )
+    assert( number_from_factorization(factorization) == number )
 
 #-----------------------------
 
 @given(st.integers(min_value=2, max_value=10**15))
 def test_factor(number):
-    divisors = factor(number)
-    for d in divisors.keys():
+    factorization = factor(number)
+    for d in factorization.keys():
         assert( is_prime(d) )
-    product = reduce(lambda x, y: x * y[0]**y[1], divisors.items(), 1)
-    assert( product == number )
+    assert( number_from_factorization(factorization) == number )
+
+#=============================
+
+@given(st.integers(min_value=2, max_value=10**12))
+def test_square_and_square_free_parts(number):
+    factorization = factor(number)
+    square = square_part(factorization)
+    square_free = square_free_part(factorization)
+    square_number = number_from_factorization(square)
+    square_free_number = number_from_factorization(square_free)
+    if square != dict():
+        assert( set(map(lambda v: v % 2, square.values())) == set([0]) )
+    if square_free != dict():
+        assert( set(square_free.values()) == set([1]) )
+    assert( _combine_counters(square, square_free) == factorization )
+    assert( is_square(square_number) )
+    assert( square_number * square_free_number == number )
+
+#=============================
+
+@given(st.integers(min_value=2, max_value=10**12))
+def test_divisors(number):
+    all_divisors = divisors(number)
+    for i in range(len(all_divisors) // 2):
+        assert( all_divisors[i] * all_divisors[-i-1] == number )
 
