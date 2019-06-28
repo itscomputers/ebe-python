@@ -3,7 +3,7 @@
 from hypothesis import given, assume, strategies as st
 
 from ..basic import gcd, jacobi, lcm
-from ..factorization import factor
+from ..factorization import factor, divisors
 from ..primality import primes_in_range 
 from ..modular import *
 #===========================================================
@@ -37,18 +37,24 @@ def test_mod_sqrt(number):
 
 #=============================
 
-@given(st.integers(min_value=2, max_value=10**4))
-def test_euler_phi(number):
-    phi = len([x for x in range(1, number) if gcd(x, number) == 1])
-    assert( phi == euler_phi(number) )
-
-    
-@given(st.integers(min_value=2, max_value=10**4))
-def test_carmichael_lambda(number):
+@given(st.integers(min_value=3, max_value=10**4))
+def test_euler_phi_and_carmichael_lambda(number):
     factorization = factor(number)
+    euler = euler_phi_from_factorization(factorization)
     carmichael = carmichael_lambda_from_factorization(factorization)
-    individual_euler = {k : euler_phi(k**v) for k, v in factorization.items()}
-    if 2 in factorization and factorization[2] > 2:
-        individual_euler[2] //= 2
-    assert( carmichael == lcm(*individual_euler.values()) )
+    mult_group = [x for x in range(1, number) if gcd(x, number) == 1]
+    half_carmichael_powers = list(map(
+        lambda x: pow(x, carmichael // 2, number),
+        mult_group
+    ))
+    carmichael_powers = map(lambda x: pow(x, 2, number), half_carmichael_powers)
+    assert( len(mult_group) == euler )
+    assert( set(half_carmichael_powers) != set({1}) )
+    assert( set(carmichael_powers) == set({1}) )
+
+#=============================
+
+@given(st.integers(min_value=3, max_value=10**5))
+def test_euler_phi_with_divisors(number):
+    assert( sum(map(euler_phi, divisors(number))) == number )
 
