@@ -1,6 +1,6 @@
 #   numth/quaternion.py
 #===========================================================
-from ..basic import div_with_small_remainder, gcd
+from ..basic import div_with_small_remainder
 from .rational import frac, Rational
 #===========================================================
 

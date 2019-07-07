@@ -1,10 +1,11 @@
 #   test_polynomial.py
 #===========================================================
-from hypothesis import assume, example, given, strategies as st
+from hypothesis import assume, given, strategies as st
 from random import choice
 
 from ..basic import is_square, lcm
-from ..types import polyn, Polynomial, Rational, Quadratic 
+from ..types import Rational, Quadratic 
+from ..types.polynomial import *
 from ..types.polynomial import (
     polyn_div,
     _term_pattern,

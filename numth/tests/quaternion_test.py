@@ -1,10 +1,9 @@
 #   test_quadratic.py
 #===========================================================
 from hypothesis import given, assume, strategies as st
-import math
 
-from ..basic import div, is_square
-from ..types import Rational, Quadratic, Quaternion
+from ..types import Rational
+from ..types.quaternion import *
 #===========================================================
 
 def coords():

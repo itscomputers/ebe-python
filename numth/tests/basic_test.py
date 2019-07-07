@@ -1,9 +1,7 @@
 #   numth/tests/basic_test.py
 #===========================================================
 from hypothesis import given, assume, strategies as st
-from itertools import product
 from random import sample
-import math
 
 from ..basic import *
 #===========================================================

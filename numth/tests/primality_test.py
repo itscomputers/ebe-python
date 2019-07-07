@@ -1,9 +1,8 @@
 #   numth/tests/primality_test.py
 #===========================================================
 from hypothesis import given, assume, strategies as st
-from random import choice, sample
 
-from ..basic import gcd, is_prime__naive, prime_sieve
+from ..basic import is_prime__naive, prime_sieve
 from ..primality.miller_rabin import (
     _generate_witnesses,
     miller_rabin_max_cutoff,

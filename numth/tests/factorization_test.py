@@ -1,8 +1,7 @@
 #   numth/tests/factorization.py
 #===========================================================
 from functools import reduce
-from random import randint
-from hypothesis import assume, example, given, strategies as st
+from hypothesis import assume, given, strategies as st
 
 from ..basic import is_square
 from ..primality import is_prime, next_prime
@@ -30,7 +29,7 @@ def test_pollard_rho(number):
 
 #=============================
 
-@given(st.integers(min_value=2, max_value=10**12))
+@given(st.integers(min_value=2, max_value=10**10))
 def test_pollard_p_minus_one(number):
     if not is_prime(number):
         d = pollard_p_minus_one(number, 2)

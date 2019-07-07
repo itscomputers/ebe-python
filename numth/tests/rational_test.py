@@ -1,7 +1,6 @@
 #   test_rational.py
 #===========================================================
 from fractions import Fraction
-import math
 from hypothesis import given, assume, strategies as st
 
 from ..basic import gcd, mod_inverse

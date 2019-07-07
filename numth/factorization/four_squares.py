@@ -4,7 +4,6 @@ from functools import reduce
 
 from ..basic import jacobi
 from .main import factor, square_part, square_free_part
-from ..modular import mod_sqrt
 from ..types import Quaternion
 from .two_squares import gaussian_divisor, _square_to_quadratic
 #===========================================================

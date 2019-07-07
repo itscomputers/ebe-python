@@ -7,7 +7,6 @@ from ..lucas_sequence import (
     by_index as lucas_sequence_by_index,
     double_index as lucas_sequence_double_index
 )
-from ..types import Quadratic, Rational
 #===========================================================
 
 def lucas_witness_pair(number, P, Q):

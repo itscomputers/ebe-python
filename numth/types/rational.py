@@ -1,7 +1,6 @@
 #   numth/rational.py
 #===========================================================
 from fractions import Fraction
-import math
 import re
 
 from ..basic import div, gcd, integer_sqrt, is_square, mod_inverse

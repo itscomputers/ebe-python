@@ -2,7 +2,7 @@
 #===========================================================
 from functools import reduce
 
-from ..basic import gcd, jacobi, lcm, padic
+from ..basic import jacobi, padic
 from ..types import Quadratic
 #===========================================================
 
