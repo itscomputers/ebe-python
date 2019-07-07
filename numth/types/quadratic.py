@@ -1,6 +1,6 @@
 #   numth/quadratic.py
 #===========================================================
-from .basic import gcd, mod_inverse, mod_power, round_down
+from ..basic import gcd, mod_inverse, mod_power, round_down
 from .rational import frac, Rational
 #===========================================================
 

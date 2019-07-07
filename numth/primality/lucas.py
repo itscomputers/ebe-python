@@ -1,10 +1,13 @@
-#   numth/primality_lucas.py
+#   numth/primality/lucas.py
 #===========================================================
 from random import randint
 
-from .basic import gcd, is_square, jacobi, padic
-from .quadratic import Quadratic
-from .rational import Rational
+from ..basic import gcd, is_square, jacobi, padic
+from ..lucas_sequence import (
+    by_index as lucas_sequence_by_index,
+    double_index as lucas_sequence_double_index
+)
+from ..types import Quadratic, Rational
 #===========================================================
 
 def lucas_witness_pair(number, P, Q):
@@ -37,16 +40,16 @@ def lucas_witness_pair(number, P, Q):
     s, d = padic(delta, 2)
     strong = False
 
-    U, V, Q_k = _by_index(d, P, Q, number)
+    U, V, Q_k = lucas_sequence_by_index(d, P, Q, number)
     if U == 0:
         strong = True
 
     for j in range(s - 1):
-        U, V, Q_k = _double_index(U, V, Q_k, number)
+        U, V, Q_k = lucas_sequence_double_index(U, V, Q_k, number)
         if V == 0:
             strong = True
 
-    U, V, Q_ = _double_index(U, V, Q_k, number)
+    U, V, Q_ = lucas_sequence_double_index(U, V, Q_k, number)
     if U == 0:
         if _trivially_composite(V, Q, Q_k, number, delta):
             return 'composite', False
@@ -159,57 +162,3 @@ def _trivially_composite(V, Q, Q_power, number, delta):
 
     return False
 
-#=============================
-
-def _double_index(U, V, Q_k, mod):
-    return (U*V) % mod, (V*V - 2*Q_k) % mod, pow(Q_k, 2, mod)
-
-#-----------------------------
-
-def _index_plus_one(U, V, Q_k, P, Q, mod):
-    return (
-        ((P*U + V) * (mod + 1) // 2) % mod,
-        (((P**2 - 4*Q) * U + P*V) * (mod + 1) // 2) % mod,
-        (Q_k * Q) % mod
-    )
-
-#-----------------------------
-
-def _by_index(k, P, Q, mod):
-    if k == 0:
-        return (0, 2, 1)
-    elif k == 1:
-        return (1, P % mod, Q % mod)
-    elif k % 2 == 0:
-        return _double_index(*_by_index(k//2, P, Q, mod), mod)
-    else:
-        return _index_plus_one(*_by_index(k-1, P, Q, mod), P, Q, mod)
-
-#=============================
-
-def _get_quadratic_element(P, D, modulus):
-    imag = ((modulus + 1) // 2) % modulus
-    real = (P * imag) % modulus
-    return Quadratic(real, imag, D)
-
-#-----------------------------
-
-def _extract_from_quadratic(quadratic_element, modulus):
-    U = (2 * quadratic_element.imag) % modulus
-    V = (2 * quadratic_element.real) % modulus
-    return U, V
-
-#=============================
-
-def _lucas_sequence(P, Q, mod):
-    U_, V_, Q_ = (0, 2, 1)
-    yield (U_, V_, Q_)
-
-    U__, V__, Q__ = (1, P % mod, Q % mod)
-    yield (U__, V__, Q__)
-
-    while True:
-        U_, U__ = U__, (P*U__ - Q*U_) % mod
-        V_, V__ = V__, (P*V__ - Q*V_) % mod
-        Q_, Q__ = Q__, (Q * Q__) % mod
-        yield(U__, V__, Q__)

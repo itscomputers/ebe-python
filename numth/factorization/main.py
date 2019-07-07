@@ -4,9 +4,9 @@ from collections import Counter
 from functools import reduce
 from random import randint
 
-from .basic import integer_sqrt, padic
-from .factorization_algorithms import pollard_rho_gen, pollard_p_minus_one_gen
-from .primality import is_prime, next_prime, primes_in_range
+from ..basic import integer_sqrt, padic
+from ..primality import is_prime, next_prime, primes_in_range
+from .algorithms import pollard_rho_gen, pollard_p_minus_one_gen
 #===========================================================
 
 def _default(key):

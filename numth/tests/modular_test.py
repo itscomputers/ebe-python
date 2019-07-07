@@ -5,6 +5,7 @@ from hypothesis import given, assume, strategies as st
 from ..basic import gcd, jacobi, lcm
 from ..factorization import factor, divisors
 from ..primality import primes_in_range 
+from ..types import Quadratic
 from ..modular import *
 #===========================================================
 

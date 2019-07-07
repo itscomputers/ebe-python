@@ -1,6 +1,6 @@
 #   numth/quaternion.py
 #===========================================================
-from .basic import gcd
+from ..basic import div_with_small_remainder, gcd
 from .rational import frac, Rational
 #===========================================================
 
@@ -177,7 +177,9 @@ class Quaternion:
 
     def __mod__(self, other):
         if type(other) is int:
-            return self.component_map(lambda x: x % other)
+            def mod_with_small_remainder(x):
+                return div_with_small_remainder(x, other)[1]
+            return self.component_map(mod_with_small_remainder)
         return self - (self // other) * other
 
     def __rmod__(self, other):

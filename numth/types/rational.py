@@ -4,7 +4,7 @@ from fractions import Fraction
 import math
 import re
 
-from numth.basic import div, gcd, integer_sqrt, is_square, mod_inverse
+from ..basic import div, gcd, integer_sqrt, is_square, mod_inverse
 #===========================================================
 
 def _default_values(category):

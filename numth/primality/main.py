@@ -2,9 +2,9 @@
 #===========================================================
 from functools import reduce
 
-from .basic import prime_to 
-from .primality_lucas import lucas_test
-from .primality_miller_rabin import miller_rabin_test, miller_rabin_max_cutoff
+from ..basic import prime_to 
+from .lucas import lucas_test
+from .miller_rabin import miller_rabin_test, miller_rabin_max_cutoff
 #===========================================================
 
 def _default_values(category):

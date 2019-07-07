@@ -1,13 +1,115 @@
 #   numth/tests/primality_test.py
 #===========================================================
 from hypothesis import given, assume, strategies as st
-from random import sample
+from random import choice, sample
 
 from ..basic import gcd, is_prime__naive, prime_sieve
-from ..primality_miller_rabin import miller_rabin_test
-from ..primality_lucas import lucas_test
+from ..primality.miller_rabin import (
+    _generate_witnesses,
+    miller_rabin_max_cutoff,
+    miller_rabin_cutoffs
+)
+from ..primality.lucas import (
+    _generate_witness_pairs,
+    _good_parameters,
+)
 from ..primality import *
 #===========================================================
+
+
+@given(
+    st.integers(min_value=3),
+    st.integers(min_value=1, max_value=50)
+)
+def test_miller_rabin_witnesses(number, num_witnesses):
+    witnesses = _generate_witnesses(number, num_witnesses)
+    single_results = set(miller_rabin_witness(number, witness) for witness in witnesses)
+    combined_result = miller_rabin_witnesses(number, witnesses)
+    if single_results == set(['probable prime']):
+        assert( combined_result == 'probable prime' )
+    else:
+        assert( combined_result == 'composite' )
+
+#-----------------------------
+
+@given(st.integers(min_value=2, max_value=10**6))
+def test_miller_rabin_test(number):
+    mr_primality = miller_rabin_test(number, 20)
+    number_is_prime = is_prime__naive(number)
+    if mr_primality in ['prime', 'probable prime']:
+        assert( number_is_prime )
+    else:
+        assert( not number_is_prime )
+
+#-----------------------------
+
+@given(
+    st.integers(min_value=3),
+    st.integers(min_value=1, max_value=50)
+)
+def test_generate_witnesses(number, num_witnesses):
+    witnesses = _generate_witnesses(number, num_witnesses)
+
+    for w in witnesses:
+        assert( 2 <= w < number )
+
+    if number > miller_rabin_max_cutoff() and num_witnesses > number:
+        assert( len(witnesses) == number - 3 )
+    
+    elif number <= miller_rabin_max_cutoff():
+        assert( witnesses <= set(p for (val, p) in miller_rabin_cutoffs()) )
+
+    else:
+        assert( len(witnesses) == num_witnesses )
+
+#=============================
+
+@given(
+    st.integers(min_value=3),
+    st.integers(min_value=1,
+        max_value=50)
+)
+def test_lucas_witnesses(number, num_witnesses):
+    number += 1 - number % 2
+    witness_pairs = _generate_witness_pairs(number, num_witnesses)
+
+    results = set(lucas_witness_pair(number, *pair) for pair in witness_pairs)
+    combined_result = lucas_witness_pairs(number, witness_pairs)
+
+    if ('composite', False) in results:
+        assert( combined_result == ('composite', False) )
+    elif ('probable prime', True) in results:
+        assert( combined_result == ('probable prime', True) )
+    else:
+        assert( combined_result == ('probable prime', False) )
+
+#-----------------------------
+
+@given(st.integers(min_value=3, max_value=10**6))
+def test_lucas_test(number):
+    number += 1 - number % 2
+    l_primality = lucas_test(number, 20)
+    number_is_prime = is_prime__naive(number)
+    if l_primality in ['strong probable prime', 'probable prime']:
+        assert( number_is_prime )
+    else:
+        assert( not number_is_prime )
+
+#-----------------------------
+
+@given(
+    st.integers(min_value=3),
+    st.integers(min_value=1, max_value=30)
+)
+def test_generate_witness_pairs(number, num_witnesses):
+    number += 1 - number % 2
+    witness_pairs = _generate_witness_pairs(number, num_witnesses)
+    assert( num_witnesses == len(witness_pairs) )
+    for witness_pair in witness_pairs:
+        P, Q = witness_pair
+        assert( _good_parameters(number, P, Q, P**2 - 4*Q) != False )
+
+#=============================
 
 def test_is_prime_on_sieve():
     primes = prime_sieve(10**4)
@@ -140,5 +242,4 @@ def test_goldbach_conjecture(number):
 def test_goldbach_conjecture_small():
     assert( goldbach_partition(4) == (2, 2) )
     assert( goldbach_partition(5) == (3, 2) )
-
     

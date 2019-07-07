@@ -1,6 +1,6 @@
 #   numth/find_factor.py
 #===========================================================
-from .basic import gcd
+from ..basic import gcd
 #===========================================================
 
 def pollard_rho_gen(number, seed, func):

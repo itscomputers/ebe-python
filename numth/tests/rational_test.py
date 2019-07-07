@@ -4,7 +4,8 @@ from fractions import Fraction
 import math
 from hypothesis import given, assume, strategies as st
 
-from ..rational import *
+from ..basic import gcd, mod_inverse
+from ..types import frac, Rational
 #===========================================================
 
 def coords(flag=None):

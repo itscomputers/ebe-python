@@ -4,8 +4,7 @@ from hypothesis import given, assume, strategies as st
 import math
 
 from ..basic import div, is_square
-from ..quadratic import Quadratic
-from ..quaternion import * 
+from ..types import Rational, Quadratic, Quaternion
 #===========================================================
 
 def coords():
@@ -23,7 +22,7 @@ def rational(flag=None):
 def test_norm(r, i, j, k):
     q = Quaternion(r, i, j, k)
     assert( q.norm() == r**2 + i**2 + j**2 + k**2 )
-    assert( q * q.conjugate() == quaternion(q.norm()) )
+    assert( q * q.conjugate() == Quaternion(q.norm(), 0, 0, 0) )
 
 #-----------------------------
 
@@ -31,7 +30,7 @@ def test_norm(r, i, j, k):
 def test_conjugate(r, i, j, k):
     q = Quaternion(r, i, j, k)
     assert( q.conjugate().components == (q.r, -q.i, -q.j, -q.k) )
-    assert( q + q.conjugate() == quaternion(2*r) )
+    assert( q + q.conjugate() == Quaternion(2*r, 0, 0, 0) )
     assert( q - q.conjugate() == Quaternion(0, 2*i, 2*j, 2*k) )
 
 #-----------------------------
@@ -40,7 +39,7 @@ def test_conjugate(r, i, j, k):
 def test_inverse(r, i, j, k):
     assume( (r, i, j, k) != (0, 0, 0, 0) )
     q = Quaternion(r, i, j, k)
-    assert( q * q.inverse() == quaternion(1) )
+    assert( q * q.inverse() == Quaternion(1, 0, 0, 0) )
     assert( q.inverse().inverse() == q )
 
 #=============================
@@ -49,7 +48,7 @@ def test_inverse(r, i, j, k):
 def test_neg(r, i, j, k):
     q = Quaternion(r, i, j, k)
     assert( (-q).components == tuple(-x for x in q.components) )
-    assert( q + (-q) == -q + q == quaternion(0) )
+    assert( q + (-q) == -q + q == Quaternion(0, 0, 0, 0) )
 
 #=============================
 
@@ -213,11 +212,17 @@ def test_mod(r1, i1, j1, k1, r2, i2, j2, k2):
 #-----------------------------
 
 @given(*coords(), st.integers(min_value=1))
-def test_mod_quaterion_and_integer(r, i, j, k, integer):
+def test_mod_quaternion_and_integer(r, i, j, k, integer):
     q = Quaternion(r, i, j, k)
     assume( q.components != (0, 0, 0, 0) )
-    r = Quaternion(r % integer, i % integer, j % integer, k % integer)
+    mod_components = map(
+        lambda x: x - integer * (2*x > integer),
+        map(
+            lambda x: x % integer, 
+            q.components
+        )
+    )
+    r = Quaternion(*mod_components)
     assert( q % integer == r )
     assert( integer % q == Quaternion(integer, 0, 0, 0) % q )
-    assert( q == (q // integer) * integer + (q % integer) )
 

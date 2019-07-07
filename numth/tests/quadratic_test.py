@@ -3,8 +3,8 @@
 from hypothesis import given, assume, strategies as st
 import math
 
-from ..basic import div, is_square
-from ..quadratic import * 
+from ..basic import div, gcd, is_square, round_down
+from ..types import Rational, Quadratic
 #===========================================================
 
 def root_filter(x):

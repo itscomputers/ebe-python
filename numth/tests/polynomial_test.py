@@ -3,14 +3,15 @@
 from hypothesis import assume, example, given, strategies as st
 from random import choice
 
-from ..basic import is_square
-from ..quadratic import Quadratic
-from ..polynomial import * 
-from ..polynomial import \
-    _term_pattern, \
-    _term_to_exp_coeff, \
-    _exp_coeff_to_term, \
+from ..basic import is_square, lcm
+from ..types import polyn, Polynomial, Rational, Quadratic 
+from ..types.polynomial import (
+    polyn_div,
+    _term_pattern,
+    _term_to_exp_coeff,
+    _exp_coeff_to_term,
     _args_to_polyn
+)
 #===========================================================
 
 def coords(n, coeff_filter=lambda x: True, exp_min=0, exp_max=30, coeff_min=None, coeff_max=None):

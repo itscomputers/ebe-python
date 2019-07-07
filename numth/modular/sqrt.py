@@ -2,9 +2,8 @@
 #===========================================================
 from functools import reduce
 
-from .basic import gcd, jacobi, lcm, padic
-from .factorization import factor
-from .quadratic import Quadratic
+from ..basic import gcd, jacobi, lcm, padic
+from ..types import Quadratic
 #===========================================================
 
 def mod_sqrt(number, prime):
@@ -188,86 +187,4 @@ def mod_sqrt_cipolla(number, prime):
 
     val = pow(Quadratic(y, 1, root), (prime+1)//2, prime).real
     return tuple(sorted([val, prime - val]))
-
-#=============================
-
-def euler_phi_from_factorization(factorization):
-    """
-    Euler's phi function.
-
-    Given a factorization, calculates Euler's phi function of 
-    the corresponding number.
-
-    params
-    + factorization : dict
-        prime divisors of a number with multiplicity
-
-    return
-    int
-    """
-    def euler(prime_power):
-        prime, exp = prime_power
-        return prime**(exp - 1) * (prime - 1)
-
-    return reduce(lambda x, y: x * y, map(euler, factorization.items()), 1)
-
-#-----------------------------
-
-def euler_phi(number):
-    """
-    Euler's phi function.
-
-    Calculates the number of integers between 0 and number that are
-    relatively prime to number, ie, the size of the multiplicative
-    group modulo number.
-
-    params
-    + number : int
-
-    return
-    int
-    """
-    return euler_phi_from_factorization(factor(number))
-
-#=============================
-
-def carmichael_lambda_from_factorization(factorization):
-    """
-    Carmichael's lambda function.
-
-    Given a factorization, calculates Carmichael's lambda function of 
-    the corresponding number.
-
-    params
-    + factorization : dict
-        prime divisors of a number with multiplicity
-
-    return
-    int
-    """
-    def l(pair):
-        prime, exp = pair
-        value = prime**(exp - 1) * (prime - 1)
-        if prime == 2 and exp > 2:
-            return value // 2
-        return value
-
-    return lcm(*map(l, factorization.items()))
-
-#-----------------------------
-
-def carmichael_lambda(number):
-    """
-    Carmichael's lambda function.
-
-    Calculates the maximum order of an element of the multiplicative
-    group modulo number.
-
-    params
-    + number : int 
-
-    return
-    int
-    """
-    return carmichael_lambda_from_factorization(factor(number))
 

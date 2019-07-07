@@ -2,7 +2,7 @@
 #===========================================================
 from random import randint
 
-from .basic import padic 
+from ..basic import padic 
 #===========================================================
 
 def miller_rabin_witness(number, witness):
