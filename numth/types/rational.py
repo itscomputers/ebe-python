@@ -73,7 +73,7 @@ class Rational:
         numer_offset = (length - numer_length + 1) // 2
         denom_offset = (length - denom_length + 1) // 2
         numer = ' '*(minus + numer_offset + 1) + str(numer)
-        denom = ' '*(minus + denom_offset + 1) * str(denom)
+        denom = ' '*(minus + denom_offset + 1) + str(denom)
         line = '-'*minus + ' ' + '\u2500'*length
         return '{}\n{}\n{}'.format(numer, line, denom)
 
