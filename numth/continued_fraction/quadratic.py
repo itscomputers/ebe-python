@@ -165,13 +165,13 @@ class QuadraticRational:
     + root : int
         positive non-square
     """
-    def __init__(self, real, imag, denom, root):
+    def __init__(self, real, imag, denom, root, approx_root=None):
         self.real = real
         self.imag = imag
         self.denom = denom
         self.root = root
         self.components = (real, imag, denom)
-        self.approx_root = integer_sqrt(root)
+        self.approx_root = approx_root or integer_sqrt(root)
 
     def __repr__(self):
         return '{}/{} + {}/{} sqrt({})'\

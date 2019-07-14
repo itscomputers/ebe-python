@@ -4,19 +4,11 @@ from collections import Counter
 from functools import reduce
 from random import randint
 
+from ..config import default
 from ..basic import integer_sqrt, padic
 from ..primality import is_prime, primes_in_range
 from .algorithms import pollard_rho_gen, pollard_p_minus_one_gen
 #===========================================================
-
-def _default(key):
-    return {
-        'rho_seeds' : [2, 3, 4, 6, 7, 8, 9, randint(10, 10**5)],
-        'minus_seeds' : [2],
-        'prime_base' : primes_in_range(1, 1000)
-    }[key]
-
-#=============================
 
 def find_divisor(number, rho_seeds=None, minus_seeds=None):
     """
@@ -58,7 +50,7 @@ def factor_trivial(number, prime_base=None):
     + prime_divisors : dict
         prime divisors of number from prime base with multiplicity
     """
-    prime_base = prime_base or _default('prime_base')
+    prime_base = prime_base or primes_in_range(1, default('prime_base_max'))
     remaining = number
     factorization = dict()
     for prime in prime_base:
@@ -237,11 +229,11 @@ def _divisor_search_generators(number, rho_seeds, minus_seeds):
         * value is a dict with key 'generator' and value the generator
     """
     divisor_search = dict()
-    for seed in (rho_seeds or _default('rho_seeds')):
+    for seed in (rho_seeds or default('rho_seeds')):
         divisor_search[(seed, 'rho')] = {
             'generator' : pollard_rho_gen(number, seed, lambda x: x**2 + 1)
         }
-    for seed in (minus_seeds or _default('minus_seeds')):
+    for seed in (minus_seeds or default('minus_seeds')):
         divisor_search[(seed, 'p-1')] = {
             'generator' : pollard_p_minus_one_gen(number, seed)
         }

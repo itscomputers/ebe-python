@@ -3,14 +3,9 @@
 from fractions import Fraction
 import re
 
+from ..config import default
 from ..basic import div, gcd, integer_sqrt, is_square, mod_inverse
 #===========================================================
-
-def _default_values(category):
-    if category == 'decimal':
-        return 20
-
-#=============================
 
 def frac(number):
     """Shortcut to create Rational"""
@@ -90,8 +85,7 @@ class Rational:
         str
             decimal representation of self
         """
-        if num_digits is None:
-            num_digits = _default_values('decimal')
+        num_digits = num_digits = default('decimal_digits')
         
         quotient, remainder = div(self.numer, self.denom)
         if num_digits == 0:
@@ -233,8 +227,7 @@ class Rational:
         return
         bool
         """
-        if num_digits is None:
-            num_digits = _default_values('decimal')
+        num_digits = num_digits or default('decimal_digits')
 
         other_ = frac(other)
         ad = self.numer * other_.denom
@@ -269,8 +262,7 @@ class Rational:
                 and denom_integer_sqrt**2 == self.denom:
             return guess 
 
-        if num_digits is None:
-            num_digits = _default_values('decimal')
+        num_digits = num_digits or default('sqrt_digits')
 
         if self.numer > self.denom:
             other_guess = self / guess

@@ -2,19 +2,10 @@
 #===========================================================
 from functools import reduce
 
+from ..config import default
 from ..basic import prime_to 
 from .lucas import lucas_test
 from .miller_rabin import miller_rabin_test, miller_rabin_max_cutoff
-#===========================================================
-
-def _default_values(category):
-    if category == 'miller_rabin':
-        return 40 
-    if category == 'lucas':
-        return 10
-    if category == 'sieve_primes':
-        return [2, 3, 5, 7]
-
 #===========================================================
 
 def is_prime(number, mr_wit=None, l_wit=None):
@@ -41,13 +32,11 @@ def is_prime(number, mr_wit=None, l_wit=None):
     if number < miller_rabin_max_cutoff():
         return miller_rabin_test(number, 1) == 'prime'
 
-    if mr_wit is None:
-        mr_wit = _default_values('miller_rabin')
+    mr_wit = mr_wit or default('miller_rabin_witness_count')
     if miller_rabin_test(number, mr_wit) == 'composite':
         return False
 
-    if l_wit is None:
-        l_wit = _default_values('lucas')
+    l_wit = l_wit or default('lucas_witness_pair_count')
     if lucas_test(number, l_wit) == 'composite':
         return False
 
@@ -68,8 +57,7 @@ def next_prime_gen(number, sieve_primes=None):
     generator -> int
         yields next prime number
     """
-    if sieve_primes is None:
-        sieve_primes = _default_values('sieve_primes')
+    sieve_primes = sieve_primes or default('sieve_primes')
 
     start = max(number, 1)
     diameter = reduce(lambda x, y: x * y, sieve_primes, 1)
@@ -163,8 +151,7 @@ def prev_prime_gen(number, sieve_primes=None):
     generator -> int
         yields previous prime number
     """
-    if sieve_primes is None:
-        sieve_primes = _default_values('sieve_primes')
+    sieve_primes = sieve_primes or default('sieve_primes')
 
     diameter = reduce(lambda x, y: x * y, sieve_primes, 1)
     block = [number - number % diameter + x for x in reversed(prime_to(*sieve_primes))]

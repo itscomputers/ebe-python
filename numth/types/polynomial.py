@@ -248,7 +248,6 @@ class Polynomial:
         if self.degree == 0:
             return Polynomial('0')
 
-        deriv = self.coeff_map(lambda x: (x[0] - 1, x[1] * x[0]))
         deriv = Polynomial({e-1: e*c for (e, c) in self.coeffs.items()})
 
         if order is not None and order > 1:

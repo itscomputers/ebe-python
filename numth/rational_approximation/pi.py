@@ -1,18 +1,22 @@
 #   numth/rational_approximation/pi.py
 #===========================================================
+from ..config import default
 from ..types import Rational
 #===========================================================
 
-def _default_values(category):
-    return {
-        'pi'    :   20,
-    }[category]
-
-#=============================
-
 def ramanujan_hardy(sqrt_digits):
+    """
+    Generator for Ramanujan-Hardy series that approximates 1 / pi.
+
+    params
+    + sqrt_digits : int
+        number of digits of accuracy for approximation of sqrt(2)
+
+    return
+    generator -> Rational
+    """
     k = 0
-    multiplier = Rational(2, 9801) / Rational(1, 2).sqrt(sqrt_digits)
+    multiplier = Rational(2, 9801) * Rational(2, 1).sqrt(sqrt_digits)
     multiplicative_term = Rational(1, 1)
     linear_term = 1103
     value = multiplicative_term * linear_term
@@ -28,12 +32,22 @@ def ramanujan_hardy(sqrt_digits):
 #=============================
 
 def pi(num_digits=None):
+    """
+    Rational approximation of pi.
+
+    params
+    + num_digits : int
+        number of digits of accuracy for approximation
+
+    return
+    Rational
+    """
     if num_digits is None:
-        num_digits = _default_values('pi')
+        num_digits = default('pi_digits')
 
     rh = ramanujan_hardy(num_digits)
 
-    for i in range(num_digits // 7):
+    for i in range(num_digits // 8):
         next(rh)
 
     return next(rh).inverse()
