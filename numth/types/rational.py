@@ -85,7 +85,10 @@ class Rational:
         str
             decimal representation of self
         """
-        num_digits = num_digits = default('decimal_digits')
+        if num_digits == 0:
+            return str(round(self))
+
+        num_digits = num_digits or default('decimal_digits')
         
         quotient, remainder = div(self.numer, self.denom)
         if num_digits == 0:
@@ -227,6 +230,9 @@ class Rational:
         return
         bool
         """
+        if num_digits == 0:
+            return abs(self - other) < 1
+
         num_digits = num_digits or default('decimal_digits')
 
         other_ = frac(other)
