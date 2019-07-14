@@ -3,6 +3,7 @@
 from ..basic import lcm
 from ..factorization import factor
 #===========================================================
+
 def carmichael_lambda_from_factorization(factorization):
     """
     Carmichael's lambda function.
