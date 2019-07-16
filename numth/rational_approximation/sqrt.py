@@ -5,6 +5,7 @@ from ..types import frac, Rational
 #===========================================================
 
 def first_approximation(number, initial=None):
+    """Returns integer square root or initial value as a Rational."""
     if initial is None:
         return frac(integer_sqrt(number))
     return frac(initial)
@@ -12,6 +13,19 @@ def first_approximation(number, initial=None):
 #=============================
 
 def babylonian_gen(number, initial=None):
+    """
+    Babylonian method for approximating the square root of number.
+
+    This is equivalent to Newton's method applied to `x^2 - number`.
+
+    params
+    + number : int, float, Rational
+    + initial : int, float, Rational
+        initial guess
+
+    return
+    generator -> Rational
+    """
     approx = first_approximation(number, initial)
 
     while True:
@@ -20,7 +34,20 @@ def babylonian_gen(number, initial=None):
 
 #=============================
 
-def halley_gen(number, initial=None):
+def halley_sqrt_gen(number, initial=None):
+    """
+    Halleys's method for approximating the square root of number.
+
+    This is equivalent to Halley's method applied to `x^2 - number`.
+
+    params
+    + number : int, float, Rational
+    + initial : int, float, Rational
+        initial guess
+
+    return
+    generator -> Rational
+    """
     approx = first_approximation(number, initial)
 
     while True:
@@ -30,6 +57,19 @@ def halley_gen(number, initial=None):
 #=============================
 
 def bakhshali_gen(number, initial=None):
+    """
+    Bakhshali's method for approximating the square root of number.
+
+    This is equivalent to two iterations of the Babylonian method.
+
+    params
+    + number : int, float, Rational
+    + initial : int, float, Rational
+        initial guess
+
+    return
+    generator -> Rational
+    """
     approx = first_approximation(number, initial)
 
     while True:
@@ -41,9 +81,22 @@ def bakhshali_gen(number, initial=None):
 #=============================
 
 def goldschmidt_gen(number, initial=None):
+    """
+    Goldschmidt's method for approximating the square root of number.
+
+    This simultaneously approimates sqrt(number) and sqrt(1 / number).
+
+    params
+    + number : int, float, Rational
+    + initial : int, float, Rational
+        initial guess
+
+    return
+    generator -> (Rational, Rational)
+    """
     b = number
-    Y = first_approximation(number, initial)
-    y = 1 / Y
+    Y = first_approximation(number, initial).inverse()
+    y = Y
     x = number * y
 
     while True:
@@ -56,6 +109,19 @@ def goldschmidt_gen(number, initial=None):
 #=============================
 
 def ladder_arithmetic_gen(number, initial=None):
+    """
+    Ladder arithmetic method for approximating the square root of number.
+
+    Similar to a continued fraction method, likely known to the Babylonians.
+
+    params
+    + number : int, float, Rational
+    + initial : int, float, Rational
+        initial guess
+
+    return
+    generator -> Rational
+    """
     m = first_approximation(number, initial)
     m2 = m**2
     s0, s1 = 0, 1
@@ -67,9 +133,26 @@ def ladder_arithmetic_gen(number, initial=None):
 
 #=============================
 
-def linear_fractional_transformation_gen(number, a, c):
+def linear_fractional_transformation_gen(number, initial=None):
+    """
+    Linear frational transformation method for approximating 
+    the square root of number.
+
+    For a decent initial guess `x = a / c`, the linear functional transformation
+    `f(x) = (a * x + number * c) / (c * x + a)` produces a better approximation.
+
+    params
+    + number : int, float, Rational
+    + initial : int, float, Rational
+        initial guess
+
+    return
+    generator -> Rational
+    """
+    approx = first_approximation(number, initial)
+    a = approx.numer
+    c = approx.denom
     b = number * c
-    approx = Rational(a, c)
 
     while True:
         yield approx

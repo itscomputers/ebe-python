@@ -4,6 +4,16 @@ from ..types import frac
 #===========================================================
 
 def newton_gen(polynomial, initial):
+    """
+    Newton's method for approximating a zero of a polynomial.
+
+    params
+    + polynomial : Polynomial
+    + initial : int, float, Rational
+
+    return
+    generator -> Rational
+    """
     approx = frac(initial)
     derivative = polynomial.derivative()
 
@@ -14,6 +24,16 @@ def newton_gen(polynomial, initial):
 #=============================
 
 def halley_gen(polynomial, initial):
+    """
+    Halley's method for approximating a zero of a polynomial.
+
+    params
+    + polynomial : Polynomial
+    + initial : int, float, Rational
+
+    return
+    generator -> Rational
+    """
     approx = frac(initial)
     derivative = polynomial.derivative()
     second_derivative = derivative.derivative()

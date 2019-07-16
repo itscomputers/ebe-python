@@ -13,7 +13,7 @@ from .pi import (
 
 from .sqrt import (
     babylonian_gen,
-    halley_gen,
+    halley_sqrt_gen,
     bakhshali_gen,
     goldschmidt_gen,
     ladder_arithmetic_gen,
