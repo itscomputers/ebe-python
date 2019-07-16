@@ -1,4 +1,4 @@
-#   numth/modular/lucas_sequence.py
+#   numth/lucas_sequence/modular.py
 #===========================================================
 
 def lucas_sequence_gen(P, Q, modulus):

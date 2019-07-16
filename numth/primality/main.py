@@ -1,4 +1,4 @@
-#   numth/primality.py
+#   numth/primality/main.py
 #===========================================================
 from functools import reduce
 

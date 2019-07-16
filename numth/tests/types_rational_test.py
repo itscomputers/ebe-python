@@ -1,4 +1,4 @@
-#   test_rational.py
+#   numth/tests/types_rational_test.py
 #===========================================================
 from fractions import Fraction
 from hypothesis import given, assume, strategies as st

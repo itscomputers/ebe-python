@@ -1,4 +1,4 @@
-#   numth/rational.py
+#   numth/types/rational.py
 #===========================================================
 from fractions import Fraction
 import re

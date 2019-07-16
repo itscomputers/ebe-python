@@ -1,4 +1,4 @@
-#   numth/sum_of_four_squares.py
+#   numth/factorization/four_squares.py
 #===========================================================
 from functools import reduce
 

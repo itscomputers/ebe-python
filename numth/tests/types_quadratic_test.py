@@ -1,4 +1,4 @@
-#   test_quadratic.py
+#   numth/tests/types_quadratic_test.py
 #===========================================================
 from hypothesis import given, assume, strategies as st
 import math

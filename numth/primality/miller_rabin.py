@@ -1,4 +1,4 @@
-#   numth/primality_miller_rabin.py
+#   numth/primality/miller_rabin.py
 #===========================================================
 from random import randint
 

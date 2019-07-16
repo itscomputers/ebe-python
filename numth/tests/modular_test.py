@@ -1,4 +1,4 @@
-#   test_modular.py
+#   numth/tests/modular_test.py
 #===========================================================
 from hypothesis import given, assume, strategies as st
 

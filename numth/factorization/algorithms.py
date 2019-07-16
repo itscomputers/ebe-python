@@ -1,4 +1,4 @@
-#   numth/find_factor.py
+#   numth/factorization/algorithms.py
 #===========================================================
 from ..basic import gcd
 #===========================================================

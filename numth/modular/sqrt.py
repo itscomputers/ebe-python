@@ -1,4 +1,4 @@
-#   numth/modular.py
+#   numth/modular/sqrt.py
 #===========================================================
 from functools import reduce
 

@@ -1,4 +1,4 @@
-#   numth/factorization.py
+#   numth/factorization/main.py
 #===========================================================
 from collections import Counter 
 from functools import reduce

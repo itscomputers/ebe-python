@@ -1,4 +1,4 @@
-#   numth/polynomial.py
+#   numth/types/polynomial.py
 #===========================================================
 from collections import defaultdict
 from functools import reduce

@@ -1,3 +1,6 @@
+#   numth/factorization/__init__.py
+#===========================================================
+
 from .algorithms import (
     pollard_rho_gen,
     pollard_rho,
@@ -5,6 +8,7 @@ from .algorithms import (
     pollard_p_minus_one,
     williams_p_plus_one
 )
+
 from .main import (
     find_divisor,
     factor_trivial,
@@ -16,14 +20,17 @@ from .main import (
     square_free_part,
     number_from_factorization
 )
+
 from .two_squares import (
     gaussian_divisor,
     is_sum_of_two_squares,
     two_squares_from_factorization,
     two_squares
 )
+
 from .four_squares import (
     quaternion_divisor,
     four_squares_from_factorization,
     four_squares
 )
+

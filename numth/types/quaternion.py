@@ -1,4 +1,4 @@
-#   numth/quaternion.py
+#   numth/types/quaternion.py
 #===========================================================
 from ..basic import div_with_small_remainder
 from .rational import frac, Rational

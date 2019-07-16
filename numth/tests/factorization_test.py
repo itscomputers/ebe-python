@@ -1,4 +1,4 @@
-#   numth/tests/factorization.py
+#   numth/tests/factorization_test.py
 #===========================================================
 from functools import reduce
 from hypothesis import assume, given, strategies as st

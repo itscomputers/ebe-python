@@ -1,4 +1,4 @@
-#   numth/tests/continued_fraction.py
+#   numth/tests/continued_fraction_test.py
 #===========================================================
 from hypothesis import assume, given, strategies as st
 

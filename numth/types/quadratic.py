@@ -1,4 +1,4 @@
-#   numth/quadratic.py
+#   numth/types/quadratic.py
 #===========================================================
 from ..basic import mod_inverse, round_down
 from .rational import frac, Rational

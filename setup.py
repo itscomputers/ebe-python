@@ -1,11 +1,11 @@
-
 #   setup.py
-
+#===========================================================
 from setuptools import setup
+#===========================================================
 
 setup(
     name = 'NumTh',
-    version = '0.1.0.dev0',
+    version = '1.0.beta',
     author = 'itscomputers',
     author_email = 'its_computers@protonmail.com',
     description = 'A number theory package for Python'
@@ -28,3 +28,4 @@ setup(
     install_requires = [],
     python_requires = '>=3',
 )
+

@@ -1,4 +1,4 @@
-#   test_polynomial.py
+#   numth/tests/types_polynomial_test.py
 #===========================================================
 from hypothesis import assume, given, strategies as st
 from random import choice
