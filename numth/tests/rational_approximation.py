@@ -3,6 +3,7 @@
 from hypothesis import given, assume, example, strategies as st
 
 from ..basic import gcd, is_square, round_down
+from ..continued_fraction import continued_fraction_pell_numbers
 from ..types import Polynomial 
 from ..rational_approximation import *
 #===========================================================
@@ -90,7 +91,7 @@ def test_babylonian(number):
     for i in range(5):
         curr, diff = assert_convergence_and_advance(curr, diff, gen)
 
-    assert( (curr**2).approx_equal(number, 30 ) )
+    assert( (curr**2).approx_equal(number, 30) )
 
 #-----------------------------
 
@@ -104,7 +105,7 @@ def test_halley_sqrt(number):
     for i in range(3):
         curr, diff = assert_convergence_and_advance(curr, diff, gen)
 
-    assert( (curr**2).approx_equal(number, 30 ) )
+    assert( (curr**2).approx_equal(number, 30) )
 
 #-----------------------------
 
@@ -115,6 +116,34 @@ def test_bakshali(number):
     for i in range(4):
         assert( next(bab) == next(bak) )
         next(bab)
+
+#-----------------------------
+
+@given(
+    st.integers(
+        min_value=2,
+        max_value=10**5
+    ).filter(lambda x: not is_square(x))
+)
+def test_continued_fraction_convergent(number):
+    gen = continued_fraction_convergent_gen(number)
+    pell_numbers = continued_fraction_pell_numbers(number)
+    last = pell_numbers[-1]
+    period = len(pell_numbers)
+
+    prev = next(gen)
+    curr = next(gen)
+    diff = abs(curr - prev)
+    counter = 1
+
+    for i in range(50):
+        pell = curr.numer**2 - number * curr.denom**2
+        expected = last**(counter // period) * pell_numbers[counter % period]
+        assert( pell == expected )
+        prev, curr = curr, next(gen)
+        next_diff = abs(curr - prev)
+        counter += 1
+        assert( next_diff < diff )
 
 #-----------------------------
 

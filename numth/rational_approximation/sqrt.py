@@ -1,7 +1,8 @@
 #   numth/rational_approximation/sqrt.py
 #===========================================================
 from ..basic import integer_sqrt
-from ..types import frac, Rational 
+from ..continued_fraction import continued_fraction_convergents
+from ..types import frac, Rational, Quadratic
 #===========================================================
 
 def first_approximation(number, initial=None):
@@ -77,6 +78,34 @@ def bakhshali_gen(number, initial=None):
         a = (number / approx - approx) / 2
         b = approx + a
         approx = b - a**2 / (2 * b)
+
+#=============================
+
+def continued_fraction_convergent_gen(number):
+    """
+    Continued fraction convergent approximations for square root of number.
+
+    params
+    + number : int
+
+    return
+    geneartor -> Rational
+    """
+    def to_quadratic(pair):
+        return Quadratic(pair[0], pair[1], number)
+    
+    def to_rational(quadratic):
+        return Rational(quadratic.real, quadratic.imag)
+
+    convergents = continued_fraction_convergents(number)
+    quadratics = list(map(to_quadratic, convergents))
+    last = quadratics[-1]
+    
+    while True:
+        for quadratic in quadratics:
+            yield to_rational(quadratic)
+        
+        quadratics = list(map(lambda q: q * last, quadratics))
 
 #=============================
 
