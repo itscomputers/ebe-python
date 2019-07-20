@@ -4,8 +4,8 @@ from random import randint
 
 from ..basic import gcd, is_square, jacobi, padic
 from ..lucas_sequence import (
-    by_index as lucas_sequence_by_index,
-    double_index as lucas_sequence_double_index
+    lucas_sequence_by_index,
+    lucas_sequence_double_index
 )
 #===========================================================
 

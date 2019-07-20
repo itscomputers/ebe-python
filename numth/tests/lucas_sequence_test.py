@@ -3,7 +3,7 @@
 from hypothesis import given, assume, strategies as st
 
 from ..types import Quadratic
-from ..lucas_sequence import *
+from ..lucas_sequence.modular import *
 #===========================================================
 
 @given(
