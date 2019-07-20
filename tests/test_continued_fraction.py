@@ -1,10 +1,11 @@
-#   numth/tests/continued_fraction_test.py
+#   tests/continued_fraction_test.py
 #===========================================================
+import env
 from hypothesis import assume, given, strategies as st
 
-from ..basic import is_square
-from ..types import Quadratic, Rational
-from ..continued_fraction.quadratic import *
+from numth.basic import is_square
+from numth.types import Quadratic, Rational
+from numth.continued_fraction.quadratic import *
 #===========================================================
 
 def to_quadratic(quadratic_rational):
@@ -14,7 +15,9 @@ def to_quadratic(quadratic_rational):
         quadratic_rational.root
     )
 
-#=============================
+#===========================================================
+#   quadratic
+#===========================================================
 
 @given(
     st.integers(),

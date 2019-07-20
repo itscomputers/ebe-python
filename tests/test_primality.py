@@ -1,67 +1,22 @@
-#   numth/tests/primality_test.py
+#   tests/primality_test.py
 #===========================================================
+import env
 from hypothesis import given, assume, strategies as st
 
-from ..basic import is_prime__naive, prime_sieve
-from ..primality.miller_rabin import (
+from numth.basic import is_prime__naive, prime_sieve
+from numth.primality.miller_rabin import (
     _generate_witnesses,
     miller_rabin_max_cutoff,
     miller_rabin_cutoffs
 )
-from ..primality.lucas import (
+from numth.primality.lucas import (
     _generate_witness_pairs,
     _good_parameters,
 )
-from ..primality import *
+from numth.primality import *
 #===========================================================
-
-
-@given(
-    st.integers(min_value=3),
-    st.integers(min_value=1, max_value=50)
-)
-def test_miller_rabin_witnesses(number, num_witnesses):
-    witnesses = _generate_witnesses(number, num_witnesses)
-    single_results = set(miller_rabin_witness(number, witness) for witness in witnesses)
-    combined_result = miller_rabin_witnesses(number, witnesses)
-    if single_results == set(['probable prime']):
-        assert( combined_result == 'probable prime' )
-    else:
-        assert( combined_result == 'composite' )
-
-#-----------------------------
-
-@given(st.integers(min_value=2, max_value=10**6))
-def test_miller_rabin_test(number):
-    mr_primality = miller_rabin_test(number, 20)
-    number_is_prime = is_prime__naive(number)
-    if mr_primality in ['prime', 'probable prime']:
-        assert( number_is_prime )
-    else:
-        assert( not number_is_prime )
-
-#-----------------------------
-
-@given(
-    st.integers(min_value=3),
-    st.integers(min_value=1, max_value=50)
-)
-def test_generate_witnesses(number, num_witnesses):
-    witnesses = _generate_witnesses(number, num_witnesses)
-
-    for w in witnesses:
-        assert( 2 <= w < number )
-
-    if number > miller_rabin_max_cutoff() and num_witnesses > number:
-        assert( len(witnesses) == number - 3 )
-    
-    elif number <= miller_rabin_max_cutoff():
-        assert( witnesses <= set(p for (val, p) in miller_rabin_cutoffs()) )
-
-    else:
-        assert( len(witnesses) == num_witnesses )
-
-#=============================
+#   lucas
+#===========================================================
 
 @given(
     st.integers(min_value=3),
@@ -108,7 +63,58 @@ def test_generate_witness_pairs(number, num_witnesses):
         P, Q = witness_pair
         assert( _good_parameters(number, P, Q, P**2 - 4*Q) != False )
 
-#=============================
+#===========================================================
+#   miller_rabin
+#===========================================================
+
+@given(
+    st.integers(min_value=3),
+    st.integers(min_value=1, max_value=50)
+)
+def test_miller_rabin_witnesses(number, num_witnesses):
+    witnesses = _generate_witnesses(number, num_witnesses)
+    single_results = set(miller_rabin_witness(number, witness) for witness in witnesses)
+    combined_result = miller_rabin_witnesses(number, witnesses)
+    if single_results == set(['probable prime']):
+        assert( combined_result == 'probable prime' )
+    else:
+        assert( combined_result == 'composite' )
+
+#-----------------------------
+
+@given(st.integers(min_value=2, max_value=10**6))
+def test_miller_rabin_test(number):
+    mr_primality = miller_rabin_test(number, 20)
+    number_is_prime = is_prime__naive(number)
+    if mr_primality in ['prime', 'probable prime']:
+        assert( number_is_prime )
+    else:
+        assert( not number_is_prime )
+
+#-----------------------------
+
+@given(
+    st.integers(min_value=3),
+    st.integers(min_value=1, max_value=50)
+)
+def test_generate_witnesses(number, num_witnesses):
+    witnesses = _generate_witnesses(number, num_witnesses)
+
+    for w in witnesses:
+        assert( 2 <= w < number )
+
+    if number > miller_rabin_max_cutoff() and num_witnesses > number:
+        assert( len(witnesses) == number - 3 )
+    
+    elif number <= miller_rabin_max_cutoff():
+        assert( witnesses <= set(p for (val, p) in miller_rabin_cutoffs()) )
+
+    else:
+        assert( len(witnesses) == num_witnesses )
+
+#===========================================================
+#   main
+#===========================================================
 
 def test_is_prime_on_sieve():
     primes = prime_sieve(10**4)

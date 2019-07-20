@@ -1,12 +1,13 @@
-#   numth/tests/types_quadratic_test.py
+#   tests/types_quadratic_test.py
 #===========================================================
+import env
 from hypothesis import given, assume, strategies as st
 import math
 
-from ..basic import gcd, is_square
-from ..types import Rational
-from ..types.quadratic import *
-from ..types.quadratic import _round_prefer_down
+from numth.basic import gcd, is_square
+from numth.types import Rational
+from numth.types.quadratic import *
+from numth.types.quadratic import _round_prefer_down
 #===========================================================
 
 def root_filter(x):

@@ -3,8 +3,8 @@
 from functools import reduce
 
 from ..basic import jacobi
-from .main import factor, square_part, square_free_part
 from ..types import Quaternion
+from .main import factor, square_part, square_free_part
 from .two_squares import gaussian_divisor, _square_to_quadratic
 #===========================================================
 

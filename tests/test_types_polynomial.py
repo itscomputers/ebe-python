@@ -1,12 +1,13 @@
-#   numth/tests/types_polynomial_test.py
+#   tests/types_polynomial_test.py
 #===========================================================
+import env
 from hypothesis import assume, given, strategies as st
 from random import choice
 
-from ..basic import is_square, lcm
-from ..types import Rational, Quadratic 
-from ..types.polynomial import *
-from ..types.polynomial import (
+from numth.basic import is_square, lcm
+from numth.types import Rational, Quadratic 
+from numth.types.polynomial import *
+from numth.types.polynomial import (
     polyn_div,
     _term_pattern,
     _term_to_exp_coeff,

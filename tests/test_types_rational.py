@@ -1,10 +1,11 @@
-#   numth/tests/types_rational_test.py
+#   tests/types_rational_test.py
 #===========================================================
+import env
 from fractions import Fraction
 from hypothesis import given, assume, strategies as st
 
-from ..basic import gcd, mod_inverse
-from ..types import frac, Rational
+from numth.basic import gcd, mod_inverse
+from numth.types import frac, Rational
 #===========================================================
 
 def coords(flag=None):

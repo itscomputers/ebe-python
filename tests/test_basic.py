@@ -1,11 +1,14 @@
-#   numth/tests/basic_test.py
+#   tests/basic_test.py
 #===========================================================
+import env
 from hypothesis import given, assume, strategies as st
 from random import sample
 
-from ..factorization import factor
-from ..modular import euler_phi
-from ..basic import *
+from numth.factorization import factor
+from numth.modular import euler_phi
+from numth.basic import *
+#===========================================================
+#   division
 #===========================================================
 
 @given(
@@ -98,20 +101,19 @@ def test_padic(number, base):
     assert( number == base**exp * rest )
     assert( rest % base != 0 )
 
-#=============================
-
-@given(st.integers(min_value=0))
-def test_integer_sqrt(number):
-    s = integer_sqrt(number)
-    assert( s**2 <= number < (s+1)**2 )
-
-#-----------------------------
+#===========================================================
+#   modular
+#===========================================================
 
 @given(st.integers())
-def test_is_square(number):
-    assert( is_square(number**2) )
+def test_jacobi(a):
+    for p in prime_sieve(10**3)[1:]:
+        if a % p == 0:
+            assert( jacobi(a, p) == 0 )
+        else:
+            assert( jacobi(a, p) == euler_criterion(a, p) ) 
 
-#=============================
+#-----------------------------
 
 @given(
     number = st.integers(),
@@ -158,7 +160,9 @@ def test_prime_to(number):
     for x in group:
         assert( gcd(x, number) == 1 )
 
-#=============================
+#===========================================================
+#   primality
+#===========================================================
 
 def test_prime_sieve():
     assert( len(prime_sieve(10**2)) == 25 )
@@ -172,13 +176,27 @@ def test_is_prime__naive():
     for p in prime_sieve(10**3):
         assert( is_prime__naive(p) )
 
-#=============================
+#===========================================================
+#   shape_number
+#===========================================================
+
+@given(st.integers(min_value=3))
+def test_shape_number(s):
+    for k in range(1, 20):
+        assert( which_shape_number(shape_number_by_index(k, s), s) == k )
+
+#===========================================================
+#   sqrt
+#===========================================================
+
+@given(st.integers(min_value=0))
+def test_integer_sqrt(number):
+    s = integer_sqrt(number)
+    assert( s**2 <= number < (s+1)**2 )
+
+#-----------------------------
 
 @given(st.integers())
-def test_jacobi(a):
-    for p in prime_sieve(10**3)[1:]:
-        if a % p == 0:
-            assert( jacobi(a, p) == 0 )
-        else:
-            assert( jacobi(a, p) == euler_criterion(a, p) ) 
+def test_is_square(number):
+    assert( is_square(number**2) )
 

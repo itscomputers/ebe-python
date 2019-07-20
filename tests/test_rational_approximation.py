@@ -1,11 +1,12 @@
-#   numth/tests/rational_approximation_test.py
+#   tests/rational_approximation_test.py
 #===========================================================
+import env
 from hypothesis import given, assume, example, strategies as st
 
-from ..basic import gcd, is_square, round_down
-from ..continued_fraction import continued_fraction_pell_numbers
-from ..types import Polynomial 
-from ..rational_approximation import *
+from numth.basic import gcd, is_square
+from numth.continued_fraction import continued_fraction_pell_numbers
+from numth.types import Polynomial 
+from numth.rational_approximation import *
 #===========================================================
 
 def assert_convergence_and_advance(curr, diff, gen):
@@ -21,6 +22,8 @@ def approx_sqrt(number):
     next(gen)
     return next(gen)
 
+#===========================================================
+#   general
 #===========================================================
 
 @given(st.integers(min_value=-1, max_value=100))
@@ -41,6 +44,8 @@ def test_halley_gen(x_coeff):
         next(gen)
     assert( p.eval(next(gen)).approx_equal(0, 3) )
 
+#===========================================================
+#   pi
 #===========================================================
 
 pi_string = '3.14159265358979323846264338327950288419716939937510' \
@@ -79,6 +84,8 @@ def test_ramanujan_hardy():
         assert( prev.approx_equal(curr, 8*i) )
         prev, curr = curr, next(gen)
 
+#===========================================================
+#   sqrt
 #===========================================================
 
 @given(st.integers(min_value=1))
@@ -186,5 +193,4 @@ def test_linear_fractional_transformation(number):
         curr, diff = assert_convergence_and_advance(curr, diff, gen)
 
     assert( (curr**2).approx_equal(number, 10) )
-
 

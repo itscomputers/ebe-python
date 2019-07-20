@@ -1,5 +1,8 @@
 #   numth/basic/shape_number.py
 #===========================================================
+from .division import div
+from .sqrt import integer_sqrt, is_square
+#===========================================================
 
 def shape_number_by_index(k, sides):
     """

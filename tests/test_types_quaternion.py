@@ -1,9 +1,10 @@
-#   numth/tests/types_quadratic_test.py
+#   tests/types_quadratic_test.py
 #===========================================================
+import env
 from hypothesis import given, assume, strategies as st
 
-from ..types import Rational
-from ..types.quaternion import *
+from numth.types import Rational
+from numth.types.quaternion import *
 #===========================================================
 
 def coords():

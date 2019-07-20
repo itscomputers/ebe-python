@@ -1,13 +1,14 @@
-#   numth/tests/factorization_test.py
+#   tests/factorization_test.py
 #===========================================================
+import env
 from functools import reduce
 from hypothesis import assume, given, strategies as st
 
-from ..basic import is_square
-from ..primality import is_prime, next_prime
-from ..types import Quadratic, Quaternion
-from ..factorization import *
-from ..factorization.main import _combine_counters
+from numth.basic import is_square
+from numth.primality import is_prime, next_prime
+from numth.types import Quadratic, Quaternion
+from numth.factorization import *
+from numth.factorization.main import _combine_counters
 #===========================================================
 
 def build_composite(*numbers):
@@ -20,6 +21,8 @@ def coordinates(num_args, min_digits, max_digits):
     return [build_strategy(min_digits, max_digits) for _ in range(num_args)]
 
 #===========================================================
+#   algorithms
+#===========================================================
 
 @given(st.integers(min_value=2, max_value=10**12))
 def test_pollard_rho(number):
@@ -27,7 +30,7 @@ def test_pollard_rho(number):
         d = pollard_rho(number, 2, lambda x: x**2 + 1)
         assert( d > 1 and number % d == 0 )
 
-#=============================
+#-----------------------------
 
 @given(st.integers(min_value=2, max_value=10**10))
 def test_pollard_p_minus_one(number):
@@ -35,7 +38,7 @@ def test_pollard_p_minus_one(number):
         d = pollard_p_minus_one(number, 2)
         assert( d > 1 and number % d == 0 )
         
-#=============================
+#-----------------------------
 
 @given(st.integers(min_value=2, max_value=10**12))
 def test_williams_p_plus_one(number):
@@ -43,6 +46,33 @@ def test_williams_p_plus_one(number):
         d = williams_p_plus_one(number, Quadratic(1, 1, -1))
         assert( d > 1 and number % d == 0 )
 
+#===========================================================
+#   four_squares
+#===========================================================
+
+@given(st.integers(min_value=2))
+def test_quaternion_divisor(number):
+    prime = next_prime(number)
+    q = quaternion_divisor(prime)
+    assert( q.norm() == prime )
+    assert( Quaternion(prime, 0, 0, 0) % q == Quaternion(0, 0, 0, 0) )
+
+#-----------------------------
+
+@given(st.integers(min_value=2, max_value=10**4))
+def test_four_squares(number):
+    factorization = factor(number)
+    squares = four_squares_from_factorization(factorization)
+    assert( sorted(squares, reverse=True) == list(squares) )
+    assert(
+        sum(map(
+            lambda x: x**2,
+            squares
+        )) == number
+    )
+
+#===========================================================
+#   main
 #===========================================================
 
 @given(*coordinates(4, 2, 5))
@@ -82,7 +112,7 @@ def test_factor(number):
         assert( is_prime(d) )
     assert( number_from_factorization(factorization) == number )
 
-#=============================
+#-----------------------------
 
 @given(st.integers(min_value=2, max_value=10**12))
 def test_square_and_square_free_parts(number):
@@ -99,7 +129,7 @@ def test_square_and_square_free_parts(number):
     assert( is_square(square_number) )
     assert( square_number * square_free_number == number )
 
-#=============================
+#-----------------------------
 
 @given(st.integers(min_value=2, max_value=10**12))
 def test_divisors(number):
@@ -107,6 +137,8 @@ def test_divisors(number):
     for i in range(len(all_divisors) // 2):
         assert( all_divisors[i] * all_divisors[-i-1] == number )
 
+#===========================================================
+#   two_squares
 #===========================================================
 
 @given(st.integers(min_value=5))
@@ -133,27 +165,4 @@ def test_two_squares(number):
         )
     else:
         assert( squares is None )
-
-#===========================================================
-
-@given(st.integers(min_value=2))
-def test_quaternion_divisor(number):
-    prime = next_prime(number)
-    q = quaternion_divisor(prime)
-    assert( q.norm() == prime )
-    assert( Quaternion(prime, 0, 0, 0) % q == Quaternion(0, 0, 0, 0) )
-
-#-----------------------------
-
-@given(st.integers(min_value=2, max_value=10**4))
-def test_four_squares(number):
-    factorization = factor(number)
-    squares = four_squares_from_factorization(factorization)
-    assert( sorted(squares, reverse=True) == list(squares) )
-    assert(
-        sum(map(
-            lambda x: x**2,
-            squares
-        )) == number
-    )
 

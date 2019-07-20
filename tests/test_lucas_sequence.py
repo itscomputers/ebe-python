@@ -1,9 +1,12 @@
-#   numth/tests/lucas_sequence_test.py
+#   tests/lucas_sequence_test.py
 #===========================================================
+import env
 from hypothesis import given, assume, strategies as st
 
-from ..types import Quadratic
-from ..lucas_sequence.modular import *
+from numth.types import Quadratic
+from numth.lucas_sequence.modular import *
+#===========================================================
+#   modular
 #===========================================================
 
 @given(

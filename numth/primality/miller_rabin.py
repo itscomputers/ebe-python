@@ -93,7 +93,7 @@ def miller_rabin_test(number, num_witnesses):
 def miller_rabin_max_cutoff():
     return 341550071728321
 
-#- - - - - - - - - - - - - - -
+#-----------------------------
 
 def miller_rabin_cutoffs():
     return ((1, 2),

@@ -2,9 +2,9 @@
 #===========================================================
 from functools import reduce
 
-from .main import factor, square_part, square_free_part
 from ..modular import mod_sqrt
 from ..types import Quadratic
+from .main import factor, square_part, square_free_part
 #===========================================================
 
 def gaussian_divisor(prime):
