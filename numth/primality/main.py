@@ -61,7 +61,10 @@ def next_prime_gen(number, sieve_primes=None):
 
     start = max(number, 1)
     diameter = reduce(lambda x, y: x * y, sieve_primes, 1)
-    block = [start - start % diameter + x for x in prime_to(*sieve_primes)]
+    block = [
+        start - start % diameter + x \
+            for x in prime_to({p : 1 for p in sieve_primes})
+    ]
 
     for p in sieve_primes:
         if number < p:
@@ -154,7 +157,10 @@ def prev_prime_gen(number, sieve_primes=None):
     sieve_primes = sieve_primes or default('sieve_primes')
 
     diameter = reduce(lambda x, y: x * y, sieve_primes, 1)
-    block = [number - number % diameter + x for x in reversed(prime_to(*sieve_primes))]
+    block = [
+        number - number % diameter + x \
+            for x in reversed(prime_to({p : 1 for p in sieve_primes}))
+    ]
 
     shift = 0
     max_shift = number // diameter

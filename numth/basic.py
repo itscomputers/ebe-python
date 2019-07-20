@@ -313,7 +313,7 @@ def mod_power(number, exponent, modulus):
     
     return pow(number, exponent, modulus)
 
-#-----------------------------
+#=============================
 
 def _chinese_remainder_coeffs(moduli, moduli_product):
     def coeff(modulus):
@@ -322,7 +322,7 @@ def _chinese_remainder_coeffs(moduli, moduli_product):
 
     return map(coeff, moduli)
 
-#-----------------------------
+#- - - - - - - - - - - - - - -
 
 def chinese_remainder_theorem(residues, moduli):
     """
@@ -350,30 +350,40 @@ def chinese_remainder_theorem(residues, moduli):
 
 #-----------------------------
 
-def prime_to(*primes):
-    """
-    List of numbers which are relatively prime to list of given primes.
+def _prime_to_prime_power(pair):
+    return (x for x in range(1, pair[0]**pair[1]) if x % pair[0] != 0)
 
-    Computes list of x for x < product of primes such that 
-    ``gcd(x, product) == 1``.
+#- - - - - - - - - - - - - - -
+
+def _residues(factorization):
+    return product(*map(_prime_to_prime_power, factorization.items()))
+
+#- - - - - - - - - - - - - - -
+
+def prime_to(factorization):
+    """
+    List of numbers which are relatively prime to given prime factorization.
+
+    Computes list of x for x < associated number such that
+    ``gcd(x, number) == 1``.
 
     params
-    primes : list(int)
-        primes must be distinct primes
+    + factorization : dict
+        has the shape {prime : power} for distinct primes
 
     return
     list(int)
     """
-    primes_product = reduce(lambda x, y: x * y, primes, 1)
-    coeffs = list(_chinese_remainder_coeffs(primes, primes_product))
+    prime_powers = [p**e for (p, e) in factorization.items()]
+    number = reduce(lambda x, y: x * y, prime_powers, 1)
 
     return sorted(
         sum(map(
-            lambda x, y: (x * y) % primes_product,
-            _chinese_remainder_coeffs(primes, primes_product),
-            residues)
-        ) % primes_product \
-    for residues in product(*(range(1, x) for x in primes)))
+            lambda x, y: (x * y) % number,
+            _chinese_remainder_coeffs(prime_powers, number),
+            residues
+        )) % number for residues in _residues(factorization)
+    )
 
 #=============================
 

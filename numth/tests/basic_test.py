@@ -3,6 +3,8 @@
 from hypothesis import given, assume, strategies as st
 from random import sample
 
+from ..factorization import factor
+from ..modular import euler_phi_from_factorization
 from ..basic import *
 #===========================================================
 
@@ -139,23 +141,23 @@ def test_mod_power(number, exponent, modulus):
 
 @given(*(3 * [st.integers()]))
 def test_chinese_remainder_theorem(a, b, c):
-    moduli = sample(prime_sieve(10**3), 3)
+    primes = sample(prime_sieve(10**3), 4)
+    moduli = [primes[0]**1, primes[1]**2, primes[2] * primes[3]]
     solution = chinese_remainder_theorem([a,b,c], moduli)
     for (r, m) in zip([a,b,c], moduli):
         assert( solution % m == r % m )
 
 #-----------------------------
 
-@given(st.integers())
-def test_prime_to(_):
-    primes = sample(prime_sieve(30), 3)
-    m = reduce(lambda x, y: x * y, primes, 1)
-    phi_m = reduce(lambda x, y: x * (y - 1), primes, 1)
-    Zm_star = prime_to(*primes)
-    assert( len(Zm_star) == phi_m )
-    for x in Zm_star:
-        assert( gcd(x, m) == 1 )
-    
+@given(st.integers(min_value=2, max_value=500))
+def test_prime_to(number):
+    factorization = factor(number)
+    phi = euler_phi_from_factorization(factorization)
+    group = prime_to(factorization)
+    assert( phi == len(group) )
+    for x in group:
+        assert( gcd(x, number) == 1 )
+
 #=============================
 
 def test_prime_sieve():
