@@ -3,9 +3,10 @@
 from hypothesis import given, assume, strategies as st
 import math
 
-from ..basic import gcd, is_square, round_down
+from ..basic import gcd, is_square
 from ..types import Rational
 from ..types.quadratic import *
+from ..types.quadratic import _round_prefer_down
 #===========================================================
 
 def root_filter(x):
@@ -110,8 +111,8 @@ def test_round(real_numer, real_denom, imag_numer, imag_denom, root):
     real = Rational(real_numer, real_denom)
     imag = Rational(imag_numer, imag_denom)
     a = Quadratic(real, imag, root).round()
-    assert( a.real == round_down(real) )
-    assert( a.imag == round_down(imag) )
+    assert( a.real == _round_prefer_down(real) )
+    assert( a.imag == _round_prefer_down(imag) )
     
 #-----------------------------
 
@@ -233,8 +234,8 @@ def test_floordiv(real1, imag1, real2, imag2, root):
     q1 = Quadratic(real1, imag1, root)
     q2 = Quadratic(real2, imag2, root)
     q2_norm = q2.norm()
-    real = round_down(Rational(real1 * real2 - imag1 * imag2 * root, q2_norm))
-    imag = round_down(Rational(-real1 * imag2 + imag1 * real2, q2_norm))
+    real = _round_prefer_down(Rational(real1 * real2 - imag1 * imag2 * root, q2_norm))
+    imag = _round_prefer_down(Rational(-real1 * imag2 + imag1 * real2, q2_norm))
     s = Quadratic(real, imag, root)
     assert( q1 // q2 == s )
 
@@ -336,4 +337,15 @@ def test_gcd(real1, imag1, real2, imag2):
     assert( (q2 % d).components == (0, 0) )
     assert( (q1 // d).gcd(q2 // d).components == (1, 0) )
     assert( (q2 // d).gcd(q1 // d).components == (1, 0) )
+
+#=============================
+
+@given(st.floats(min_value=0))
+def test_round_prefer_down(number):
+    assume( str(number) not in ['-inf', 'inf', 'nan'] )
+    if number <= int(number) + .5:
+        assert( _round_prefer_down(number) == int(number) )
+    else:
+        assert( _round_prefer_down(number) == int(number) + 1 )
+    assert( _round_prefer_down(-number) == - _round_prefer_down(number) )
 

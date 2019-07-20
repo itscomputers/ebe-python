@@ -1,6 +1,6 @@
 #   numth/types/quadratic.py
 #===========================================================
-from ..basic import mod_inverse, round_down
+from ..basic import mod_inverse
 from .rational import frac, Rational
 #===========================================================
 
@@ -128,7 +128,7 @@ class Quadratic:
         return self.component_map(int)
 
     def round(self):
-        return self.component_map(round_down)
+        return self.component_map(_round_prefer_down)
 
     def __float__(self):
         return float(self.to_rational_approx())
@@ -250,4 +250,14 @@ class Quadratic:
             a, b = b, a % b
 
         return a.canonical()
+
+#===========================================================
+
+def _round_prefer_down(number):
+    """Rounds toward zero if fractional part is less than or equal to half."""
+    if number < 0:
+        return - _round_prefer_down(-number)
+    if 2 * (number - int(number)) > 1:
+        return int(number) + 1
+    return int(number)
 
