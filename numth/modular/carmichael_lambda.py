@@ -4,20 +4,24 @@ from ..basic import lcm
 from ..factorization import factor
 #===========================================================
 
-def carmichael_lambda_from_factorization(factorization):
+def carmichael_lambda(params):
     """
     Carmichael's lambda function.
 
-    Given a factorization, calculates Carmichael's lambda function of 
-    the corresponding number.
+    Given an integer or its factorization, calculates Carmichael's 
+    lambda function of the number, which is the maximum order
+    of an element in the multiplicative group modulo the number.
 
     params
-    + factorization : dict
-        prime divisors of a number with multiplicity
+    + int or dict
+        number or its prime factorization
 
     return
     int
     """
+    if type(params) is int:
+        return carmichael_lambda(factor(number))
+
     def l(pair):
         prime, exp = pair
         value = prime**(exp - 1) * (prime - 1)
@@ -25,22 +29,5 @@ def carmichael_lambda_from_factorization(factorization):
             return value // 2
         return value
 
-    return lcm(*map(l, factorization.items()))
-
-#-----------------------------
-
-def carmichael_lambda(number):
-    """
-    Carmichael's lambda function.
-
-    Calculates the maximum order of an element of the multiplicative
-    group modulo number.
-
-    params
-    + number : int 
-
-    return
-    int
-    """
-    return carmichael_lambda_from_factorization(factor(number))
+    return lcm(*map(l, params.items()))
 

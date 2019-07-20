@@ -11,12 +11,10 @@ from .sqrt import (
 )
 
 from .euler_phi import (
-    euler_phi_from_factorization,
     euler_phi
 )
 
 from .carmichael_lambda import (
-    carmichael_lambda_from_factorization,
     carmichael_lambda
 )
 

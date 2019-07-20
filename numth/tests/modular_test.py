@@ -40,8 +40,8 @@ def test_mod_sqrt(number):
 @given(st.integers(min_value=3, max_value=10**4))
 def test_euler_phi_and_carmichael_lambda(number):
     factorization = factor(number)
-    euler = euler_phi_from_factorization(factorization)
-    carmichael = carmichael_lambda_from_factorization(factorization)
+    euler = euler_phi(factorization)
+    carmichael = carmichael_lambda(factorization)
     mult_group = [x for x in range(1, number) if gcd(x, number) == 1]
     half_carmichael_powers = list(map(
         lambda x: pow(x, carmichael // 2, number),

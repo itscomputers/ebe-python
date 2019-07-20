@@ -4,7 +4,7 @@ from hypothesis import given, assume, strategies as st
 from random import sample
 
 from ..factorization import factor
-from ..modular import euler_phi_from_factorization
+from ..modular import euler_phi
 from ..basic import *
 #===========================================================
 
@@ -152,7 +152,7 @@ def test_chinese_remainder_theorem(a, b, c):
 @given(st.integers(min_value=2, max_value=500))
 def test_prime_to(number):
     factorization = factor(number)
-    phi = euler_phi_from_factorization(factorization)
+    phi = euler_phi(factorization)
     group = prime_to(factorization)
     assert( phi == len(group) )
     for x in group:
