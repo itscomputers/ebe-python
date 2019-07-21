@@ -9,11 +9,6 @@ from .algorithms import (
     williams_p_plus_one
 )
 
-from .four_squares import (
-    four_squares_from_factorization,
-    four_squares
-    quaternion_divisor
-)
 
 from .main import (
     divisors_from_factorization,
@@ -32,5 +27,11 @@ from .two_squares import (
     is_sum_of_two_squares,
     two_squares_from_factorization,
     two_squares
+)
+
+from .four_squares import (
+    four_squares_from_factorization,
+    four_squares,
+    quaternion_divisor
 )
 
