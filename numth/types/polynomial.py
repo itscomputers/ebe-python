@@ -255,39 +255,6 @@ class Polynomial:
 
         return deriv
 
-    #-------------------------
-
-#   def mod_gcd(self, other, modulus):
-#       if self == other == Polynomial({0: 0}):
-#           raise ValueError('gcd(0, 0) is undefined')
-
-#       if self.degree == other.degree == 1:
-#           s_m = self.coeffs[0] % modulus
-#           o_m = other.coeffs[0] % modulus
-#           return gcd(s_m, o_m) % modulus
-
-#       a, b = self % modulus, other % modulus
-#       while b.degree >= 0:
-#           a, b = b, (a % b) % modulus
-
-#       return (mod_inverse(a.leading_coeff, modulus) * a) % modulus
-    
-    #-------------------------
-    
-#   use subresultant polynomials to compute
-#   def gcd(self, other):
-#       if self == other == polyn('0'):
-#           raise ValueError('gcd(0, 0) is undefined')
-#       
-#       if self.degree == other.degree == 1:
-#           return gcd(self.coeffs[0], other.coeffs[0])
-
-#       a, b = self.to_integer_polyn(), other.to_integer_polyn()
-#       while b.degree >= 0:
-#           a, b = b, a % b
-
-#       return a.canonical() / gcd(*a.coeffs.values())
-
 #===========================================================
 
 def _term_pattern():
