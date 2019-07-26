@@ -388,6 +388,19 @@ def test_mod_eval(e1, c1, e2, c2, val, mod):
     p = make(e1, c1, e2, c2)
     assume( p.mod_eval(val, mod) == p.eval(val) % mod )
 
+#-----------------------------
+
+    @given(*coords(4, coeff_min=1))
+    def test_mod_gcd(e1, c1, e2, c2, e3, c3, e4, c4):
+        modulus = choice([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47])
+        assume( are_distinct(e1, e2) and are_distinct(e3, e4) )
+        p1 = make(e1, c1, e2, c2) % modulus
+        p2 = make(e3, c3, e4, c4) % modulus
+        d = p1.mod_gcd(p2, modulus)
+        assert( d == p2.mod_gcd(p1, modulus) )
+        assert( p1 % d % modulus == p2 % d % modulus == polyn('0') )
+        assert( (p1 // d).mod_gcd(p2 // d, modulus) == polyn('1') )
+
 #=============================
 
 @given(
