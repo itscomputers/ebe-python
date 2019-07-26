@@ -274,7 +274,6 @@ class Polynomial:
     
     #-------------------------
     
-    use subresultant polynomials to compute
     def gcd(self, other):
         if self == other == polyn('0'):
             raise ValueError('gcd(0, 0) is undefined')
