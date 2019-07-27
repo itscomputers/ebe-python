@@ -71,10 +71,10 @@ def euclidean_algorithm(a, b, division_func=div):
     return
     None
     """
-    q, r = division(a, b)
+    q, r = division_func(a, b)
     print('{} = {} * {} + {}'.format(a, q, b, r))
     if r != 0:
-        euclidean_algorithm(b, r, division)
+        euclidean_algorithm(b, r, division_func)
 
 #=============================
 

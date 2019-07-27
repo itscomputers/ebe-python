@@ -16,8 +16,10 @@ class ModularRing:
         self.modulus = modulus
         if modulus == 2:
             self.orders = {1 : 1}
+            self.inverses = {1 : 1}
         else:
             self.orders = {1 : 1, modulus - 1 : 2}
+            self.inverses = {1 : 1, modulus - 1 : modulus - 1}
 
         self._factorization = None
         self._euler = None
@@ -25,8 +27,8 @@ class ModularRing:
         self._carmichael_factorization = None
         self._multiplicative_group = None
         self._generator = None
-        self._as_cyclic_group = None
-        self._discrete_log = None
+        self._cyclic_group_dict = None
+        self._discrete_log_dict = None
 
     #=========================
 
@@ -74,6 +76,12 @@ class ModularRing:
 
     #-------------------------
 
+    def is_field(self):
+        """Whether the modular ring is a field."""
+        return self.euler() == self.modulus - 1
+
+    #-------------------------
+
     def multiplicative_group(self):
         """Compute the multiplicative group."""
         if self._multiplicative_group is None:
@@ -93,21 +101,21 @@ class ModularRing:
 
     #-------------------------
 
-    def as_cyclic_group(self):
+    def cyclic_group_dict(self):
         """Realize multiplicative group as a cyclic group for a generator."""
-        if self._as_cyclic_group is None and self.is_cyclic():
-            self._as_cyclic_group = self.cyclic_subgroup_from(self.generator())
+        if self._cyclic_group_dict is None and self.is_cyclic():
+            self._cyclic_group_dict = self.cyclic_subgroup_from(self.generator())
             if self._multiplicative_group is None:
-                self._multiplicative_group = sorted(self._as_cyclic_group.values())
-        return self._as_cyclic_group
+                self._multiplicative_group = sorted(self._cyclic_group_dict.values())
+        return self._cyclic_group_dict
 
     #-------------------------
 
-    def discrete_log(self):
+    def discrete_log_dict(self):
         """Compute a discrete log table for multiplicative group if cyclic."""
-        if self._discrete_log is None and self.is_cyclic():
-            self._discrete_log = {x : e for e, x in self.as_cyclic_group().items()}
-        return self._discrete_log
+        if self._discrete_log_dict is None and self.is_cyclic():
+            self._discrete_log_dict = {x : e for e, x in self.cyclic_group_dict().items()}
+        return self._discrete_log_dict
 
     #-------------------------
 
@@ -119,6 +127,16 @@ class ModularRing:
             for x in self.multiplicative_group():
                 self.order_of(x)
         return self.orders
+
+    #-------------------------
+
+    def all_inverses(self):
+        if len(self.inverses) != self.euler():
+            if self.is_cyclic():
+                self.generator()
+            for x in self.multiplicative_group():
+                self.inverse_of(x)
+        return self.inverses
 
     #-------------------------
 
@@ -134,15 +152,29 @@ class ModularRing:
 
     #-------------------------
 
+    def neg(self, element):
+        """Negation of element in modular ring."""
+        return self.elem(-element)
+
+    #-------------------------
+
     def add(self, *elements):
         """Add elements in modular ring."""
-        return reduce(lambda x, y: (x + y) % self.modulus, elements, 0)
+        return reduce(
+            lambda x, y: (x + y) % self.modulus,
+            map(self.elem, elements),
+            0
+        )
 
     #-------------------------
 
     def mult(self, *elements):
         """Multiply elements in modular ring."""
-        return reduce(lambda x, y: (x * y) % self.modulus, elements, 1)
+        return reduce(
+            lambda x, y: (x * y) % self.modulus,
+            map(self.elem, elements),
+            1
+        )
 
     #-------------------------
 
@@ -154,13 +186,37 @@ class ModularRing:
 
     def inverse_of(self, element):
         """Compute inverse of element of multiplicative group."""
-        return mod_inverse(element, self.modulus)
+        if element not in self.inverses:
+            if self._generator is not None:
+                inverse = self.exp_of(-self.log_of(element) % self.euler())
+            else:
+                inverse = mod_inverse(element, self.modulus)
+            self.inverses[element] = inverse
+        return inverse
 
     #-------------------------
 
     def sqrt_of(self, element):
         """Compute square roots of element of multiplicative group if modulus is prime."""
-        return mod_sqrt(element, self.modulus)
+        if self._generator is not None:
+            index = self.log_of(element)
+            if index % 2 == 0:
+                sqrt = self.exp_of((index // 2))
+                return tuple(sorted([sqrt, self.neg(sqrt)]))
+        if self.is_field():
+            return mod_sqrt(element, self.modulus)
+
+    #-------------------------
+
+    def log_of(self, element):
+        """Compute exponent of element of multiplicative relative to generator."""
+        return self.discrete_log_dict()[self.elem(element)]
+
+    #-------------------------
+
+    def exp_of(self, index):
+        """Compute power of generator in multiplicative group."""
+        return self.cyclic_group_dict()[index]
 
     #=========================
 
@@ -170,7 +226,7 @@ class ModularRing:
             return self.orders[element]
 
         if self._generator is not None:
-            order = self.euler() // gcd(self.discrete_log()[element], self.euler())
+            order = self.euler() // gcd(self.log_of(element), self.euler())
             self.orders[element] = order
             return order
 
@@ -202,6 +258,4 @@ class ModularRing:
             self.orders[element] = curr_power
 
         return subgroup
-
-    #   TODO mod_sqrt of element, use discrete log to comput inverse, mult, power, etc
 
