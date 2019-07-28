@@ -131,6 +131,7 @@ class ModularRing:
     #-------------------------
 
     def all_inverses(self):
+        """Compute inverses of all elements of multiplicative group."""
         if len(self.inverses) != self.euler():
             if self.is_cyclic():
                 self.generator()
@@ -192,7 +193,8 @@ class ModularRing:
             else:
                 inverse = mod_inverse(element, self.modulus)
             self.inverses[element] = inverse
-        return inverse
+            self.inverses[inverse] = element
+        return self.inverses[element]
 
     #-------------------------
 

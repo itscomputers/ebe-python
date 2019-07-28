@@ -69,10 +69,14 @@ def test_modular_ring(modulus, a, b, c):
 
     x = Zm.multiplicative_group()[a % Zm.euler()]
     assert( Zm.power_of(x, b) == mod_power(x, b, modulus) )
-    assert( Zm.mult(x, Zm.inverse_of(x)) == 1 )
     order = Zm.order_of(x)
     assert( len(Zm.cyclic_subgroup_from(x).keys()) == order )
     
+    Zm.all_inverses()
+    inverse_pairs = set(sorted(x) for x in Zm.inverses.items())
+    for (x, y) in inverse_pairs:
+        assert( Zm.mult(x, y) == 1 )
+
     Zm.all_orders()
     assert( Zm.orders == Zm.all_orders() )
     assert( max(Zm.orders.values()) == Zm.carmichael() )
