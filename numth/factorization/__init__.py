@@ -30,8 +30,8 @@ from .two_squares import (
 )
 
 from .four_squares import (
+    quaternion_divisor,
     four_squares_from_factorization,
-    four_squares,
-    quaternion_divisor
+    four_squares
 )
 
