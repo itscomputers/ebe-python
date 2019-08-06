@@ -1,9 +1,15 @@
 #   numth/basic/primality.py
 #===========================================================
+from typing import Iterator, List
+
 from .sqrt import integer_sqrt
 #===========================================================
 
-def prime_sieve(max_value, primes=None, numbers_left=None):
+def prime_sieve(
+        max_value: int,
+        primes: List[int] = None,
+        numbers_left: Iterator[int] = None
+    ) -> List[int]:
     """
     Uses the sieve of Eratosthenes to find all prime numbers up to `max_value`.
 
@@ -35,7 +41,10 @@ def prime_sieve(max_value, primes=None, numbers_left=None):
 
 #=============================
 
-def is_prime__naive(number, numbers_left=None):
+def is_prime__naive(
+        number: int,
+        numbers_left: Iterator[int] = None
+    ) -> bool:
     """
     Uses the sieve of Eratosthenes to determine if `number` is prime.
 
