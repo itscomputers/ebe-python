@@ -1,11 +1,12 @@
 #   numth/primality/miller_rabin.py
 #===========================================================
 from random import randint
+from typing import Set, Tuple
 
 from ..basic import padic 
 #===========================================================
 
-def miller_rabin_witness(number, witness):
+def miller_rabin_witness(number: int, witness: int) -> str:
     """
     Miller-Rabin witness for primality.
 
@@ -39,7 +40,7 @@ def miller_rabin_witness(number, witness):
 
 #-----------------------------
 
-def miller_rabin_witnesses(number, witnesses):
+def miller_rabin_witnesses(number: int, witnesses: Set[int]) -> str:
     """
     Combination of Miller-Rabin witnesses for primality.
 
@@ -60,7 +61,7 @@ def miller_rabin_witnesses(number, witnesses):
 
 #-----------------------------
 
-def miller_rabin_test(number, num_witnesses):
+def miller_rabin_test(number: int, num_witnesses: int) -> str:
     """
     Miller-Rabin test for primality.
 
@@ -90,12 +91,12 @@ def miller_rabin_test(number, num_witnesses):
 
 #=============================
 
-def miller_rabin_max_cutoff():
+def miller_rabin_max_cutoff() -> int:
     return 341550071728321
 
 #-----------------------------
 
-def miller_rabin_cutoffs():
+def miller_rabin_cutoffs() -> Tuple[Tuple[int, int], ...]:
     return ((1, 2),
             (2047, 3),
             (1373653, 5),
@@ -106,7 +107,7 @@ def miller_rabin_cutoffs():
 
 #-----------------------------
 
-def _generate_witnesses(number, num_witnesses):
+def _generate_witnesses(number: int, num_witnesses: int) -> Set[int]:
     if number > miller_rabin_max_cutoff():
         if num_witnesses > number:
             witnesses = set(x for x in range(2, number-1))
