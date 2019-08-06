@@ -5,19 +5,16 @@ from .sqrt import integer_sqrt
 
 def prime_sieve(max_value, primes=None, numbers_left=None):
     """
-    Sieve of Eratosthenes.
+    Uses the sieve of Eratosthenes to find all prime numbers up to `max_value`.
 
-    Computes primes up to max_value.
+    example:
+        `prime_sieve(20) => [2, 3, 5, 7, 11, 13, 17, 19]`
 
-    params
-    + max_value : int
-    + primes : list(int)
-        primes so far
-    + numbers_left : list(int)
-        numbers left to check
+    params:
+        `max_value : int`
 
-    return
-    list(int)
+    returns:
+        `list of int`
     """
     if primes is None and numbers_left is None:
         primes = []
@@ -40,24 +37,26 @@ def prime_sieve(max_value, primes=None, numbers_left=None):
 
 def is_prime__naive(number, numbers_left=None):
     """
-    Primality testing using Sieve of Eratosthenes.
+    Uses the sieve of Eratosthenes to determine if `number` is prime.
 
-    Determines if a number is prime by computing all primes up to its square root.
+    example:
+        `is_prime__naive(19) => True` and
+        `is_prime__naive(20) => False`
+        since 19 is not divisible by 2 or 3 but 20 is
 
     params:
-    + number : int
-    + numbers_left : list(int)
-        numbers left to check
+        `number : int`
 
-    return
-    bool
+    returns:
+        `bool`
+    of whether `number` is prime.
     """
     if number < 2:
         return False
 
     if numbers_left is None:
         numbers_left = (x for x in range(2, integer_sqrt(number) + 1))
-    
+
     try:
         min_value = next(numbers_left)
     except StopIteration:

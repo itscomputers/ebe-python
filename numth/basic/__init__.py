@@ -5,7 +5,6 @@ from .division import (
     bezout,
     div,
     div_with_small_remainder,
-    euclidean_algorithm,
     gcd,
     lcm,
     padic

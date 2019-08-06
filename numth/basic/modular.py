@@ -8,44 +8,31 @@ from .division import bezout, gcd, padic
 
 def jacobi(a, b):
     """
-    Jacobi symbol.
-    
-    Computes the Jacobi symbol (a | b), generalization of Lagrange symbol.
+    Computes Jacobi symbol `(a | b)`, a generalization of Lagrange symbol.
 
     params:
-    + a : int
-    + b : int
-        odd
+        `a : int`,
+        `b : int --odd`
 
-    return
-    int
-        1, 0, or -1
+    returns:
+        `1, 0, or -1`
     """
     if b % 2 == 0:
-        raise ValueError(
-                'Jacobi symbol is undefined when second argument is even')
-
+        raise ValueError('jacobi(_, even) is undefined')
     if b == 1:
         return 1
     if gcd(a, b) != 1:
         return 0
 
-    return _jacobi_helper(a, b)
-
-# - - - - - - - - - - - - - - 
-
-def _jacobi_helper(a, b):
     sign = 1
+    sign_change = [
+        (0, 3, 3), (0, 3, 7),
+        (1, 1, 3), (1, 1, 5),
+        (1, 3, 5), (1, 3, 7)
+    ]
     while b != 1:
         e, r = padic(a % b, 2)
-        if (e % 2, r % 4, b % 8) in [
-            (0, 3, 3),
-            (0, 3, 7),
-            (1, 1, 3),
-            (1, 1, 5),
-            (1, 3, 5),
-            (1, 3, 7)
-        ]:
+        if (e % 2, r % 4, b % 8) in sign_change:
             sign *= -1
         a, b = b, r
 
@@ -55,56 +42,50 @@ def _jacobi_helper(a, b):
 
 def euler_criterion(a, p):
     """
-    Euler criterion.
-
-    Computes the Lagrange symbol (a | p) for p prime.
-        * same as jacobi(a | p)
-        * jacobi symbol is faster, this is primarily for testing purposes
+    Uses Euler's criterion to compute Lagrange symbol `(a | p)`,
+    which is equal to `1` if `a` is a square modulo `p` and `-1` otherwise.
+    (Its main purpose here is for testing `numth.basic.modular.jacobi`,
+    since the jacobi symbol is both faster and more versatile.)
 
     params:
-    + a : int
-        relatively prime to p
-    + p : int
-        prime
+        `a : int`,
+        `p : int --prime`
 
-    return
-    int
-        * 1 if a is a square modulo p
-        * -1 if a is not a square modulo p
+    returns:
+        `1 or -1`
     """
-    result = mod_power(a, (p-1)//2, p)
-
+    result = mod_power(a, (p - 1) // 2, p)
     if result == p - 1:
         return -1
-    
+
     return 1
 
 #=============================
 
 def mod_inverse(number, modulus):
     """
-    The inverse of under modular multiplication.
+    Computes `inverse` of `number` relative to `modulus`, satisfying
+        `(number * inverse) % modulus == 1`.
 
-    Computes inverse such that ``number * inverse % modulus == 1``
+    example:
+        `mod_inverse(7, 13) => 2` and
+        `mod_inverse(2, 13) => 7`
+        since `(7 * 2) % 13 == 1`
 
-    params
-    + number : int
-        relatively prime to modulus
-    + modulus : int
-        greater than 1
+    params:
+        `number : int`,
+        `modulus : int --at least 2`
 
-    return
-    int
+    returns:
+        `inverse : int`
     """
     if modulus < 2:
-        raise ValueError('Modulus must be at least 2')
+        raise ValueError('modulus must be at least 2')
 
     inverse = bezout(number, modulus)[0]
-    
-    if number * inverse % modulus not in [1, -1]:
-        raise ValueError(
-                '{} is not invertible modulo {}'
-                .format(number, modulus))
+
+    if (number * inverse) % modulus not in [1, -1]:
+        raise ValueError('{} not invertible modulo {}'.format(number, modulus))
 
     if inverse < 0:
         inverse += modulus
@@ -115,77 +96,77 @@ def mod_inverse(number, modulus):
 
 def mod_power(number, exponent, modulus):
     """
-    Power of a number relative to a modulus.
-    
-    Computes ``number ** exponent % modulus``, even for negative exponent.
+    Computes `(number ** exponent) % modulus`
+    where `exponent` can be positive or negative.
 
-    params
-    + number : int
-    + exponent : int
-    + modulus : int
-        greater than 1
+    example:
+        `mod_power(7, -5, 13) => 6` and
+        `mod_power(2, 5, 13) => 6`
+        since `7**(-5) % 13 == 2**5 % 13 == 6`.
 
-    return
-    int
+    params:
+        `number : int`,
+        `exponent : int`,
+        `modulus : int --at least 2`
+
+    returns:
+        `int`
     """
     if modulus < 2:
         raise ValueError('Modulus must be at least 2')
 
     if exponent < 0:
         return pow(mod_inverse(number, modulus), -exponent, modulus)
-    
+
     return pow(number, exponent, modulus)
 
 #=============================
 
 def chinese_remainder_theorem(residues, moduli):
     """
-    Chinese remainder theorem.
+    Computes the unique solution modulo the product of `moduli`
+    of the system
+        `x % modulus == residue % modulus`
+    for each pair `(residue, modulus)` in `zip(residues, moduli)`.
 
-    Computes the unique solution modulo product of moduli to the system 
-        ``x % modulus == residue % modulus``
-        for each pair in ``zip(residues, moduli)``
+    example:
+        `chinese_remainder_theorem([4, 2], [6, 7]) => 16`
+        since
+            `16 % 6 == 4` and
+            `16 % 7 == 2`
 
-    params
-    residues : iterable(int)
-    moduli : interable(int)
-        all greater than 1 and pair-wise relatively prime
+    params:
+        `residues : list of int`,
+        `moduli : list of int --each at least 2 and pair-wise relatively prime`
 
-    return
-    int
+    returns:
+        `int`
     """
     moduli_product = reduce(lambda x, y: x * y, moduli, 1)
-    
+
     return sum(map(
         lambda x, y: (x * y) % moduli_product,
-        _chinese_remainder_coeffs(moduli, moduli_product),
+        map(lambda modulus: _coeffs(modulus, moduli_product), moduli),
         residues)
     ) % moduli_product
-
-#- - - - - - - - - - - - - - -
-
-def _chinese_remainder_coeffs(moduli, moduli_product):
-    def coeff(modulus):
-        partial = moduli_product // modulus
-        return (partial * mod_inverse(partial, modulus)) % moduli_product
-
-    return map(coeff, moduli)
 
 #-----------------------------
 
 def prime_to(factorization):
     """
-    List of numbers which are relatively prime to given prime factorization.
+    Computes the integers up to the number associated to `factorization`
+    which are relatively prime to the number.
 
-    Computes list of x for x < associated number such that
-    ``gcd(x, number) == 1``.
+    example:
+        `prime_to({2: 3, 3: 1}) => [1, 5, 7, 11, 13, 17, 19, 23]`
+        since these are the numbers between 0 and 24 which are relatively
+        prime to `2**3 * 3 == 24`.
 
-    params
-    + factorization : dict
-        has the shape {prime : power} for distinct primes
+    params:
+        `factorization : dict` --with shape `{prime : exponent}`
 
-    return
-    list(int)
+    returns:
+        `list of int`
     """
     prime_powers = [p**e for (p, e) in factorization.items()]
     number = reduce(lambda x, y: x * y, prime_powers, 1)
@@ -193,7 +174,7 @@ def prime_to(factorization):
     return sorted(
         sum(map(
             lambda x, y: (x * y) % number,
-            _chinese_remainder_coeffs(prime_powers, number),
+            map(lambda modulus: _coeffs(modulus, number), prime_powers),
             residues
         )) % number for residues in _residues(factorization)
     )
@@ -208,3 +189,8 @@ def _prime_to_prime_power(pair):
 def _residues(factorization):
     return product(*map(_prime_to_prime_power, factorization.items()))
 
+#- - - - - - - - - - - - - - -
+
+def _coeffs(modulus, moduli_product):
+    partial = moduli_product // modulus
+    return (partial * mod_inverse(partial, modulus)) % moduli_product

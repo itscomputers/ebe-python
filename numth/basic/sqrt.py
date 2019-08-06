@@ -5,18 +5,17 @@ import math
 
 def integer_sqrt(number, guess=None):
     """
-    Integer part of the square root of a number.
+    Computes the integer part of the square root of `number`.
 
-    Computes largest integer whose square is less than or equal to number.
+    example:
+        `integer_sqrt(30) => 5`
+        since `5**2 == 25 <= 30 < 36 == 6**2`
 
-    params
-    + number : int
-        nonnegative
-    + guess : int
-        nonnegative
+    params:
+        `number : int --positive`
 
-    return
-    int
+    returns:
+        `int`
     """
     if guess is None:
         guess = int(math.sqrt(number))
@@ -30,13 +29,18 @@ def integer_sqrt(number, guess=None):
 
 def is_square(number):
     """
-    If a number is a perfect square.
+    Determines whether `number` is a perfect square.
 
-    params
-    number : int
+    examples:
+        `is_square(25) => True`,
+        `is_square(30) => False`,
+        `is_square(-25) => False`
 
-    return
-    bool
+    params:
+        `number : int`
+
+    returns:
+        `bool`
     """
-    return integer_sqrt(number)**2 == number
+    return number >= 0 and integer_sqrt(number)**2 == number
 
