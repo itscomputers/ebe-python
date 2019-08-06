@@ -1,6 +1,7 @@
 #   numth/primality/main.py
 #===========================================================
 from functools import reduce
+from typing import Iterator, List, Tuple
 
 from ..config import default
 from ..basic import prime_to 
@@ -8,7 +9,11 @@ from .lucas import lucas_test
 from .miller_rabin import miller_rabin_test, miller_rabin_max_cutoff
 #===========================================================
 
-def is_prime(number, mr_wit=None, l_wit=None):
+def is_prime(
+        number: int,
+        mr_wit: int = None,
+        l_wit: int = None
+    ) -> bool:
     """
     Primality test.
 
@@ -44,7 +49,10 @@ def is_prime(number, mr_wit=None, l_wit=None):
 
 #=============================
 
-def next_prime_gen(number, sieve_primes=None):
+def next_prime_gen(
+        number: int,
+        sieve_primes: List[int] = None
+    ) -> Iterator[int]:
     """
     Generator that yields primes after given number.
 
@@ -80,7 +88,10 @@ def next_prime_gen(number, sieve_primes=None):
 
 #-----------------------------
 
-def next_prime(number, sieve_primes=None):
+def next_prime(
+        number: int,
+        sieve_primes: List[int] = None
+    ) -> int:
     """
     Next prime after given number.
 
@@ -95,7 +106,11 @@ def next_prime(number, sieve_primes=None):
 
 #-----------------------------
 
-def next_primes(number, k, sieve_primes=None):
+def next_primes(
+        number: int,
+        k: int,
+        sieve_primes: List[int] = None
+    ) -> List[int]:
     """
     List of next k primes after given number.
 
@@ -113,7 +128,11 @@ def next_primes(number, k, sieve_primes=None):
 
 #-----------------------------
 
-def primes_in_range(lower_bound, upper_bound, sieve_primes=None):
+def primes_in_range(
+        lower_bound: int,
+        upper_bound: int,
+        sieve_primes: List[int] = None
+    ) -> List[int]:
     """
     Primes in a range.
 
@@ -129,7 +148,7 @@ def primes_in_range(lower_bound, upper_bound, sieve_primes=None):
     """
     gen = next_prime_gen(lower_bound - 1, sieve_primes)
     
-    primes = []
+    primes = []         # type: List[int]
     while True:
         p = next(gen)
         if p < upper_bound:
@@ -141,7 +160,10 @@ def primes_in_range(lower_bound, upper_bound, sieve_primes=None):
 
 #=============================
 
-def prev_prime_gen(number, sieve_primes=None):
+def prev_prime_gen(
+        number: int,
+        sieve_primes: List[int] = None
+    ) -> Iterator[int]:
     """
     Generator that yields primes before given number.
 
@@ -177,7 +199,10 @@ def prev_prime_gen(number, sieve_primes=None):
 
 #-----------------------------
 
-def prev_prime(number, sieve_primes=None):
+def prev_prime(
+        number: int,
+        sieve_primes: List[int] = None
+    ) -> int:
     """
     Prev prime before given number.
 
@@ -195,7 +220,10 @@ def prev_prime(number, sieve_primes=None):
 
 #=============================
 
-def next_twin_primes_gen(number, sieve_primes=None):
+def next_twin_primes_gen(
+        number: int,
+        sieve_primes: List[int] = None
+    ) -> Iterator[Tuple[int, int]]:
     """
     Generator that yields twin primes after given number.
 
@@ -220,7 +248,10 @@ def next_twin_primes_gen(number, sieve_primes=None):
 
 #-----------------------------
 
-def next_twin_primes(number, sieve_primes=None):
+def next_twin_primes(
+        number: int,
+        sieve_primes: List[int] = None
+    ) -> Tuple[int, int]:
     """
     Next pair of twin primes after given number.
 
@@ -235,7 +266,10 @@ def next_twin_primes(number, sieve_primes=None):
 
 #=============================
 
-def goldbach_partition(number, sieve_primes=None):
+def goldbach_partition(
+        number: int,
+        sieve_primes: List[int] = None
+    ) -> Tuple[int, ...]:
     """
     Goldbach partition of a number.
 
