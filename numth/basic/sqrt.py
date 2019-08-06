@@ -3,7 +3,7 @@
 import math
 #===========================================================
 
-def integer_sqrt(number, guess=None):
+def integer_sqrt(number: int, guess: int = None) -> int:
     """
     Computes the integer part of the square root of `number`.
 
@@ -27,7 +27,7 @@ def integer_sqrt(number, guess=None):
 
 #=============================
 
-def is_square(number):
+def is_square(number: int) -> bool:
     """
     Determines whether `number` is a perfect square.
 
