@@ -1,7 +1,9 @@
 #   numth/basic/division.py
 #===========================================================
+from typing import Tuple
+#===========================================================
 
-def div(a, b):
+def div(a: int, b: int) -> Tuple[int, int]:
     """
     Division with remainder of `a` by `b`.
     Computes `quotient` and `remainder` such that
@@ -19,8 +21,7 @@ def div(a, b):
     returns:
         `(quotient : int, remainder : int)`
     """
-    quotient = a // b
-    remainder = a % b
+    quotient, remainder = divmod(a, b)
     if b < 0 and remainder != 0:
         quotient += 1
         remainder -= b
@@ -29,7 +30,7 @@ def div(a, b):
 
 #-----------------------------
 
-def div_with_small_remainder(a, b):
+def div_with_small_remainder(a: int, b: int) -> Tuple[int, int]:
     """
     Like `numth.basic.division.div`.  Computes `quotient` and `remainder` such
     that
@@ -57,7 +58,7 @@ def div_with_small_remainder(a, b):
 
 #=============================
 
-def gcd(*numbers):
+def gcd(*numbers: int) -> int:
     """
     Greatest common divisor.  Computes largest positive integer that divides
     each of given `numbers`.
@@ -90,7 +91,7 @@ def gcd(*numbers):
 
 #=============================
 
-def lcm(*numbers):
+def lcm(*numbers: int) -> int:
     """
     Least common multiple.  Computes smallest positive integer that is divisible
     by each of given `numbers`.
@@ -117,7 +118,7 @@ def lcm(*numbers):
 
 #=============================
 
-def bezout(a, b):
+def bezout(a: int, b: int) -> Tuple[int, int]:
     """
     Finds a solution `(x, y)` to Bezout's identity:
         `a*x + b*y == gcd(a, b)`.
@@ -157,7 +158,7 @@ def bezout(a, b):
 
 #=============================
 
-def padic(number, base):
+def padic(number: int, base: int) -> Tuple[int, int]:
     """
     Computes p-adic `exponent` and `unit` part of `number` relative to `base`,
     ie satisfying
