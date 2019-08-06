@@ -1,7 +1,11 @@
 #   numth/lucas_sequence/modular.py
 #===========================================================
+from typing import Iterator, Tuple
+#===========================================================
 
-def lucas_sequence_gen(P, Q, modulus):
+def lucas_sequence_gen(
+        P: int, Q: int, modulus: int
+    ) -> Iterator[Tuple[int, int, int]]:
     """
     Generator for Lucas sequence triple modulo given modulus.
 
@@ -31,7 +35,10 @@ def lucas_sequence_gen(P, Q, modulus):
 
 #=============================
 
-def by_index(k, P, Q, modulus):
+def by_index(
+        k: int,
+        P: int, Q: int, modulus: int
+    ) -> Tuple[int, int, int]:
     """
     Compute kth terms of Lucas sequence triple modulo given modulus.
 
@@ -56,7 +63,10 @@ def by_index(k, P, Q, modulus):
 
 #-----------------------------
 
-def double_index(U_k, V_k, Q_k, modulus):
+def double_index(
+        U_k: int, V_k: int, Q_k: int,
+        modulus: int
+    ) -> Tuple[int, int, int]:
     """
     Given kth elements of Lucas sequence triple, produces (2k)th elements.
 
@@ -72,12 +82,15 @@ def double_index(U_k, V_k, Q_k, modulus):
     """
     U = (U_k * V_k) % modulus
     V = (V_k * V_k - 2 * Q_k) % modulus
-    
+
     return U, V, pow(Q_k, 2, modulus)
 
 #-----------------------------
 
-def index_plus_one(U_k, V_k, Q_k, P, Q, modulus):
+def index_plus_one(
+        U_k: int, V_k: int, Q_k: int,
+        P: int, Q: int, modulus: int
+    ) -> Tuple[int, int, int]:
     """
     Given kth elements of Lucas sequence triple, produces next elements.
 
@@ -100,13 +113,18 @@ def index_plus_one(U_k, V_k, Q_k, P, Q, modulus):
 
 #===========================================================
 
-def _term_zero(P, Q, modulus):
+def _term_zero(P: int, Q: int, modulus: int) -> Tuple[int, int, int]:
     return (0, 2, 1)
 
-def _term_one(P, Q, modulus):
+def _term_one(P: int, Q: int, modulus: int) -> Tuple[int, int, int]:
     return (1, P % modulus, Q % modulus)
 
-def _next_term(prev, curr, P, Q, modulus):
+def _next_term(
+        prev: Tuple[int, int, int],
+        curr: Tuple[int, int, int],
+        P: int, Q: int, modulus: int
+    ) -> Tuple[int, int, int]:
+    """Computes next term from previous two terms."""
     U, V = map(lambda x, y: (P * x - Q * y) % modulus, curr[:2], prev[:2])
     return (U, V, (Q * curr[2]) % modulus)
 
