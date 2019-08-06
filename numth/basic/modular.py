@@ -2,11 +2,12 @@
 #===========================================================
 from functools import reduce
 from itertools import product
+from typing import Dict, Iterator, List, Tuple
 
 from .division import bezout, gcd, padic
 #===========================================================
 
-def jacobi(a, b):
+def jacobi(a: int, b: int) -> int:
     """
     Computes Jacobi symbol `(a | b)`, a generalization of Lagrange symbol.
 
@@ -40,7 +41,7 @@ def jacobi(a, b):
 
 #-----------------------------
 
-def euler_criterion(a, p):
+def euler_criterion(a: int, p: int) -> int:
     """
     Uses Euler's criterion to compute Lagrange symbol `(a | p)`,
     which is equal to `1` if `a` is a square modulo `p` and `-1` otherwise.
@@ -62,7 +63,7 @@ def euler_criterion(a, p):
 
 #=============================
 
-def mod_inverse(number, modulus):
+def mod_inverse(number: int, modulus: int) -> int:
     """
     Computes `inverse` of `number` relative to `modulus`, satisfying
         `(number * inverse) % modulus == 1`.
@@ -94,7 +95,7 @@ def mod_inverse(number, modulus):
 
 #-----------------------------
 
-def mod_power(number, exponent, modulus):
+def mod_power(number: int, exponent: int, modulus: int) -> int:
     """
     Computes `(number ** exponent) % modulus`
     where `exponent` can be positive or negative.
@@ -122,7 +123,7 @@ def mod_power(number, exponent, modulus):
 
 #=============================
 
-def chinese_remainder_theorem(residues, moduli):
+def chinese_remainder_theorem(residues: List[int], moduli: List[int]) -> int:
     """
     Computes the unique solution modulo the product of `moduli`
     of the system
@@ -152,7 +153,7 @@ def chinese_remainder_theorem(residues, moduli):
 
 #-----------------------------
 
-def prime_to(factorization):
+def prime_to(factorization: Dict[int, int]) -> List[int]:
     """
     Computes the integers up to the number associated to `factorization`
     which are relatively prime to the number.
@@ -181,16 +182,16 @@ def prime_to(factorization):
 
 #- - - - - - - - - - - - - - -
 
-def _prime_to_prime_power(pair):
+def _prime_to_prime_power(pair: Tuple[int, int]) -> Iterator[int]:
     return (x for x in range(1, pair[0]**pair[1]) if x % pair[0] != 0)
 
 #- - - - - - - - - - - - - - -
 
-def _residues(factorization):
+def _residues(factorization: Dict[int, int]) -> Iterator[Tuple[int, ...]]:
     return product(*map(_prime_to_prime_power, factorization.items()))
 
 #- - - - - - - - - - - - - - -
 
-def _coeffs(modulus, moduli_product):
+def _coeffs(modulus: int, moduli_product: int) -> int:
     partial = moduli_product // modulus
     return (partial * mod_inverse(partial, modulus)) % moduli_product
