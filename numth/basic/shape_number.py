@@ -4,7 +4,7 @@ from .division import div
 from .sqrt import integer_sqrt, is_square
 #===========================================================
 
-def shape_number_by_index(k, sides):
+def shape_number_by_index(k: int, sides: int) -> int:
     """
     Computes the `k`th shape number for number of `sides`.
 
@@ -23,7 +23,7 @@ def shape_number_by_index(k, sides):
 
 #=============================
 
-def which_shape_number(number, sides):
+def which_shape_number(number: int, sides: int) -> int:
     """
     Computes, if possible, shape number index for `number` with
     given number of `sides`.
@@ -46,7 +46,8 @@ def which_shape_number(number, sides):
     if not is_square(root):
         return None
 
-    q, r = div(sides - 4 + integer_sqrt(root), denom)
-    if r == 0:
-        return q
+    k, r = div(sides - 4 + integer_sqrt(root), denom)
+    if r != 0:
+        return None
+    return k
 
