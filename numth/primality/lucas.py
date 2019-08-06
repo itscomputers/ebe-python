@@ -1,6 +1,7 @@
 #   numth/primality/lucas.py
 #===========================================================
 from random import randint
+from typing import Set, Tuple, Union
 
 from ..basic import gcd, is_square, jacobi, padic
 from ..lucas_sequence import (
@@ -9,7 +10,7 @@ from ..lucas_sequence import (
 )
 #===========================================================
 
-def lucas_witness_pair(number, P, Q):
+def lucas_witness_pair(number: int, P: int, Q: int) -> Tuple[str, bool]:
     """
     Lucas sequence witness for primality.
 
@@ -50,7 +51,7 @@ def lucas_witness_pair(number, P, Q):
 
     U, V, Q_ = lucas_sequence_double_index(U, V, Q_k, number)
     if U == 0:
-        if _trivially_composite(V, Q, Q_k, number, delta):
+        if _trivially_composite(number, delta, V, Q, Q_k):
             return 'composite', False
 
         return 'probable prime', strong
@@ -59,7 +60,10 @@ def lucas_witness_pair(number, P, Q):
 
 #-----------------------------
 
-def lucas_witness_pairs(number, witness_pairs):
+def lucas_witness_pairs(
+        number: int,
+        witness_pairs: Set[Tuple[int, int]]
+    ) -> Tuple[str, bool]:
     """
     Combination of Lucas sequence witnesses for primality
 
@@ -86,7 +90,7 @@ def lucas_witness_pairs(number, witness_pairs):
 
 #-----------------------------
 
-def lucas_test(number, num_witnesses):
+def lucas_test(number: int, num_witnesses: int) -> str:
     """
     Lucas test for primality.
 
@@ -117,8 +121,12 @@ def lucas_test(number, num_witnesses):
 
 #=============================
 
-def _generate_witness_pairs(number, num_witnesses):
-    witnesses = set()
+def _generate_witness_pairs(
+        number: int,
+        num_witnesses: int
+    ) -> Set[Tuple[int, int]]:
+    """Generate witness pairs for primality testing."""
+    witnesses = set()       # type: Set[Tuple[int, int]]
 
     if not is_square(number):
         D = 5
@@ -139,7 +147,13 @@ def _generate_witness_pairs(number, num_witnesses):
 
 #=============================
 
-def _good_parameters(number, P, Q, D):
+def _good_parameters(
+        number: int,
+        P: int,
+        Q: int,
+        D: int
+    ) -> Union[bool, int]:
+    """Determines if parameters are good or if trivial factor is present."""
     for d in (gcd(P, number), gcd(Q, number), gcd(D, number)):
         if d == number:
             return False
@@ -149,7 +163,14 @@ def _good_parameters(number, P, Q, D):
 
 #-----------------------------
 
-def _trivially_composite(V, Q, Q_power, number, delta):
+def _trivially_composite(
+        number: int,
+        delta: int,
+        V: int,
+        Q: int,
+        Q_power: int
+    ) -> bool:
+    """Computes is number is composite using calculated values."""
     if delta == number + 1:
         if V != (2*Q) % number:
             return True
