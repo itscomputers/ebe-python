@@ -245,26 +245,28 @@ def test_is_square(numer, denom):
 #=============================
 
 @given(
-    number = st.integers()
+    st.integers(),
+    st.floats(),
+    *coords()
 )
-def test_int_to_rational(number):
-    assert( int(frac(number)) == number )
+def test_frac(int_, float_, numer, denom):
+    assert( int(frac(int_)) == int_ )
+    assert( int(frac(str(int_))) == int_ )
+    if str(float_) not in ['inf', 'nan', '-inf']:
+        assert( float(frac(float_)) == float_ )
+        assert( float(frac(str(float_))) == float_ )
 
-#-----------------------------
-
-@given(
-    number = st.floats()
-)
-def test_float_to_rational(number):
-    assume( str(number) not in ['inf', 'nan', '-inf'] )
-    assert( float(frac(number)) == number )
-
-#-----------------------------
-
-@given(*coords())
-def test_str_to_rational(numer, denom):
     r = Rational(numer, denom)
-    f1 = '{}/{}'.format(numer, denom)
-    f2 = '{} / {}'.format(numer, denom)
-    assert( frac(f1) == frac(f2) == r )
-    
+    f = Fraction(numer, denom)
+    s1 = '{}/{}'.format(numer, denom)
+    s2 = '{} / {}'.format(numer, denom)
+    l = [numer, denom]
+    t = (numer, denom)
+    assert( frac(r) == r )
+    assert( frac(f) == r )
+    assert( frac(s1) == r )
+    assert( frac(s2) == r )
+    assert( frac(l) == r )
+    assert( frac(t) == r )
+    assert( frac(numer, denom) == r )
+
