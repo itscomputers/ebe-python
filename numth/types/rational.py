@@ -1,18 +1,19 @@
 #   numth/types/rational.py
 #===========================================================
 from fractions import Fraction
+from typing import Any, Union
 import re
 
 from ..config import default
 from ..basic import div, gcd, integer_sqrt, is_square, mod_inverse
 #===========================================================
 
-def frac(*inputs):
-    """Shortcut to create Rational"""
+def frac(*inputs: Any) -> 'Rational':
+    """Shortcut to create a Rational object."""
     if len(inputs) == 1:
         number = inputs[0]
 
-        if type(number) not in Rational.compatible_types():
+        if type(number) not in [int, float, str, list, tuple, Fraction, Rational]:
             raise ValueError('incompatible type: {}'.format(type(number)))
 
         type_name = type(number).__name__
@@ -35,7 +36,8 @@ class Rational:
     represents
     numer / denom
     """
-    def __init__(self, numer, denom):
+    def __init__(self, numer: int, denom: int):
+        """Inits Rational number with numer and denom."""
         if denom == 0:
             raise ValueError('Attempted division by zero')
 
@@ -51,15 +53,16 @@ class Rational:
 
     #-------------------------
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Represents Rational number as string."""
         if self.denom == 1:
             return '{}'.format(self.numer)
         return '{}/{}'.format(self.numer, self.denom)
 
     #-------------------------
 
-    def display(self):
-        """Pretty-print rational number."""
+    def display(self) -> str:
+        """Pretty-print Rational number."""
         minus = self.sign == -1
         numer = abs(self.numer)
         denom = self.denom
@@ -68,14 +71,14 @@ class Rational:
         length = max(numer_length, denom_length)
         numer_offset = (length - numer_length + 1) // 2
         denom_offset = (length - denom_length + 1) // 2
-        numer = ' '*(minus + numer_offset + 1) + str(numer)
-        denom = ' '*(minus + denom_offset + 1) + str(denom)
+        numer_s = ' '*(minus + numer_offset + 1) + str(numer)
+        denom_s = ' '*(minus + denom_offset + 1) + str(denom)
         line = '-'*minus + ' ' + '\u2500'*length
-        return '{}\n{}\n{}'.format(numer, line, denom)
+        return '{}\n{}\n{}'.format(numer_s, line, denom_s)
 
     #-------------------------
 
-    def decimal(self, num_digits=None):
+    def decimal(self, num_digits: int = None) -> str:
         """
         Express rational number as a string in decimal form.
 
@@ -87,71 +90,72 @@ class Rational:
             decimal representation of self
         """
         if num_digits == 0:
-            return str(round(self))
+            return str(int(self + Rational(1, 2)))
 
         num_digits = num_digits or default('decimal_digits')
 
         quotient, remainder = div(self.numer, self.denom)
         if num_digits == 0:
             return format(quotient)
-        digits = format(round(Rational(remainder*10**num_digits, self.denom)))
+        shifted_remainder = Rational(remainder * 10**num_digits, self.denom)
+        digits = format(int(shifted_remainder + Rational(1, 2)))
         num_zeros = num_digits - len(digits)
 
         return '{}.{}{}'.format(quotient, '0'*num_zeros, digits)
 
     #=========================
 
-    def compare(self, other):
+    def compare(self, other: Union[int, float, Fraction, 'Rational']) -> int:
         other_ = frac(other)
         return self.numer * other_.denom - self.denom * other_.numer
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if type(other) in [int, float, Fraction, Rational]:
             return self.compare(other) == 0
         return other == self
 
-    def __ne__(self, other):
+    def __ne__(self, other: Any) -> bool:
         return not (self == other)
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         if type(other) in [int, float, Fraction, Rational]:
             return self.compare(other) < 0
         return other > self
 
-    def __gt__(self, other):
+    def __gt__(self, other: Any) -> bool:
         if type(other) in [int, float, Fraction, Rational]:
             return self.compare(other) > 0
         return other < self
 
-    def __le__(self, other):
+    def __le__(self, other: Any) -> bool:
         return not (self > other)
 
-    def __ge__(self, other):
+    def __ge__(self, other: Any) -> bool:
         return not (self < other)
 
     #=========================
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.numer // self.denom
 
-    def __float__(self):
+    def __float__(self) -> float:
         return self.numer / self.denom
 
-    def __round__(self):
-        return int(Rational(2*self.numer + self.denom, 2*self.denom))
+    def __round__(self) -> int:
+        return int(self + Rational(1, 2))
 
-    def __neg__(self):
+    def __neg__(self) -> 'Rational':
         return Rational(-self.numer, self.denom)
 
-    def __abs__(self):
+    def __abs__(self) -> 'Rational':
         return Rational(abs(self.numer), self.denom)
 
-    def inverse(self):
+    def inverse(self) -> 'Rational':
         return Rational(self.denom, self.numer)
 
     #=========================
 
-    def __add__(self, other):
+    def __add__(self, other: Any) -> 'Rational':
         if type(other) in [int, float, Rational]:
             other_ = frac(other)
             d = gcd(self.denom, other_.denom)
@@ -162,40 +166,44 @@ class Rational:
             return Rational(numer, denom)
         return other + self
 
-    def __radd__(self, other):
+    def __radd__(self, other: Any) -> 'Rational':
         return self + other
 
     #-------------------------
 
-    def __sub__(self, other):
+    def __sub__(self, other: Any) -> 'Rational':
         return self + (-other)
 
-    def __rsub__(self, other):
+    def __rsub__(self, other: Any) -> 'Rational':
         return -self + other
 
     #-------------------------
 
-    def __mul__(self, other):
+    def __mul__(self, other: Any) -> 'Rational':
         if type(other) in [int, float, Rational]:
-            return Rational(self.numer*frac(other).numer, self.denom*frac(other).denom)
+            other_ = frac(other)
+            return Rational(
+                self.numer * other_.numer,
+                self.denom * other_.denom
+            )
         return other * self
 
-    def __rmul__(self, other):
+    def __rmul__(self, other: Any) -> 'Rational':
         return self * other
 
     #-------------------------
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: Any) -> 'Rational':
         if type(other) in [int, float, Rational]:
             return self * frac(other).inverse()
         return self * other.inverse()
 
-    def __rtruediv__(self, other):
+    def __rtruediv__(self, other: Any) -> 'Rational':
         return self.inverse() * other
 
     #-------------------------
 
-    def __pow__(self, other):
+    def __pow__(self, other: int) -> 'Rational':
         if type(other) is not int:
             raise ValueError('Exponent must be an integer')
 
@@ -208,7 +216,7 @@ class Rational:
 
     #-------------------------
 
-    def __mod__(self, other):
+    def __mod__(self, other: int) -> int:
         if type(other) is not int or other < 2:
             raise ValueError('Modulus must an integer greater than 1')
 
@@ -217,7 +225,7 @@ class Rational:
 
     #=========================
 
-    def approx_equal(self, other, num_digits=None):
+    def approx_equal(self, other: Any, num_digits: int = None) -> bool:
         """
         Approximate equality of two rational numbers.
 
@@ -245,7 +253,7 @@ class Rational:
 
     #=========================
 
-    def sqrt(self, num_digits=None):
+    def sqrt(self, num_digits: int = None) -> 'Rational':
         """
         Square root (or approximation of square root) of a rational number.
 
@@ -285,7 +293,7 @@ class Rational:
 
     #-------------------------
 
-    def inverse_sqrt(self, num_digits=None):
+    def inverse_sqrt(self, num_digits: int = None) -> 'Rational':
         """
         Inverse square root (or approximation) of a rational number greater than 1.
 
@@ -312,15 +320,10 @@ class Rational:
 
     #-------------------------
 
-    def is_square(self):
+    def is_square(self) -> bool:
         return is_square(self.numer) and is_square(self.denom)
 
     #=========================
-
-    def compatible_types():
-        return [int, float, str, list, tuple, Fraction, Rational]
-
-    #-------------------------
 
     def from_int(int_):
         return Rational(int_, 1)
