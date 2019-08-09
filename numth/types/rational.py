@@ -7,18 +7,19 @@ from ..config import default
 from ..basic import div, gcd, integer_sqrt, is_square, mod_inverse
 #===========================================================
 
-def frac(number):
+def frac(*inputs):
     """Shortcut to create Rational"""
-    if type(number) is Rational:
-        return number
-    if type(number) is int:
-        return _int_to_rational(number)
-    if type(number) is Fraction:
-        return _fraction_to_rational(number)
-    if type(number) is float:
-        return _float_to_rational(number)
-    if type(number) is str:
-        return _str_to_rational(number)
+    if len(inputs) == 1:
+        number = inputs[0]
+
+        if type(number) not in Rational.compatible_types():
+            raise ValueError('incompatible type: {}'.format(type(number)))
+
+        type_name = type(number).__name__
+        function_name = 'Rational.from_{}'.format(type_name)
+        return eval(function_name)(number)
+
+    return Rational(*inputs)
 
 #===========================================================
 
@@ -30,7 +31,7 @@ class Rational:
     + numer : int
     + denom : int
         nonzero
-    
+
     represents
     numer / denom
     """
@@ -89,7 +90,7 @@ class Rational:
             return str(round(self))
 
         num_digits = num_digits or default('decimal_digits')
-        
+
         quotient, remainder = div(self.numer, self.denom)
         if num_digits == 0:
             return format(quotient)
@@ -149,7 +150,7 @@ class Rational:
         return Rational(self.denom, self.numer)
 
     #=========================
-    
+
     def __add__(self, other):
         if type(other) in [int, float, Rational]:
             other_ = frac(other)
@@ -173,7 +174,7 @@ class Rational:
         return -self + other
 
     #-------------------------
-        
+
     def __mul__(self, other):
         if type(other) in [int, float, Rational]:
             return Rational(self.numer*frac(other).numer, self.denom*frac(other).denom)
@@ -266,13 +267,13 @@ class Rational:
 
         if numer_integer_sqrt**2 == self.numer \
                 and denom_integer_sqrt**2 == self.denom:
-            return guess 
+            return guess
 
         num_digits = num_digits or default('sqrt_digits')
 
         if self.numer > self.denom:
             other_guess = self / guess
-            
+
             while not guess.approx_equal(other_guess, num_digits):
                 guess = (guess + other_guess) / 2
                 other_guess = self / guess
@@ -314,80 +315,77 @@ class Rational:
     def is_square(self):
         return is_square(self.numer) and is_square(self.denom)
 
-#===========================================================
+    #=========================
 
-def _int_to_rational(number):
-    return Rational(number, 1)
+    def compatible_types():
+        return [int, float, str, list, tuple, Fraction, Rational]
 
-#-----------------------------
+    #-------------------------
 
-def _split_float_with_decimal_point(number):
-    pattern = re.fullmatch(r'([\+\-]?\d+)\.(\d+)', str(number))
-    if pattern is not None:
-        whole, decimal = pattern.group(1, 2)
-        numer = int(whole + decimal)
-        denom = 10**len(decimal)
-        return numer, denom
-        
-#-----------------------------
+    def from_int(int_):
+        return Rational(int_, 1)
 
-def _split_float_with_exponent(number):
-    pattern = re.fullmatch(r'(.+)e([+-]?\d+)', str(number))
-    if pattern is not None:
-        num, exponent = pattern.group(1, 2)
-        return num, int(exponent)
+    #-------------------------
 
-#-----------------------------
-
-def _float_to_rational(number):
-    with_exponent = _split_float_with_exponent(number)
-    
-    if with_exponent is None:
-        numer, denom = _split_float_with_decimal_point(number)
-
-    else:
-        number_, exponent = with_exponent
-        with_decimal = _split_float_with_decimal_point(number_)
-        if with_decimal:
-            numer, denom = with_decimal
+    def from_float(float_):
+        exponent_pattern = re.fullmatch(r'(.+)e([\+\-]?\d+)', str(float_))
+        if exponent_pattern is None:
+            number, exponent = str(float_), None
         else:
-            numer = int(number_)
-            denom = 1
-        if exponent >= 0:
-            numer *= 10**exponent
+            number, exponent = exponent_pattern.group(1, 2)
+
+        decimal_pattern = re.fullmatch(r'([\+\-]?\d+)\.(\d+)', str(number))
+        if decimal_pattern is None:
+            numer, denom = int(number), 1
         else:
-            denom *= 10**(-exponent)
+            whole, decimal = decimal_pattern.group(1, 2)
+            numer = int(whole + decimal)
+            denom = 10**len(decimal)
 
-    return Rational(numer, denom)
+        if exponent is None:
+            return Rational(numer, denom)
 
-#-----------------------------
+        exp = int(exponent)
+        if exp < 0:
+            return Rational(numer, denom * 10**(-exp))
+        return Rational(numer * 10**exp, denom)
 
-def _fraction_to_rational(number):
-    return Rational(number.numerator, number.denominator)
+    #-------------------------
 
-#-----------------------------
+    def from_str(string_):
+        try:
+            int_ = int(string_)
+            return Rational.from_int(int_)
+        except:
+            pass
 
-def _frac_string_to_rational(number):
-    """Convert string of form 'a/b' to Rational."""
-    pattern = re.match(r'([\+\-]?\d+)\/(\d+)', ''.join(number.split()))
-    if pattern is not None:
-        return Rational(*map(int, pattern.group(1, 2)))
+        try:
+            float_ = float(string_)
+            return Rational.from_float(float_)
+        except:
+            pass
 
-#-----------------------------
+        pattern = re.match(r'([\+\-]?\d+)\/(\d+)', ''.join(string_.split()))
+        if pattern is not None:
+            return Rational(*map(int, pattern.group(1, 2)))
 
-def _str_to_rational(number):
-    try:
-        return _int_to_rational(int(number))
-    except:
-        pass
+    #-------------------------
 
-    try:
-        return _frac_string_to_rational(number)
-    except:
-        pass
-    
-    try:
-        return _float_to_rational(float(number))
-    except Exception as e:
-        raise TypeError(e)
+    def from_list(list_):
+        return Rational(*list_)
+
+    #-------------------------
+
+    def from_tuple(tuple_):
+        return Rational(*tuple_)
+
+    #-------------------------
+
+    def from_Fraction(Fraction_):
+        return Rational(Fraction_.numerator, Fraction_.denominator)
+
+    #-------------------------
+
+    def from_Rational(Rational_):
+        return Rational_
 
