@@ -1,10 +1,12 @@
 #   numth/rational_approximation/pi.py
 #===========================================================
+from typing import Iterator
+
 from ..config import default
 from ..types import Rational
 #===========================================================
 
-def ramanujan_hardy(sqrt_digits):
+def ramanujan_hardy(sqrt_digits: int) -> Iterator[Rational]:
     """
     Generator for Ramanujan-Hardy series that approximates 1 / pi.
 
@@ -31,7 +33,7 @@ def ramanujan_hardy(sqrt_digits):
 
 #=============================
 
-def pi(num_digits=None):
+def pi(num_digits: int = None) -> Rational:
     """
     Rational approximation of pi.
 

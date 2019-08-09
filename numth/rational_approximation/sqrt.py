@@ -1,11 +1,18 @@
 #   numth/rational_approximation/sqrt.py
 #===========================================================
+from typing import Iterator, Tuple, Union
+
 from ..basic import integer_sqrt
 from ..continued_fraction import continued_fraction_convergents
 from ..types import frac, Rational, Quadratic
+
+Number = Union[int, float, Rational]
 #===========================================================
 
-def first_approximation(number, initial=None):
+def first_approximation(
+        number: int,
+        initial: Number = None
+    ) -> Rational:
     """Returns integer square root or initial value as a Rational."""
     if initial is None:
         return frac(integer_sqrt(number))
@@ -13,7 +20,10 @@ def first_approximation(number, initial=None):
 
 #=============================
 
-def babylonian_gen(number, initial=None):
+def babylonian_gen(
+        number: int,
+        initial: Number = None
+    ) -> Iterator[Rational]:
     """
     Babylonian method for approximating the square root of number.
 
@@ -35,7 +45,10 @@ def babylonian_gen(number, initial=None):
 
 #=============================
 
-def halley_sqrt_gen(number, initial=None):
+def halley_sqrt_gen(
+        number: int,
+        initial: Number = None
+    ) -> Iterator[Rational]:
     """
     Halleys's method for approximating the square root of number.
 
@@ -57,7 +70,10 @@ def halley_sqrt_gen(number, initial=None):
 
 #=============================
 
-def bakhshali_gen(number, initial=None):
+def bakhshali_gen(
+        number: int,
+        initial: Number = None
+    ) -> Iterator[Rational]:
     """
     Bakhshali's method for approximating the square root of number.
 
@@ -81,7 +97,7 @@ def bakhshali_gen(number, initial=None):
 
 #=============================
 
-def continued_fraction_convergent_gen(number):
+def continued_fraction_convergent_gen(number: int) -> Iterator[Rational]:
     """
     Continued fraction convergent approximations for square root of number.
 
@@ -109,7 +125,10 @@ def continued_fraction_convergent_gen(number):
 
 #=============================
 
-def goldschmidt_gen(number, initial=None):
+def goldschmidt_gen(
+        number: int,
+        initial: Number = None
+    ) -> Iterator[Tuple[Rational, Rational]]:
     """
     Goldschmidt's method for approximating the square root of number.
 
@@ -123,7 +142,7 @@ def goldschmidt_gen(number, initial=None):
     return
     generator -> (Rational, Rational)
     """
-    b = number
+    b = frac(number)
     Y = first_approximation(number, initial).inverse()
     y = Y
     x = number * y
@@ -137,7 +156,10 @@ def goldschmidt_gen(number, initial=None):
 
 #=============================
 
-def ladder_arithmetic_gen(number, initial=None):
+def ladder_arithmetic_gen(
+        number: int,
+        initial: Number = None
+    ) -> Iterator[Rational]:
     """
     Ladder arithmetic method for approximating the square root of number.
 
@@ -162,7 +184,10 @@ def ladder_arithmetic_gen(number, initial=None):
 
 #=============================
 
-def linear_fractional_transformation_gen(number, initial=None):
+def linear_fractional_transformation_gen(
+        number: int,
+        initial: Number = None
+    ) -> Iterator[Rational]:
     """
     Linear frational transformation method for approximating 
     the square root of number.

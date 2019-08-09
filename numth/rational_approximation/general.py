@@ -1,9 +1,14 @@
 #   numth/rational_approximation/general.py
 #===========================================================
-from ..types import frac
+from typing import Iterator, Union
+
+from ..types import frac, Polynomial, Rational
 #===========================================================
 
-def newton_gen(polynomial, initial):
+def newton_gen(
+    polynomial: Polynomial,
+    initial: Union[int, float, Rational]
+) -> Iterator[Rational]:
     """
     Newton's method for approximating a zero of a polynomial.
 
@@ -23,7 +28,10 @@ def newton_gen(polynomial, initial):
 
 #=============================
 
-def halley_gen(polynomial, initial):
+def halley_gen(
+    polynomial: Polynomial,
+    initial: Union[int, float, Rational]
+) -> Iterator[Rational]:
     """
     Halley's method for approximating a zero of a polynomial.
 
