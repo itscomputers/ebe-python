@@ -73,7 +73,7 @@ def test_modular_ring(modulus, a, b, c):
     assert( len(Zm.cyclic_subgroup_from(x).keys()) == order )
     
     Zm.all_inverses()
-    inverse_pairs = set(sorted(x) for x in Zm.inverses.items())
+    inverse_pairs = set(tuple(sorted(x)) for x in Zm.inverses.items())
     for (x, y) in inverse_pairs:
         assert( Zm.mult(x, y) == 1 )
 
