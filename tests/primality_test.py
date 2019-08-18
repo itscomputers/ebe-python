@@ -3,7 +3,7 @@
 import env
 from hypothesis import given, assume, strategies as st
 
-from numth.basic import is_prime__naive, prime_sieve
+from numth.basic import is_prime__naive, primes_up_to
 from numth.primality.miller_rabin import (
     _generate_witnesses,
     miller_rabin_max_cutoff,
@@ -117,7 +117,7 @@ def test_generate_witnesses(number, num_witnesses):
 #===========================================================
 
 def test_is_prime_on_sieve():
-    primes = prime_sieve(10**4)
+    primes = primes_up_to(10**4)
     for p in primes:
         assert( is_prime(p) )
     

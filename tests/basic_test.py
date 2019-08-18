@@ -107,7 +107,9 @@ def test_padic(number, base):
 
 @given(st.integers())
 def test_jacobi(a):
-    for p in prime_sieve(10**3)[1:]:
+    for p in iter_primes_up_to(10**3):
+        if p == 2:
+            continue
         if a % p == 0:
             assert( jacobi(a, p) == 0 )
         else:
@@ -143,7 +145,7 @@ def test_mod_power(number, exponent, modulus):
 
 @given(*(3 * [st.integers()]))
 def test_chinese_remainder_theorem(a, b, c):
-    primes = sample(prime_sieve(10**3), 4)
+    primes = sample(primes_up_to(10**3), 4)
     moduli = [primes[0]**1, primes[1]**2, primes[2] * primes[3]]
     solution = chinese_remainder_theorem([a,b,c], moduli)
     for (r, m) in zip([a,b,c], moduli):
@@ -164,16 +166,18 @@ def test_prime_to(number):
 #   primality
 #===========================================================
 
-def test_prime_sieve():
-    assert( len(prime_sieve(10**2)) == 25 )
-    assert( len(prime_sieve(10**3)) == 168 )
-    assert( len(prime_sieve(10**4)) == 1229 )
-    assert( len(prime_sieve(10**5)) == 9592 )
+def test_primes_up_to():
+    prime_lists = (primes_up_to(10**i) for i in range(6))
+    prime_counts = [0, 4, 25, 168, 1229, 9592]
+    for i, prime_list in enumerate(prime_lists):
+        assert len(prime_list) == prime_counts[i]
+        if i < 5:
+            assert prime_list == list(iter_primes_up_to(10**i))
 
 #-----------------------------
 
 def test_is_prime__naive():
-    for p in prime_sieve(10**3):
+    for p in iter_primes_up_to(10**3):
         assert( is_prime__naive(p) )
 
 #===========================================================

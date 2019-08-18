@@ -21,7 +21,9 @@ from .modular import (
 
 from .primality import (
     is_prime__naive,
-    prime_sieve
+    iter_primes_up_to,
+    prime_gen,
+    primes_up_to
 )
 
 from .shape_number import (
