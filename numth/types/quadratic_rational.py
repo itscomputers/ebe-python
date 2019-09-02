@@ -256,7 +256,7 @@ class QuadraticRational(numbers.Number):
             return self * other.inverse
 
         if isinstance(other, numbers.Real):
-            return self * (frac(other).inverse)
+            return self * (frac(other).inverse())
 
         if isinstance(other, numbers.Complex) and self.root == 1:
             return self / QuadraticRational.from_complex(other)

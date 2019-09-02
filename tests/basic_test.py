@@ -43,11 +43,10 @@ def test_gcd(a, b):
     assert( a % d == b % d == 0 )
     assert( gcd(a//d, b//d) == 1 )
 
-
 @given(
     st.integers(min_value=1),
-    st.integers(min_value=1),
-    st.integers(min_value=1)
+    st.integers(min_value=0),
+    st.integers(min_value=0)
 )
 def test_gcd_of_many(a, b, c):
     d = gcd(a, b, c)
@@ -113,7 +112,7 @@ def test_jacobi(a):
         if a % p == 0:
             assert( jacobi(a, p) == 0 )
         else:
-            assert( jacobi(a, p) == euler_criterion(a, p) ) 
+            assert( jacobi(a, p) == euler_criterion(a, p) )
 
 #-----------------------------
 

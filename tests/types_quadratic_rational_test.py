@@ -76,9 +76,9 @@ def test_add(r, i, d, R, I, D, root):
     a = QuadraticRational(r, i, d, root)
     A = QuadraticRational(R, I, D, root)
     s = a + A
-    assert s == A + a
     assert s.real == a.real + A.real
     assert s.imag == a.imag + A.imag
+    assert s == A + a
 
 @given(*coords(), *rational())
 def test_add_number(r, i, d, root, numer, denom):
@@ -90,3 +90,84 @@ def test_add_number(r, i, d, root, numer, denom):
     assert s.imag == a.imag
     assert S.real == a.real + numer
     assert S.imag == a.imag
+    assert s == b + a
+    assert S == numer + a
+
+#-----------------------------
+
+@given(*double_coords())
+def test_sub(r, i, d, R, I, D, root):
+    a = QuadraticRational(r, i, d, root)
+    A = QuadraticRational(R, I, D, root)
+    s = a - A
+    assert s.real == a.real - A.real
+    assert s.imag == a.imag - A.imag
+    assert -s == A - a
+
+@given(*coords(), *rational())
+def test_sub_number(r, i, d, root, numer, denom):
+    a = QuadraticRational(r, i, d, root)
+    b = frac(numer, denom)
+    s = a - b
+    S = a - numer
+    assert s.real == a.real - b
+    assert s.imag == a.imag
+    assert S.real == a.real - numer
+    assert S.imag == a.imag
+    assert -s == b - a
+    assert -S == numer - a
+
+#-----------------------------
+
+@given(*double_coords())
+def test_mul(r, i, d, R, I, D, root):
+    a = QuadraticRational(r, i, d, root)
+    A = QuadraticRational(R, I, D, root)
+    s = a * A
+    assert s.real == a.real * A.real + a.imag * A.imag * root
+    assert s.imag == a.real * A.imag + a.imag * A.real
+    assert s == A * a
+
+@given(*coords(), *rational())
+def test_mul_number(r, i, d, root, numer, denom):
+    a = QuadraticRational(r, i, d, root)
+    b = frac(numer, denom)
+    s = a * b
+    S = a * numer
+    assert s.real == a.real * b
+    assert s.imag == a.imag * b
+    assert S.real == a.real * numer
+    assert S.imag == a.imag * numer
+    assert s == b * a
+    assert S == numer * a
+
+#-----------------------------
+
+@given(*double_coords())
+def test_truediv(r, i, d, R, I, D, root):
+    assume( (r, i) != (0, 0) and (R, I) != (0, 0) )
+    a = QuadraticRational(r, i, d, root)
+    A = QuadraticRational(R, I, D, root)
+    s = a / A
+    assert s == a * (A.inverse)
+    assert s.inverse == A / a
+    assert s.inverse == (a.inverse) * A
+
+@given(*coords(), *rational())
+def test_truediv_number(r, i, d, root, numer, denom):
+    assume( (r, i) != (0, 0) and numer != 0 )
+    a = QuadraticRational(r, i, d, root)
+    b = frac(numer, denom)
+    s = a / b
+    S = a / numer
+    assert s.real == a.real / b
+    assert s.imag == a.imag / b
+    assert S.real == a.real / numer
+    assert S.imag == a.imag / numer
+    assert s == a * b.inverse()
+    assert s.inverse == b / a
+    assert s.inverse == b * a.inverse
+    assert S == a * frac(1, numer)
+    assert S.inverse == numer / a
+    assert S.inverse == numer * a.inverse
+
