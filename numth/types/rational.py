@@ -3,7 +3,6 @@
 from fractions import Fraction
 import math
 import numbers
-import re
 
 from ..config import default
 from ..basic import div, gcd, integer_sqrt, is_square, mod_inverse

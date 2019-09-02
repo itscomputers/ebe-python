@@ -1,8 +1,8 @@
 #   tests/types_quadratic_test.py
 #===========================================================
 import env
-from hypothesis import given, assume, strategies as st
 import math
+from hypothesis import given, assume, strategies as st
 
 from numth.basic import gcd, is_square
 from numth.types import Rational
@@ -90,11 +90,17 @@ def test_neg(real, imag, root):
 @given(*coords(rmin=2))
 def test_int(real, imag, root):
     n = int(Quadratic(real, imag, root))
-    if imag >= 0:
-        assert( (n - real)**2 <= imag**2 * root < (n - real + 1)**2 )
+    if n >= 0:
+        if imag >= 0:
+            assert( (n - real)**2 <= imag**2 * root < (n - real + 1)**2 )
+        else:
+            assert( (n - real)**2 >= imag**2 * root > (n - real + 1)**2 )
     else:
-        assert( (n - real)**2 >= imag**2 * root > (n - real + 1)**2 )
-    
+        if imag <= 0:
+            assert( (-n + real)**2 <= imag**2 * root < (-n + real + 1)**2 )
+        else:
+            assert( (-n + real)**2 >= imag**2 * root > (-n + real + 1)**2 )
+
 #-----------------------------
 
 @given(*rational_coords())
@@ -114,7 +120,7 @@ def test_round(real_numer, real_denom, imag_numer, imag_denom, root):
     a = Quadratic(real, imag, root).round()
     assert( a.real == _round_prefer_down(real) )
     assert( a.imag == _round_prefer_down(imag) )
-    
+
 #-----------------------------
 
 @given(*coords(rmin=2))
@@ -253,7 +259,7 @@ def test_floordiv_quadratic_and_integer(real, imag, root, integer):
 #=============================
 
 @given(
-    *coords(), 
+    *coords(),
     st.integers(min_value=-20, max_value=20),
     st.integers(min_value=-10, max_value=10)
 )
