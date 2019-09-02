@@ -1,5 +1,7 @@
 #   numth/basic/division.py
 #===========================================================
+import math
+#===========================================================
 
 def div(a, b):
     """
@@ -82,11 +84,7 @@ def gcd(*numbers):
     if numbers == (0, 0):
         raise ValueError('gcd(0, 0) is undefined')
 
-    a, b = numbers
-    while b != 0:
-        a, b = b, a % b
-
-    return abs(a)
+    return math.gcd(*numbers)
 
 #=============================
 
