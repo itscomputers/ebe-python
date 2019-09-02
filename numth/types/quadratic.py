@@ -1,5 +1,7 @@
 #   numth/types/quadratic.py
 #===========================================================
+import math
+
 from ..basic import mod_inverse
 from .rational import frac, Rational
 #===========================================================
@@ -125,7 +127,7 @@ class Quadratic:
         return int(self.to_rational_approx())
 
     def floor(self):
-        return self.component_map(int)
+        return self.component_map(math.floor)
 
     def round(self):
         return self.component_map(_round_prefer_down)
@@ -212,7 +214,7 @@ class Quadratic:
         return return_val
 
     #-------------------------
-    
+
     def __mod__(self, other):
         if type(other) is int:
             return self.component_map(lambda x: x % other)
