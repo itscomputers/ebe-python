@@ -85,7 +85,7 @@ class Quaternion:
         if abs(norm) == 1:
             norm_inverse = norm
         else:
-            norm_inverse = frac(norm).inverse()
+            norm_inverse = frac(norm).inverse
 
         return self.conjugate().component_map(lambda x: x * norm_inverse)
 

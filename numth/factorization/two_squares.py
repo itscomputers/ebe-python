@@ -3,7 +3,7 @@
 from functools import reduce
 
 from ..modular import mod_sqrt
-from ..types import Quadratic
+from ..types import GaussianInteger
 from .main import factor, square_part, square_free_part
 #===========================================================
 
@@ -17,13 +17,13 @@ def gaussian_divisor(prime):
     + prime : int
     
     return
-    Quadratic
+    GaussianInteger 
     """
     if prime % 4 == 3:
         raise ValueError('{} does not split over Z[i]'.format(prime))
 
     s = min(mod_sqrt(-1, prime))
-    return Quadratic(prime, 0, -1).gcd(Quadratic(s, 1, -1))
+    return GaussianInteger(prime, 0).gcd(GaussianInteger(s, 1))
 
 #-----------------------------
 
@@ -76,12 +76,12 @@ def two_squares(number):
 
 def _square_to_quadratic(square_factorization):
     """Convert square_part of factorization to quadratic integer."""
-    return Quadratic(
+    return GaussianInteger(
         reduce(
             lambda x, y: x * y,
             map(lambda z: z[0] ** (z[1] // 2), square_factorization.items()),
             1
-        ), 0, -1)
+        ), 0)
 
 #-----------------------------
 

@@ -6,7 +6,7 @@ from hypothesis import assume, given, strategies as st
 
 from numth.basic import is_square
 from numth.primality import is_prime, next_prime
-from numth.types import Quadratic, Quaternion
+from numth.types import GaussianInteger, Quaternion
 from numth.factorization import *
 from numth.factorization.main import _combine_counters
 #===========================================================
@@ -43,7 +43,7 @@ def test_pollard_p_minus_one(number):
 @given(st.integers(min_value=2, max_value=10**12))
 def test_williams_p_plus_one(number):
     if not is_prime(number):
-        d = williams_p_plus_one(number, Quadratic(1, 1, -1))
+        d = williams_p_plus_one(number, GaussianInteger(1, 1))
         assert( d > 1 and number % d == 0 )
 
 #===========================================================
@@ -146,8 +146,8 @@ def test_gaussian_divisor(number):
     prime = next_prime(number)
     if prime % 4 == 1:
         g = gaussian_divisor(prime)
-        assert( g.norm() == prime )
-        assert( Quadratic(prime, 0, -1) % g == Quadratic(0, 0, -1) )
+        assert( g.norm == prime )
+        assert( GaussianInteger(prime, 0) % g == GaussianInteger(0, 0) )
 
 #-----------------------------
 

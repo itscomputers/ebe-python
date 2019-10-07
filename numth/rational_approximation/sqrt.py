@@ -2,7 +2,7 @@
 #===========================================================
 from ..basic import integer_sqrt
 from ..continued_fraction import continued_fraction_convergents
-from ..types import frac, Rational, Quadratic
+from ..types import frac, Rational, QuadraticInteger
 #===========================================================
 
 def first_approximation(number, initial=None):
@@ -92,7 +92,7 @@ def continued_fraction_convergent_gen(number):
     geneartor -> Rational
     """
     def to_quadratic(pair):
-        return Quadratic(pair[0], pair[1], number)
+        return QuadraticInteger(pair[0], pair[1], number)
     
     def to_rational(quadratic):
         return Rational(quadratic.real, quadratic.imag)
@@ -124,7 +124,7 @@ def goldschmidt_gen(number, initial=None):
     generator -> (Rational, Rational)
     """
     b = number
-    Y = first_approximation(number, initial).inverse()
+    Y = first_approximation(number, initial).inverse
     y = Y
     x = number * y
 

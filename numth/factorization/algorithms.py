@@ -122,7 +122,7 @@ def williams_p_plus_one(number, quadratic_seed):
         either a nontrivial divisor or the number itself
     """
     z = quadratic_seed
-    divisor = gcd(z.norm(), number)
+    divisor = gcd(z.norm, number)
 
     power = 1
     while divisor == 1:

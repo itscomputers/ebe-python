@@ -32,7 +32,7 @@ def test_euler_phi_and_carmichael_lambda(number):
 
 #-----------------------------
 
-@given(st.integers(min_value=3, max_value=10**5))
+@given(st.integers(min_value=3, max_value=10**4))
 def test_euler_phi_with_divisors(number):
     assert( sum(map(euler_phi, divisors(number))) == number )
 

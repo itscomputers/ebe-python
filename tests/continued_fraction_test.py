@@ -4,14 +4,14 @@ import env
 from hypothesis import assume, given, strategies as st
 
 from numth.basic import is_square
-from numth.types import Quadratic, Rational
+from numth.types import Quadratic, frac 
 from numth.continued_fraction.quadratic import *
 #===========================================================
 
 def to_quadratic(quadratic_rational):
     return Quadratic(
-        Rational(quadratic_rational.real, quadratic_rational.denom),
-        Rational(quadratic_rational.imag, quadratic_rational.denom),
+        frac(quadratic_rational.real, quadratic_rational.denom),
+        frac(quadratic_rational.imag, quadratic_rational.denom),
         quadratic_rational.root
     )
 
@@ -29,9 +29,9 @@ def to_quadratic(quadratic_rational):
 def test_quadratic_rational_class(real, imag, denom, root, integer):
     assume( (real, imag) != (0, 0) )
     qr = QuadraticRational(real, imag, denom, root)
-    q = Quadratic(Rational(real, denom), Rational(imag, denom), root)
+    q = Quadratic(frac(real, denom), frac(imag, denom), root)
     assert( to_quadratic(qr) == q )
-    assert( to_quadratic(qr.inverse()) == q.inverse() )
+    assert( to_quadratic(qr.inverse()) == q.inverse )
     assert( to_quadratic(qr.minus(integer)) == q - integer )
 
 #-----------------------------
