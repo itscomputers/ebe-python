@@ -21,6 +21,11 @@ class QuadraticInteger(Quadratic):
 
     #=========================
 
+    def is_similar_type(self, other):
+        return type(other) is Quadratic and self.root == other.root
+
+    #=========================
+
     @property
     def to_quadratic(self):
         return Quadratic(self._real, self._imag, self._root)
@@ -84,6 +89,6 @@ class QuadraticInteger(Quadratic):
         if isinstance(other, (int, Rational)):
             return Quadratic(other, 0, self.root) // self
         
-        if self.is_similar_type(other):
+        if self.is_similar_type(other) or self.is_same_type(other):
             return self.from_quadratic((other / self).round)
 

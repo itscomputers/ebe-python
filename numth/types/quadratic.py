@@ -86,7 +86,7 @@ class Quadratic(numbers.Number):
         return type(self) is type(other) and self.root == other.root
 
     def is_similar_type(self, other):
-        return isinstance(other, Quadratic) and self.root == other.root
+        return self.is_same_type(other) 
 
     #-------------------------
 

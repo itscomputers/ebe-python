@@ -1,5 +1,6 @@
 #   numth/types/gaussian_integer.py
 #===========================================================
+from .quadratic import Quadratic
 from .quadratic_integer import QuadraticInteger
 #===========================================================
 
@@ -18,6 +19,12 @@ class GaussianInteger(QuadraticInteger):
 
     #=========================
 
+    def is_same_type(self, other):
+        return type(self) is type(other) \
+            or type(other) is QuadraticInteger and other.root == -1
+
+    #=========================
+
     @classmethod
     def from_signature(self, *signature):
         return GaussianInteger(*signature[:2])
@@ -29,9 +36,6 @@ class GaussianInteger(QuadraticInteger):
     @property
     def to_quadratic(self):
         return Quadratic(*self.signature)
-
-    def is_same_type(self, other):
-        return type(self) is type(other)
 
     #=========================
 
