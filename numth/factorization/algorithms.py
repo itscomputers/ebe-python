@@ -20,7 +20,7 @@ def pollard_rho_gen(number, seed, func):
     """
     x_i = func(seed % number)
     x_2i = func(x_i) % number
-    
+
     while True:
         divisor = gcd(x_2i - x_i, number)
         yield divisor

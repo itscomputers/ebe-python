@@ -88,6 +88,8 @@ from .types import (
     polyn,
     Polynomial,
     Quadratic,
+    QuadraticInteger,
+    GaussianInteger,
     Quaternion,
     frac,
     Rational

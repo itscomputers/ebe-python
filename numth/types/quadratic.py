@@ -71,7 +71,7 @@ class Quadratic(numbers.Number):
     def __repr__(self):
         real = self._real_display
         imag = self._imag_display
-        
+
         if real is None:
             return imag
 
@@ -86,7 +86,7 @@ class Quadratic(numbers.Number):
         return type(self) is type(other) and self.root == other.root
 
     def is_similar_type(self, other):
-        return self.is_same_type(other) 
+        return self.is_same_type(other)
 
     #-------------------------
 
@@ -317,7 +317,7 @@ class Quadratic(numbers.Number):
             return self._mod_similar_type(other)
 
         return NotImplemented
-    
+
     #-------------------------
 
     def __pow__(self, other, modulus=None):
@@ -386,7 +386,7 @@ class Quadratic(numbers.Number):
 
     def __floor__(self):
         return math.floor(self.rational_approx(1))
-    
+
     def __round__(self):
         return round(self.rational_approx(1))
 

@@ -105,7 +105,7 @@ def test_generate_witnesses(number, num_witnesses):
 
     if number > miller_rabin_max_cutoff() and num_witnesses > number:
         assert( len(witnesses) == number - 3 )
-    
+
     elif number <= miller_rabin_max_cutoff():
         assert( witnesses <= set(p for (val, p) in miller_rabin_cutoffs()) )
 
@@ -120,7 +120,7 @@ def test_is_prime_on_sieve():
     primes = primes_up_to(10**4)
     for p in primes:
         assert( is_prime(p) )
-    
+
     non_primes = set(range(10**4)) - set(primes)
     for p in non_primes:
         assert( not is_prime(p) )
@@ -160,7 +160,7 @@ def test_next_prime(number):
     st.integers(min_value=1, max_value=30)
 )
 def test_next_primes(number, number_of_primes):
-    primes = next_primes(number, number_of_primes) 
+    primes = next_primes(number, number_of_primes)
     assert( len(set(primes)) == number_of_primes )
     for i in range(len(primes) - 1):
         assert( is_prime(primes[i]) )
@@ -247,4 +247,4 @@ def test_goldbach_conjecture(number):
 def test_goldbach_conjecture_small():
     assert( goldbach_partition(4) == (2, 2) )
     assert( goldbach_partition(5) == (3, 2) )
-    
+

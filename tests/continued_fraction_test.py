@@ -4,7 +4,7 @@ import env
 from hypothesis import assume, given, strategies as st
 
 from numth.basic import is_square
-from numth.types import Quadratic, frac 
+from numth.types import Quadratic, frac
 from numth.continued_fraction.quadratic import *
 #===========================================================
 

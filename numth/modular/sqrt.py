@@ -34,7 +34,7 @@ def mod_sqrt(number, prime):
 
     if s * (s - 1) > 8*m + 20:
         return mod_sqrt_cipolla(number, prime)
-    
+
     return mod_sqrt_tonelli_shanks(number, prime, s, q, m)
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -54,10 +54,10 @@ def mod_sqrt_minus_one_wilson(prime):
     """
     if prime == 2:
         return (1, 1)
-    
+
     if prime % 4 == 3:
         raise ValueError('-1 is not a square modulo {}'.format(prime))
-    
+
     val = reduce(lambda x, y: (x * y) % prime, range(2, (prime-1)//2 + 1), 1)
     return tuple(sorted([val, prime - val]))
 
@@ -78,10 +78,10 @@ def mod_sqrt_minus_one_legendre(prime):
     """
     if prime == 2:
         return (1, 1)
-    
+
     if prime % 4 == 3:
         raise ValueError('-1 is not a square modulo {}'.format(prime))
-    
+
     for x in range(2, prime-1):
         if jacobi(x, prime) == -1:
             val = pow(x, (prime-1)//4, prime)
@@ -126,7 +126,7 @@ def _tonelli_shanks_helper(m, c, t, val, prime):
 
     return _m, _c, _t, _val
 
-# - - - - - - - - - - - - - -    
+# - - - - - - - - - - - - - -
 
 def mod_sqrt_tonelli_shanks(number, prime, *params):
     """
@@ -139,7 +139,7 @@ def mod_sqrt_tonelli_shanks(number, prime, *params):
     + prime : int
         prime number
     + params : list(int)
-        s, q, m can be passed in if already computed    
+        s, q, m can be passed in if already computed
 
     return
     (int, int)

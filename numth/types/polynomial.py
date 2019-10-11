@@ -110,7 +110,7 @@ class Polynomial:
         if self.leading_coeff < 0:
             return -self
         return self
-    
+
     #-------------------------
 
     def to_integer_polyn(self):
@@ -120,7 +120,7 @@ class Polynomial:
 
         m = lcm(*(c.denom for c in self.coeffs.values()))
         coeffs = {e: int(c * m) for (e, c) in self.coeffs.items()}
-        
+
         return Polynomial(coeffs).canonical()
 
     #=========================
@@ -188,9 +188,9 @@ class Polynomial:
 
         if gcd(*self.coeffs.values()) % other.leading_coeff == 0:
             return polyn_div(self, other, int)[0]
-        
+
         return polyn_div(self, other, Rational)[0]
-    
+
     def __rfloordiv__(self, other):
         if type(other) is int:
             return Polynomial({0: 0})
@@ -290,7 +290,7 @@ def _exp_coeff_to_term(exponent, coeff):
 
     if exponent == 1:
         return '{}x'.format(_coeff)
-    
+
     return '{}x^{}'.format(_coeff, exponent)
 
 #=============================

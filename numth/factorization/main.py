@@ -1,6 +1,6 @@
 #   numth/factorization/main.py
 #===========================================================
-from collections import Counter 
+from collections import Counter
 from functools import reduce
 from random import randint
 
@@ -201,7 +201,7 @@ def square_free_part(factorization):
 def number_from_factorization(factorization):
     """
     Compute number from its factorization.
-    
+
     params
     + factorization : dict
         prime divisors with multiplicty

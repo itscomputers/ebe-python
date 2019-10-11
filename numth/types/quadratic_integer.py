@@ -46,7 +46,7 @@ class QuadraticInteger(Quadratic):
     def inverse(self):
         norm = self.norm
         if norm not in (1, -1):
-            return self.conjugate / norm 
+            return self.conjugate / norm
         return self.conjugate * norm
 
     @property
@@ -62,7 +62,7 @@ class QuadraticInteger(Quadratic):
         return self.to_quadratic + other
 
     #=========================
-    
+
     def _mul_rational(self, other):
         return self.to_quadratic * other
 
@@ -81,14 +81,14 @@ class QuadraticInteger(Quadratic):
         return self.from_components(*((self / other).round).components)
 
     #=========================
-    
+
     def __rtruediv__(self, other):
         return self.to_quadratic.inverse * other
 
     def __rfloordiv__(self, other):
         if isinstance(other, (int, Rational)):
             return Quadratic(other, 0, self.root) // self
-        
+
         if self.is_similar_type(other) or self.is_same_type(other):
             return self.from_quadratic((other / self).round)
 

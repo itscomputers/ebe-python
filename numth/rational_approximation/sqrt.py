@@ -93,18 +93,18 @@ def continued_fraction_convergent_gen(number):
     """
     def to_quadratic(pair):
         return QuadraticInteger(pair[0], pair[1], number)
-    
+
     def to_rational(quadratic):
         return Rational(quadratic.real, quadratic.imag)
 
     convergents = continued_fraction_convergents(number)
     quadratics = list(map(to_quadratic, convergents))
     last = quadratics[-1]
-    
+
     while True:
         for quadratic in quadratics:
             yield to_rational(quadratic)
-        
+
         quadratics = list(map(lambda q: q * last, quadratics))
 
 #=============================
@@ -155,7 +155,7 @@ def ladder_arithmetic_gen(number, initial=None):
     m2 = m**2
     s0, s1 = 0, 1
     s = frac(0)
-    
+
     while True:
         yield m + (number - m2) * s
         s = s.denom / ((number - m2) * s.numer + 2 * m * s.denom)
@@ -164,7 +164,7 @@ def ladder_arithmetic_gen(number, initial=None):
 
 def linear_fractional_transformation_gen(number, initial=None):
     """
-    Linear frational transformation method for approximating 
+    Linear frational transformation method for approximating
     the square root of number.
 
     For a decent initial guess `x = a / c`, the linear functional transformation

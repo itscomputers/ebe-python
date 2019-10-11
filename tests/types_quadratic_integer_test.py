@@ -165,7 +165,7 @@ def test_add_rational(real, imag, root, numer, denom):
 def test_sub(real1, imag1, real2, imag2, root):
     a = QuadraticInteger(real1, imag1, root)
     b = QuadraticInteger(real2, imag2, root)
-    z = a.to_quadratic - b.to_quadratic 
+    z = a.to_quadratic - b.to_quadratic
     assert type(a - b) is QuadraticInteger
     assert type(b - a) is QuadraticInteger
     assert a - b == z
@@ -177,7 +177,7 @@ def test_sub(real1, imag1, real2, imag2, root):
 def test_sub_quadratic(real1, imag1, real2, imag2, root):
     a = QuadraticInteger(real1, imag1, root)
     b = Quadratic(real2, imag2, root)
-    z = a.to_quadratic - b 
+    z = a.to_quadratic - b
     assert type(a - b) is Quadratic
     assert type(b - a) is Quadratic
     assert a - b == z
@@ -263,7 +263,7 @@ def test_div(real1, imag1, real2, imag2, root):
     assume(real2 != 0 or imag2 != 0)
     a = QuadraticInteger(real1, imag1, root)
     b = QuadraticInteger(real2, imag2, root)
-    z = a.to_quadratic / b.to_quadratic 
+    z = a.to_quadratic / b.to_quadratic
     assert type(a / b) is Quadratic
     assert type(b / a) is Quadratic
     assert a / b == z
@@ -277,7 +277,7 @@ def test_div_quadratic(real1, imag1, real2, imag2, root):
     assume(real2 != 0 or imag2 != 0)
     a = QuadraticInteger(real1, imag1, root)
     b = Quadratic(real2, imag2, root)
-    z = a.to_quadratic / b 
+    z = a.to_quadratic / b
     assert type(a / b) is Quadratic
     assert type(b / a) is Quadratic
     assert a / b == z
@@ -290,7 +290,7 @@ def test_div_int(real, imag, root, integer):
     assume(real != 0 or imag != 0)
     a = QuadraticInteger(real, imag, root)
     b = integer
-    z = a.to_quadratic / b 
+    z = a.to_quadratic / b
     assert type(a / b) is Quadratic
     assert type(b / a) is Quadratic
     assert a / b == z
@@ -304,7 +304,7 @@ def test_div_rational(real, imag, root, numer, denom):
     assume(numer != 0)
     a = QuadraticInteger(real, imag, root)
     b = frac(numer, denom)
-    z = a.to_quadratic / b 
+    z = a.to_quadratic / b
     assert type(a / b) is Quadratic
     assert type(b / a) is Quadratic
     assert a / b == z
@@ -377,7 +377,7 @@ def test_mod(real1, imag1, real2, imag2, root):
     z = a.to_quadratic % b.to_quadratic
     assert type(a % b) is QuadraticInteger
     assert a % b == z
-    
+
 #-----------------------------
 
 @given(*double_coords())
@@ -386,7 +386,7 @@ def test_mod_quadratic(real1, imag1, real2, imag2, root):
     assume( real2 != 0 or imag2 != 0 )
     a = QuadraticInteger(real1, imag1, root)
     b = Quadratic(real2, imag2, root)
-    z = a.to_quadratic % b 
+    z = a.to_quadratic % b
     y = b % a.to_quadratic
     assert type(a % b) is Quadratic
     assert type(b % a) is Quadratic

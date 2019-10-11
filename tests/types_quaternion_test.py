@@ -218,7 +218,7 @@ def test_mod_quaternion_and_integer(r, i, j, k, integer):
     mod_components = map(
         lambda x: x - integer * (2*x > integer),
         map(
-            lambda x: x % integer, 
+            lambda x: x % integer,
             q.components
         )
     )

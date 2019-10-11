@@ -37,7 +37,7 @@ def test_pollard_p_minus_one(number):
     if not is_prime(number):
         d = pollard_p_minus_one(number, 2)
         assert( d > 1 and number % d == 0 )
-        
+
 #-----------------------------
 
 @given(st.integers(min_value=2, max_value=10**12))

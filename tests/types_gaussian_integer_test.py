@@ -129,7 +129,7 @@ def test_add_quadratic_integer(real1, imag1, real2, imag2):
     assert type(b + a) is GaussianInteger
     assert a + b == z
     assert b + a == z
-    
+
 #-----------------------------
 
 @given(*double_coords())
@@ -172,7 +172,7 @@ def test_add_rational(real, imag, numer, denom):
 def test_sub(real1, imag1, real2, imag2):
     a = GaussianInteger(real1, imag1)
     b = GaussianInteger(real2, imag2)
-    z = a.to_quadratic - b.to_quadratic 
+    z = a.to_quadratic - b.to_quadratic
     assert type(a - b) is GaussianInteger
     assert type(b - a) is GaussianInteger
     assert a - b == z
@@ -189,14 +189,14 @@ def test_sub_quadratic_integer(real1, imag1, real2, imag2):
     assert type(b - a) is GaussianInteger
     assert a - b == z
     assert b - a == -z
-    
+
 #-----------------------------
 
 @given(*double_coords())
 def test_sub_quadratic(real1, imag1, real2, imag2):
     a = GaussianInteger(real1, imag1)
     b = Quadratic(real2, imag2, -1)
-    z = a.to_quadratic - b 
+    z = a.to_quadratic - b
     assert type(a - b) is Quadratic
     assert type(b - a) is Quadratic
     assert a - b == z
@@ -249,7 +249,7 @@ def test_mul_quadratic_integer(real1, imag1, real2, imag2):
     assert type(b * a) is GaussianInteger
     assert a * b == z
     assert b * a == z
-    
+
 #-----------------------------
 
 @given(*double_coords())
@@ -294,7 +294,7 @@ def test_div(real1, imag1, real2, imag2):
     assume(real2 != 0 or imag2 != 0)
     a = GaussianInteger(real1, imag1)
     b = GaussianInteger(real2, imag2)
-    z = a.to_quadratic / b.to_quadratic 
+    z = a.to_quadratic / b.to_quadratic
     assert type(a / b) is Quadratic
     assert type(b / a) is Quadratic
     assert a / b == z
@@ -309,11 +309,11 @@ def test_div_quadratic_integer(real1, imag1, real2, imag2):
     a = GaussianInteger(real1, imag1)
     b = QuadraticInteger(real2, imag2, -1)
     z = a.to_quadratic / b
-    assert type(a / b) is Quadratic 
+    assert type(a / b) is Quadratic
     assert type(b / a) is Quadratic
     assert a / b == z
     assert b / a == z.inverse
-    
+
 #-----------------------------
 
 @given(*double_coords())
@@ -322,7 +322,7 @@ def test_div_quadratic(real1, imag1, real2, imag2):
     assume(real2 != 0 or imag2 != 0)
     a = GaussianInteger(real1, imag1)
     b = Quadratic(real2, imag2, -1)
-    z = a.to_quadratic / b 
+    z = a.to_quadratic / b
     assert type(a / b) is Quadratic
     assert type(b / a) is Quadratic
     assert a / b == z
@@ -335,7 +335,7 @@ def test_div_int(real, imag, integer):
     assume(real != 0 or imag != 0)
     a = GaussianInteger(real, imag)
     b = integer
-    z = a.to_quadratic / b 
+    z = a.to_quadratic / b
     assert type(a / b) is Quadratic
     assert type(b / a) is Quadratic
     assert a / b == z
@@ -349,7 +349,7 @@ def test_div_rational(real, imag, numer, denom):
     assume(numer != 0)
     a = GaussianInteger(real, imag)
     b = frac(numer, denom)
-    z = a.to_quadratic / b 
+    z = a.to_quadratic / b
     assert type(a / b) is Quadratic
     assert type(b / a) is Quadratic
     assert a / b == z
@@ -436,7 +436,7 @@ def test_mod(real1, imag1, real2, imag2):
     z = a.to_quadratic % b.to_quadratic
     assert type(a % b) is GaussianInteger
     assert a % b == z
-    
+
 #-----------------------------
 
 @given(*double_coords())
@@ -445,7 +445,7 @@ def test_mod_quadratic(real1, imag1, real2, imag2):
     assume( real2 != 0 or imag2 != 0 )
     a = GaussianInteger(real1, imag1)
     b = Quadratic(real2, imag2, -1)
-    z = a.to_quadratic % b 
+    z = a.to_quadratic % b
     y = b % a.to_quadratic
     assert type(a % b) is Quadratic
     assert type(b % a) is Quadratic

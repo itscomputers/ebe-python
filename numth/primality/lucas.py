@@ -13,7 +13,7 @@ def lucas_witness_pair(number, P, Q):
     """
     Lucas sequence witness for primality.
 
-    Determines if number is composite or probably prime, 
+    Determines if number is composite or probably prime,
     according to a witness pair.
 
     params
@@ -81,7 +81,7 @@ def lucas_witness_pairs(number, witness_pairs):
             return 'composite', False
         if witness_strong:
             strong = True
-    
+
     return 'probable prime', strong
 
 #-----------------------------
@@ -106,10 +106,10 @@ def lucas_test(number, num_witnesses):
         raise ValueError('Number should be at least 3')
     if number % 2 == 0:
         return 'composite'
-    
+
     witness_pairs = _generate_witness_pairs(number, num_witnesses)
     primality, strong = lucas_witness_pairs(number, witness_pairs)
-    
+
     if primality == 'composite' or strong is False:
         return primality
 

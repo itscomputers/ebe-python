@@ -344,7 +344,7 @@ def test_compatibility():
     a = Quadratic(1, 2, 3)
     b = Quadratic(4, 5, -6)
     c = Quadratic(7, 8, -1)
-    
+
     incompatible_pairs = [
         (a, b),
         (a, c),
@@ -381,12 +381,12 @@ def test_compatibility():
             x ** y
         with pytest.raises(TypeError):
             y ** x
-    
+
     for y in [a, 4, frac(4, 5)]:
         assert isinstance(a + y, Quadratic)
         assert isinstance(y + a, Quadratic)
-        assert isinstance(a - y, Quadratic) 
-        assert isinstance(y - a, Quadratic) 
+        assert isinstance(a - y, Quadratic)
+        assert isinstance(y - a, Quadratic)
         assert isinstance(a * y, Quadratic)
         assert isinstance(y * a, Quadratic)
         assert isinstance(a / y, Quadratic)
@@ -400,7 +400,7 @@ def test_compatibility():
     assert isinstance(a ** -4, Quadratic)
 
     with pytest.raises(TypeError):
-        4 ** a 
+        4 ** a
     with pytest.raises(TypeError):
         a ** frac(4, 5)
     with pytest.raises(TypeError):

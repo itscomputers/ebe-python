@@ -15,9 +15,9 @@ def gaussian_divisor(prime):
 
     params
     + prime : int
-    
+
     return
-    GaussianInteger 
+    GaussianInteger
     """
     if prime % 4 == 3:
         raise ValueError('{} does not split over Z[i]'.format(prime))

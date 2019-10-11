@@ -72,7 +72,7 @@ def double_index(U_k, V_k, Q_k, modulus):
     """
     U = (U_k * V_k) % modulus
     V = (V_k * V_k - 2 * Q_k) % modulus
-    
+
     return U, V, pow(Q_k, 2, modulus)
 
 #-----------------------------

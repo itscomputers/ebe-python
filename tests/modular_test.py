@@ -5,7 +5,7 @@ from hypothesis import given, assume, strategies as st
 
 from numth.basic import gcd, jacobi
 from numth.factorization import factor, divisors
-from numth.primality import primes_in_range 
+from numth.primality import primes_in_range
 from numth.modular import *
 #===========================================================
 

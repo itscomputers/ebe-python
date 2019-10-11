@@ -150,7 +150,7 @@ class Rational(Fraction):
         return Rational(self._denominator, self._numerator, _normalize=False)
 
     #-------------------------
-    
+
     @property
     def round_to_nearest_int(self):
         return math.floor(self + Rational(1, 2))

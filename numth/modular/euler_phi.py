@@ -9,7 +9,7 @@ def euler_phi(params):
     """
     Euler's phi function.
 
-    Given an integer or itsfactorization, calculates Euler's phi function of 
+    Given an integer or itsfactorization, calculates Euler's phi function of
     the corresponding number, which is the size of the multiplicative group
     modulo the number.
 
