@@ -11,6 +11,10 @@ class GaussianInteger(QuadraticInteger):
         self._imag = int(imag)
         self._root = -1
 
+    @property
+    def is_complex(self):
+        return True
+
     #=========================
 
     @property

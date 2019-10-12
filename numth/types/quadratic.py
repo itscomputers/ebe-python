@@ -41,11 +41,15 @@ class Quadratic(numbers.Number):
     def is_real(self):
         return self.root >= 0
 
+    @property
+    def is_complex(self):
+        return self.root == -1
+
     #=========================
 
     @property
     def _root_display(self):
-        if self.root == -1:
+        if self.is_complex:
             return '\u2139'
         elif self.root.denom == 1:
             return '\u221a{}'.format(self.root)

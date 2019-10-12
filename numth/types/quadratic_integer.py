@@ -15,7 +15,7 @@ class QuadraticInteger(Quadratic):
 
     @property
     def _root_display(self):
-        if self.root == -1:
+        if self.is_complex:
             return '\u2139'
         return '\u221a{}'.format(self.root)
 
