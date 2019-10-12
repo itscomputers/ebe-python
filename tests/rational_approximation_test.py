@@ -1,11 +1,11 @@
 #   tests/rational_approximation_test.py
 #===========================================================
 import env
-from hypothesis import given, assume, example, strategies as st
+from hypothesis import assume, given, strategies as st
 
-from numth.basic import gcd, is_square
+from numth.basic import is_square
 from numth.continued_fraction import continued_fraction_pell_numbers
-from numth.types import Polynomial 
+from numth.types import Polynomial
 from numth.rational_approximation import *
 #===========================================================
 
@@ -158,7 +158,7 @@ def test_continued_fraction_convergent(number):
 def test_goldschmidt(number):
     assume( number != 3 )
     gen = goldschmidt_gen(number)
-    
+
     for i in range(2):
         next(gen)
 

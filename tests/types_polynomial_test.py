@@ -2,13 +2,11 @@
 #===========================================================
 import env
 from hypothesis import assume, given, strategies as st
-from random import choice
 
 from numth.basic import is_square, lcm
-from numth.types import Rational, Quadratic 
+from numth.types import Rational, QuadraticInteger
 from numth.types.polynomial import *
 from numth.types.polynomial import (
-    polyn_div,
     _term_pattern,
     _term_to_exp_coeff,
     _exp_coeff_to_term,
@@ -45,7 +43,7 @@ def make(*args):
 @given(*coords(1, nonzero))
 def test_term_pattern_and_term_to_exp_coeff(e, c):
     pattern = _term_pattern()
-    
+
     string = '{}t^{}'.format(c, e)
     term = pattern.match(string).group(1,2,3)
     assert( term == (str(c), 't', '^{}'.format(e)) )
@@ -105,7 +103,7 @@ def test_exp_coeff_to_term(e, c):
     assert( _exp_coeff_to_term(0, 1) == '1' )
     assert( _exp_coeff_to_term(0, -1) == '-1' )
     assert( _exp_coeff_to_term(0, 0) == '0' )
-   
+
 #-----------------------------
 
 @given(*coords(1, nonzero))
@@ -118,7 +116,7 @@ def test_args_to_polyn(e, c):
 @given(*coords(2))
 def test_polyn(e1, c1, e2, c2):
     assume( are_distinct(e1, e2) )
-    p1 = make(e1, c1, e2, c2) 
+    p1 = make(e1, c1, e2, c2)
     p2 = polyn((e1, c1), (e2, c2))
     if c2 >= 0:
         p3 = polyn('{}x^{} + {}x^{}'.format(c1, e1, c2, e2))
@@ -163,7 +161,7 @@ def test_repr(e1, c1, e2, c2, e3, c3):
 def test_degree_and_leading_coeff(e1, c1, e2, c2, e3, c3):
     assume( are_distinct(e1, e2, e3) )
     (e1, c1), (e2, c2), (e3, c3) = sorted([(e1, c1), (e2, c2), (e3, c3)])
-    p1 = make(e1, c1, e2, c2, e3, c3) 
+    p1 = make(e1, c1, e2, c2, e3, c3)
     p2 = make(e1, c1, e2, c2, e3, 0)
     p3 = make(e1, c1, e2, 0, e3, 0)
     p4 = make(e1, 0, e2, 0, e3, 0)
@@ -176,8 +174,8 @@ def test_degree_and_leading_coeff(e1, c1, e2, c2, e3, c3):
     assert( p4.degree == -1 )
     assert( p4.leading_coeff == 0 )
 
-#----------------------------- 
-   
+#-----------------------------
+
 @given(*coords(1, nonzero))
 def test_full_coeffs(e, c):
     p = make(e, c)
@@ -337,7 +335,7 @@ def test_div(e1, c1, e2, c2, e3, c3, e4, c4):
     assert( p1 // p1 == polyn(1) )
     assert( p1 // polyn(1) == p1 / 1 == p1 )
     assert( p1 // polyn(-1) == p1 / -1 == -p1 )
-    
+
 #=============================
 
 @given(
@@ -395,8 +393,8 @@ def test_mod_eval(e1, c1, e2, c2, val, mod):
     st.integers().filter(lambda x: x < 0 or not is_square(x))
 )
 def test_quadratic_integers(a1, b1, a2, b2, d):
-    g1 = Quadratic(a1, b1, d)
-    g2 = Quadratic(a2, b2, d)
+    g1 = QuadraticInteger(a1, b1, d)
+    g2 = QuadraticInteger(a2, b2, d)
     p1 = Polynomial({0: a1, 1: b1})
     p2 = Polynomial({0: a2, 1: b2})
     m = Polynomial({0: -d, 2: 1})

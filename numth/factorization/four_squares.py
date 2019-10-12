@@ -52,7 +52,7 @@ def quaternion_divisor(prime):
         if 2 * s > prime:
             s = prime - s
         return quaternion_descent(Quaternion(s, 1, 1, 0), prime)
-    
+
     t, a = 2, 5
     while jacobi(a, prime) == 1:
         t = t + 1

@@ -2,7 +2,7 @@
 #===========================================================
 from random import randint
 
-from ..basic import padic 
+from ..basic import padic
 #===========================================================
 
 def miller_rabin_witness(number, witness):
@@ -28,10 +28,10 @@ def miller_rabin_witness(number, witness):
 
     for j in range(exp):
         x = pow(x, 2, number)
-        
+
         if x == number - 1:
             return 'probable prime'
-        
+
         if x == 1:
             return 'composite'
 
@@ -64,7 +64,7 @@ def miller_rabin_test(number, num_witnesses):
     """
     Miller-Rabin test for primality.
 
-    Probabalistic primality test 
+    Probabalistic primality test
     using Fermat's Little Theorem and Lagrange's Theorem.
 
     params
@@ -82,7 +82,7 @@ def miller_rabin_test(number, num_witnesses):
         raise ValueError('Number should be at least 2')
     if number == 2:
         return 'prime'
-    
+
     primality = miller_rabin_witnesses(number, _generate_witnesses(number, num_witnesses))
     if primality == 'probable prime' and number < miller_rabin_max_cutoff():
         return 'prime'

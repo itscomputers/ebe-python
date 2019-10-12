@@ -7,7 +7,7 @@ def continued_fraction_quotients(root):
     """
     Compute the quotients of the continued fraction of sqrt(root).
 
-    The quotients are periodic with `q_0` separate 
+    The quotients are periodic with `q_0` separate
     and `q_1, ..., q_n = 2*q_0` repeating.
 
     params
@@ -23,7 +23,7 @@ def continued_fraction_quotients(root):
     while not cf.complete():
         cf.advance()
         quotients.append(cf.quotient)
-    
+
     return quotients
 
 #-----------------------------
@@ -45,11 +45,11 @@ def continued_fraction_convergents(root):
     """
     cf = ContinuedFraction(root)
     convergents = []
-    
+
     while not cf.complete():
         cf.advance()
         convergents.append(cf.convergent.curr)
-    
+
     return convergents
 
 #-----------------------------
@@ -59,7 +59,7 @@ def continued_fraction_pell_numbers(root):
     Compute the Pell numbers associated to the continued fraction of sqrt(root).
 
     For a convergent `(x, y)`, the Pell number is `x**2 - root * y**2`.
-    
+
     params
     + root : int
         positive non-square
@@ -69,11 +69,11 @@ def continued_fraction_pell_numbers(root):
     """
     cf = ContinuedFraction(root)
     pell_numbers = []
-    
+
     while not cf.complete():
         cf.advance()
         pell_numbers.append(cf.to_pell_number())
-    
+
     return pell_numbers
 
 #-----------------------------
@@ -84,7 +84,7 @@ def continued_fraction_table(root, max_length=None):
 
     The table rows have columns `alpha`, `quotient`, and `beta`
     satisfying `beta = alpha - quotient` and `next_alpha = 1 / beta`.
-    The final `beta` is equal to the initial `beta`, 
+    The final `beta` is equal to the initial `beta`,
     which makes the table periodic.
 
     params
@@ -96,15 +96,15 @@ def continued_fraction_table(root, max_length=None):
     """
     cf = ContinuedFraction(root)
     rows = [(cf.alpha, cf.quotient, cf.beta)]
-    
+
     while not cf.complete():
         cf.advance()
         rows.append((cf.alpha, cf.quotient, cf.beta))
-    
+
         if cf.at_max_length(max_length):
             rows.append(('...', '...', '...'))
             break
-    
+
     return rows
 
 #-----------------------------
@@ -135,7 +135,7 @@ def continued_fraction_all(root, max_length=None):
         'pell_numbers'  :   [],
         'table'         :   [(cf.alpha, cf.quotient, cf.beta)]
     }
-    
+
     while not cf.complete():
         cf.advance()
         result['quotients'].append(cf.quotient)
@@ -145,7 +145,7 @@ def continued_fraction_all(root, max_length=None):
 
         if cf.at_max_length(max_length):
             break
-    
+
     result['period'] = cf.period
     result['complete'] = cf.complete()
     return result
@@ -242,7 +242,7 @@ class ContinuedFraction:
     def __init__(self, root):
         """
         Initializes the root, its approximate square root,
-        the first row `alpha, quotient, beta` of the table, 
+        the first row `alpha, quotient, beta` of the table,
         the initial two convergent pairs, and the period.
         """
         self.root = root
@@ -274,6 +274,6 @@ class ContinuedFraction:
         return self.alpha.components == (self.approx, 1, 1)
 
     def at_max_length(self, max_length=None):
-        """Whether the algorithm is at a particular iteration.""" 
+        """Whether the algorithm is at a particular iteration."""
         return (max_length is not None) and self.period >= max_length
 

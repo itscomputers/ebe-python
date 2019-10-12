@@ -3,10 +3,9 @@
 import env
 import math
 from fractions import Fraction
-from hypothesis import given, assume, strategies as st
+from hypothesis import given, strategies as st
 
-from numth.basic import gcd, mod_inverse
-from numth.types import frac, Rational
+from numth.types.rational import *
 #===========================================================
 
 def coords(flag=None):
@@ -88,15 +87,15 @@ def test_decimal():
 @given(*coords('nonzero'))
 def test_inverse(n, d):
     r = Rational(n, d)
-    assert r.inverse() == Rational(d, n)
-    assert r * r.inverse() == 1
+    assert r.inverse == Rational(d, n)
+    assert r * r.inverse == 1
 
 #-----------------------------
 
 @given(*coords())
 def test_round_to_nearest_int(n, d):
     r = Rational(n, d)
-    i = r.round_to_nearest_int()
+    i = r.round_to_nearest_int
     assert abs(r - i) <= Rational(1, 2)
 
 #-----------------------------
@@ -104,7 +103,7 @@ def test_round_to_nearest_int(n, d):
 @given(*coords())
 def test_is_square(n, d):
     r2 = Rational(n**2, d**2)
-    assert r2.is_square()
+    assert r2.is_square
 
 #=============================
 
@@ -206,10 +205,10 @@ def test_div(i, n1, d1, n2, d2):
     r2 = Rational(n2, d2)
     f1 = Fraction(n1, d1)
     f2 = Fraction(n2, d2)
-    assert r1 / r2 == (r2 / r1).inverse() == f1 / f2
-    assert r1 / f2 == (f2 / r1).inverse() == f1 / f2
-    assert f1 / r2 == (r2 / f1).inverse() == f1 / f2
-    assert r1 / i == (i / r1).inverse() == f1 / i
+    assert r1 / r2 == (r2 / r1).inverse == f1 / f2
+    assert r1 / f2 == (f2 / r1).inverse == f1 / f2
+    assert f1 / r2 == (r2 / f1).inverse == f1 / f2
+    assert r1 / i == (i / r1).inverse == f1 / i
 
 #=============================
 
@@ -222,7 +221,7 @@ def test_pow(n, d, e):
     s = Rational(n**e, d**e)
     assert r_e == f_e
     assert r_e == s
-    assert r**(-e) == s.inverse()
+    assert r**(-e) == s.inverse
     assert r**Rational(e, 1) == s
     assert n**Rational(e, 1) == n**e
 

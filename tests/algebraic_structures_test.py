@@ -1,12 +1,11 @@
 #   tests/algebraic_structures_test.py
 #===========================================================
 import env
-from hypothesis import given, assume, strategies as st
+from hypothesis import given, strategies as st
 
-from numth.algebraic_structures import ModularRing
 from numth.basic import gcd, jacobi, mod_power
-from numth.modular import euler_phi
-from numth.primality import is_prime, next_prime
+from numth.primality import is_prime
+from numth.algebraic_structures import *
 #===========================================================
 
 @given(
@@ -17,7 +16,7 @@ from numth.primality import is_prime, next_prime
 )
 def test_modular_ring(modulus, a, b, c):
     Zm = ModularRing(modulus)
-    
+
     assert( Zm._factorization is None )
     assert( Zm.factorization() )
     assert( Zm._factorization == Zm.factorization() )
@@ -25,15 +24,15 @@ def test_modular_ring(modulus, a, b, c):
     assert( Zm._euler is None )
     assert( Zm.euler() is not None )
     assert( Zm._euler == Zm.euler() )
-    
+
     assert( Zm._carmichael is None )
     assert( Zm.carmichael() is not None )
     assert( Zm._carmichael == Zm.carmichael() )
-    
+
     assert( Zm._carmichael_factorization is None )
     assert( Zm.carmichael_factorization() is not None )
     assert( Zm._carmichael_factorization == Zm.carmichael_factorization() )
-    
+
     assert( Zm._multiplicative_group is None )
     assert( Zm.multiplicative_group() is not None )
     assert( Zm._multiplicative_group == Zm.multiplicative_group() )
@@ -71,7 +70,7 @@ def test_modular_ring(modulus, a, b, c):
     assert( Zm.power_of(x, b) == mod_power(x, b, modulus) )
     order = Zm.order_of(x)
     assert( len(Zm.cyclic_subgroup_from(x).keys()) == order )
-    
+
     Zm.all_inverses()
     inverse_pairs = set(tuple(sorted(x)) for x in Zm.inverses.items())
     for (x, y) in inverse_pairs:
@@ -85,7 +84,7 @@ def test_modular_ring(modulus, a, b, c):
         gens = set(x for x in Zm.multiplicative_group() if Zm.orders[x] == Zm.euler())
         gens2 = set(x for i, x in Zm.cyclic_group_dict().items() if gcd(i, Zm.euler()) == 1)
         assert( gens == gens2 )
-    
+
     if Zm.is_field() and Zm.modulus > 2:
         assert( is_prime(Zm.modulus) )
         for x in (Zm.elem(y) for y in (a, b, c) if Zm.elem(y) != 0):

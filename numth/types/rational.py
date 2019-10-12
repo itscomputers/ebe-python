@@ -5,7 +5,7 @@ import math
 import numbers
 
 from ..config import default
-from ..basic import div, gcd, integer_sqrt, is_square, mod_inverse
+from ..basic import gcd, integer_sqrt, is_square
 #===========================================================
 
 def frac(*inputs):
@@ -98,6 +98,7 @@ class Rational(Fraction):
 
     #-------------------------
 
+    @property
     def display(self):
         """Pretty-print rational number."""
         minus = self.sign == -1
@@ -125,7 +126,7 @@ class Rational(Fraction):
             decimal representation of self
         """
         if num_digits == 0:
-            return str(self.round_to_nearest_int())
+            return str(self.round_to_nearest_int)
 
         sign = '-' if self._numerator < 0 else ''
 
@@ -135,13 +136,14 @@ class Rational(Fraction):
         if num_digits == 0:
             return str(quotient)
         shifted_rem = Rational(remainder * 10**num_digits, self._denominator)
-        digits = str(shifted_rem.round_to_nearest_int())
+        digits = str(shifted_rem.round_to_nearest_int)
         num_zeros = num_digits - len(digits)
 
         return '{}{}.{}{}'.format(sign, quotient, '0'*num_zeros, digits)
 
     #=========================
 
+    @property
     def inverse(self):
         if self._numerator < 0:
             return Rational(-self._denominator, -self._numerator, _normalize=False)
@@ -149,11 +151,13 @@ class Rational(Fraction):
 
     #-------------------------
 
+    @property
     def round_to_nearest_int(self):
         return math.floor(self + Rational(1, 2))
 
     #-------------------------
 
+    @property
     def is_square(self):
         return is_square(self._numerator) and is_square(self._denominator)
 
@@ -223,7 +227,7 @@ class Rational(Fraction):
             return guess
 
         else:
-            return self.inverse().inverse_sqrt()
+            return self.inverse.inverse_sqrt()
 
     #-------------------------
 
@@ -231,7 +235,7 @@ class Rational(Fraction):
         """
         Inverse square root (or approximation) of a rational number greater than 1.
 
-        Computes sqrt such that ``sqrt**2 == self.inverse()``,
+        Computes sqrt such that ``sqrt**2 == self.inverse``,
         or up to desired accuracy if not a perfect square.
 
         params
@@ -243,7 +247,7 @@ class Rational(Fraction):
         if self._numerator <= self._denominator:
             raise ValueError('Inverse square root only if greater than 1')
 
-        guess = self.sqrt(2).inverse()
+        guess = self.sqrt(2).inverse
         other_guess = guess * (2 - self * guess**2)
 
         while not guess.approx_equal(other_guess, num_digits):
@@ -315,12 +319,17 @@ class Rational(Fraction):
             )
         return NotImplemented
 
+    def __floordiv__(self, other):
+        if isinstance(other, (int, Rational)):
+            return math.floor(self / other)
+        return NotImplemented
+
     def __pow__(self, other):
         if isinstance(other, numbers.Rational) and other.denominator == 1:
             if other == 0:
                 return Rational(1, 1)
             elif other < 0:
-                return (self**(-other)).inverse()
+                return (self**(-other)).inverse
             return Rational(
                 self._numerator ** other,
                 self._denominator ** other,
@@ -340,9 +349,10 @@ class Rational(Fraction):
         return self * other
 
     def __rtruediv__(self, other):
-        return self.inverse() * other
+        return self.inverse * other
 
     def __rpow__(self, other):
         if self.denom == 1:
             return other ** self.numer
         return NotImplemented
+

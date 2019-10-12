@@ -8,7 +8,7 @@ def carmichael_lambda(params):
     """
     Carmichael's lambda function.
 
-    Given an integer or its factorization, calculates Carmichael's 
+    Given an integer or its factorization, calculates Carmichael's
     lambda function of the number, which is the maximum order
     of an element in the multiplicative group modulo the number.
 

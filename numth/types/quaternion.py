@@ -37,7 +37,7 @@ class Quaternion:
         return representation.replace(' + -', ' - ')\
 
     #=========================
-    
+
     def __eq__(self, other):
         return self.components == quaternion(other).components
 
@@ -85,7 +85,7 @@ class Quaternion:
         if abs(norm) == 1:
             norm_inverse = norm
         else:
-            norm_inverse = frac(norm).inverse()
+            norm_inverse = frac(norm).inverse
 
         return self.conjugate().component_map(lambda x: x * norm_inverse)
 
@@ -133,7 +133,7 @@ class Quaternion:
                 s_comp,
                 (o_comp[i] for i in o_ind)
             ))
-    
+
         return Quaternion(*[
             mul_each(index, self.components, quaternion(other).components)
             for index in range(4)
@@ -170,7 +170,7 @@ class Quaternion:
             return self
         if other % 2 == 0:
             return (self * self) ** (other // 2)
-        
+
         return self * (self * self) ** (other // 2)
 
     #-------------------------

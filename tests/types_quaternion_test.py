@@ -1,7 +1,7 @@
 #   tests/types_quadratic_test.py
 #===========================================================
 import env
-from hypothesis import given, assume, strategies as st
+from hypothesis import assume, given, strategies as st
 
 from numth.types import Rational
 from numth.types.quaternion import *
@@ -218,7 +218,7 @@ def test_mod_quaternion_and_integer(r, i, j, k, integer):
     mod_components = map(
         lambda x: x - integer * (2*x > integer),
         map(
-            lambda x: x % integer, 
+            lambda x: x % integer,
             q.components
         )
     )

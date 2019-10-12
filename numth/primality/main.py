@@ -3,7 +3,7 @@
 from functools import reduce
 
 from ..config import default
-from ..basic import prime_to 
+from ..basic import prime_to
 from .lucas import lucas_test
 from .miller_rabin import miller_rabin_test, miller_rabin_max_cutoff
 #===========================================================
@@ -87,7 +87,7 @@ def next_prime(number, sieve_primes=None):
     params
     number : int
     sieve_primes : list(int)
-    
+
     return
     int
     """
@@ -128,7 +128,7 @@ def primes_in_range(lower_bound, upper_bound, sieve_primes=None):
     list(int)
     """
     gen = next_prime_gen(lower_bound - 1, sieve_primes)
-    
+
     primes = []
     while True:
         p = next(gen)
@@ -210,7 +210,7 @@ def next_twin_primes_gen(number, sieve_primes=None):
         yields next pair of twin primes
     """
     gen = next_prime_gen(number - 2, sieve_primes)
-    
+
     p, q = next(gen), next(gen)
     while True:
         while q != p + 2:
@@ -262,7 +262,7 @@ def goldbach_partition(number, sieve_primes=None):
     start = number // 2 - 1
     prime_gen = next_prime_gen(start, sieve_primes)
     p = next(prime_gen)
-    
+
     while not is_prime(number - p):
         p = next(prime_gen)
 

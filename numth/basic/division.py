@@ -74,15 +74,18 @@ def gcd(*numbers):
     returns:
         `int`
     """
+    if 0 in numbers:
+        return gcd(*filter(lambda x: x != 0, numbers))
+
+    if len(numbers) == 0:
+        raise ValueError('gcd(0, 0) is undefined')
+
     if len(numbers) == 1:
-        return gcd(*numbers, 0)
+        return abs(*numbers)
 
     if len(numbers) > 2:
         first, *rest = numbers
         return gcd(first, gcd(*rest))
-
-    if numbers == (0, 0):
-        raise ValueError('gcd(0, 0) is undefined')
 
     return math.gcd(*numbers)
 

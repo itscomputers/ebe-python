@@ -50,5 +50,5 @@ def pi(num_digits=None):
     for i in range(num_digits // 8):
         next(rh)
 
-    return next(rh).inverse()
+    return next(rh).inverse
 

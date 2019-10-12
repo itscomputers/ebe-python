@@ -20,7 +20,7 @@ def pollard_rho_gen(number, seed, func):
     """
     x_i = func(seed % number)
     x_2i = func(x_i) % number
-    
+
     while True:
         divisor = gcd(x_2i - x_i, number)
         yield divisor
@@ -122,7 +122,7 @@ def williams_p_plus_one(number, quadratic_seed):
         either a nontrivial divisor or the number itself
     """
     z = quadratic_seed
-    divisor = gcd(z.norm(), number)
+    divisor = gcd(z.norm, number)
 
     power = 1
     while divisor == 1:
