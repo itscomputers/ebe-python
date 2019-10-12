@@ -1,12 +1,8 @@
 #   tests/types_gaussian_integer_test.py
 #===========================================================
 import env
-import itertools
-import math
-import pytest
-from hypothesis import given, assume, strategies as st
+from hypothesis import assume, given, strategies as st
 
-from numth.basic import gcd, is_square
 from numth.types import frac, Rational, Quadratic, QuadraticInteger
 from numth.types.gaussian_integer import *
 #===========================================================

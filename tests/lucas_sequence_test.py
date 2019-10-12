@@ -1,9 +1,9 @@
 #   tests/lucas_sequence_test.py
 #===========================================================
 import env
-from hypothesis import given, assume, strategies as st
+from hypothesis import given, strategies as st
 
-from numth.types import Quadratic
+from numth.types import QuadraticInteger
 from numth.lucas_sequence.modular import *
 #===========================================================
 #   modular
@@ -21,7 +21,7 @@ def test_by_index(k, P, Q, mod):
     D = P**2 - 4*Q
     imag = ((mod + 1) // 2) % mod
     real = (P * imag) % mod
-    q = Quadratic(real, imag, D)
+    q = QuadraticInteger(real, imag, D)
     kth_power = pow(q, k, mod)
 
     U = (2 * kth_power.imag) % mod

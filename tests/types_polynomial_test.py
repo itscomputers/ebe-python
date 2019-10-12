@@ -2,13 +2,11 @@
 #===========================================================
 import env
 from hypothesis import assume, given, strategies as st
-from random import choice
 
 from numth.basic import is_square, lcm
-from numth.types import Rational, Quadratic
+from numth.types import Rational, QuadraticInteger
 from numth.types.polynomial import *
 from numth.types.polynomial import (
-    polyn_div,
     _term_pattern,
     _term_to_exp_coeff,
     _exp_coeff_to_term,
@@ -395,8 +393,8 @@ def test_mod_eval(e1, c1, e2, c2, val, mod):
     st.integers().filter(lambda x: x < 0 or not is_square(x))
 )
 def test_quadratic_integers(a1, b1, a2, b2, d):
-    g1 = Quadratic(a1, b1, d)
-    g2 = Quadratic(a2, b2, d)
+    g1 = QuadraticInteger(a1, b1, d)
+    g2 = QuadraticInteger(a2, b2, d)
     p1 = Polynomial({0: a1, 1: b1})
     p2 = Polynomial({0: a2, 1: b2})
     m = Polynomial({0: -d, 2: 1})

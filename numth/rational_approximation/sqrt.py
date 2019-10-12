@@ -2,7 +2,7 @@
 #===========================================================
 from ..basic import integer_sqrt
 from ..continued_fraction import continued_fraction_convergents
-from ..types import frac, Rational, QuadraticInteger
+from ..types import frac, QuadraticInteger
 #===========================================================
 
 def first_approximation(number, initial=None):
@@ -91,19 +91,19 @@ def continued_fraction_convergent_gen(number):
     return
     geneartor -> Rational
     """
-    def to_quadratic(pair):
+    def to_quadratic_integer(pair):
         return QuadraticInteger(pair[0], pair[1], number)
 
-    def to_rational(quadratic):
-        return Rational(quadratic.real, quadratic.imag)
+    def to_rational(quadratic_integer):
+        return frac(quadratic_integer.real, quadratic_integer.imag)
 
     convergents = continued_fraction_convergents(number)
-    quadratics = list(map(to_quadratic, convergents))
+    quadratics = list(map(to_quadratic_integer, convergents))
     last = quadratics[-1]
 
     while True:
-        for quadratic in quadratics:
-            yield to_rational(quadratic)
+        for quadratic_integer in quadratics:
+            yield to_rational(quadratic_integer)
 
         quadratics = list(map(lambda q: q * last, quadratics))
 

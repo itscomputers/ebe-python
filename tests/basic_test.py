@@ -1,7 +1,7 @@
 #   tests/basic_test.py
 #===========================================================
 import env
-from hypothesis import given, assume, strategies as st
+from hypothesis import assume, given, strategies as st
 from random import sample
 
 from numth.factorization import factor

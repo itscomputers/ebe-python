@@ -3,10 +3,9 @@
 import env
 import math
 from fractions import Fraction
-from hypothesis import given, assume, strategies as st
+from hypothesis import given, strategies as st
 
-from numth.basic import gcd, mod_inverse
-from numth.types import frac, Rational
+from numth.types.rational import *
 #===========================================================
 
 def coords(flag=None):

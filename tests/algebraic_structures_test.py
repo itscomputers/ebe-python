@@ -1,12 +1,11 @@
 #   tests/algebraic_structures_test.py
 #===========================================================
 import env
-from hypothesis import given, assume, strategies as st
+from hypothesis import given, strategies as st
 
-from numth.algebraic_structures import ModularRing
 from numth.basic import gcd, jacobi, mod_power
-from numth.modular import euler_phi
-from numth.primality import is_prime, next_prime
+from numth.primality import is_prime
+from numth.algebraic_structures import *
 #===========================================================
 
 @given(

@@ -2,11 +2,10 @@
 #===========================================================
 from collections import Counter
 from functools import reduce
-from random import randint
 
 from ..config import default
-from ..basic import integer_sqrt, padic
-from ..primality import is_prime, primes_in_range
+from ..basic import integer_sqrt, iter_primes_up_to, padic
+from ..primality import is_prime
 from .algorithms import pollard_rho_gen, pollard_p_minus_one_gen
 #===========================================================
 
@@ -50,7 +49,7 @@ def factor_trivial(number, prime_base=None):
     + prime_divisors : dict
         prime divisors of number from prime base with multiplicity
     """
-    prime_base = prime_base or primes_in_range(1, default('prime_base_max'))
+    prime_base = prime_base or iter_primes_up_to(default('prime_base_max'))
     remaining = number
     factorization = dict()
     for prime in prime_base:

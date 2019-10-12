@@ -2,7 +2,7 @@
 #===========================================================
 import env
 from functools import reduce
-from hypothesis import assume, given, strategies as st
+from hypothesis import given, strategies as st
 
 from numth.basic import is_square
 from numth.primality import is_prime, next_prime

@@ -1,13 +1,11 @@
 #   tests/types_quadratic_test.py
 #===========================================================
 import env
-import itertools
 import math
 import pytest
-from hypothesis import given, assume, strategies as st
+from hypothesis import assume, given, strategies as st
 
-from numth.basic import gcd, is_square
-from numth.types import Rational
+from numth.basic import is_square
 from numth.types.quadratic import *
 from numth.types.quadratic import _round_prefer_down
 #===========================================================

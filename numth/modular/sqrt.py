@@ -3,7 +3,7 @@
 from functools import reduce
 
 from ..basic import jacobi, padic
-from ..types import Quadratic
+from ..types import QuadraticInteger
 #===========================================================
 
 def mod_sqrt(number, prime):
@@ -185,6 +185,6 @@ def mod_sqrt_cipolla(number, prime):
         if jacobi(root, prime) == -1:
             break
 
-    val = pow(Quadratic(y, 1, root), (prime+1)//2, prime).real
+    val = pow(QuadraticInteger(y, 1, root), (prime+1)//2, prime).real
     return tuple(sorted([val, prime - val]))
 

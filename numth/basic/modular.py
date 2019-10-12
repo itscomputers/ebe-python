@@ -1,7 +1,7 @@
 #   numth/basic/modular.py
 #===========================================================
 from functools import reduce
-from itertools import product
+import itertools as it
 
 from .division import bezout, gcd, padic
 #===========================================================
@@ -187,7 +187,7 @@ def _prime_to_prime_power(pair):
 #- - - - - - - - - - - - - - -
 
 def _residues(factorization):
-    return product(*map(_prime_to_prime_power, factorization.items()))
+    return it.product(*map(_prime_to_prime_power, factorization.items()))
 
 #- - - - - - - - - - - - - - -
 

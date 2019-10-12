@@ -1,7 +1,7 @@
 #   tests/primality_test.py
 #===========================================================
 import env
-from hypothesis import given, assume, strategies as st
+from hypothesis import given, strategies as st
 
 from numth.basic import is_prime__naive, primes_up_to
 from numth.primality.miller_rabin import (
