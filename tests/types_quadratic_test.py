@@ -90,6 +90,46 @@ def test_from_components(real, imag, root):
 #=============================
 
 @given(*coords())
+def test_eq(real, imag, root):
+    a = Quadratic(real, imag, root)
+    b = Quadratic(real, imag, root)
+    c = Quadratic(real, real, root)
+    d = Quadratic(imag, imag, root)
+    assert a == b
+    if real != imag:
+        assert a != c
+        assert a != d
+        assert c != d
+
+#-----------------------------
+
+@given(*coords())
+def test_eq_int(real, imag, root):
+    a = Quadratic(real, imag, root)
+    if imag == 0:
+        assert a == real
+        assert real == a
+    else:
+        assert a != real
+        assert real != a
+
+#-----------------------------
+
+@given(*rational_coords())
+def test_eq_rational(real_n, real_d, imag_n, imag_d, root):
+    real = frac(real_n, real_d)
+    imag = frac(imag_n, imag_d)
+    a = Quadratic(real, imag, root)
+    if imag == 0:
+        assert a == real
+        assert real == a
+    else:
+        assert a != real
+        assert real != a
+
+#=============================
+
+@given(*coords())
 def test_neg(real, imag, root):
     a = Quadratic(real, imag, root)
     assert -a == Quadratic(-real, -imag, root)

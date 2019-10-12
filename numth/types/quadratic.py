@@ -134,7 +134,7 @@ class Quadratic(numbers.Number):
         if isinstance(other, Quadratic):
             return self.signature == other.signature
 
-        if isinstance(other, Rational):
+        if isinstance(other, numbers.Rational):
             return self.imag == 0 and self.real == other
 
         return NotImplemented

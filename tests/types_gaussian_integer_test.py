@@ -479,6 +479,6 @@ def test_gcd(real1, imag1, real2, imag2):
     a = GaussianInteger(real1, imag1)
     b = GaussianInteger(real2, imag2)
     z = a.gcd(b)
-    assert a % z == b % z == GaussianInteger(0, 0)
-    assert (a // z).gcd(b // z) == GaussianInteger(1, 0)
+    assert a % z == b % z == 0
+    assert (a // z).gcd(b // z) == 1
 
