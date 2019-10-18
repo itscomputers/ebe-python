@@ -133,7 +133,7 @@ def test_eq_rational(real_n, real_d, imag_n, imag_d, root):
 def test_neg(real, imag, root):
     a = Quadratic(real, imag, root)
     assert -a == Quadratic(-real, -imag, root)
-    assert a + -a == -a + a == Quadratic(0, 0, root)
+    assert a + -a == -a + a == 0
     assert -a == -1 * a
 
 #-----------------------------
@@ -143,9 +143,9 @@ def test_norm_conjugate(real, imag, root):
     a = Quadratic(real, imag, root)
     assert a.conjugate == Quadratic(real, -imag, root)
     assert a.norm == a.real**2 - a.root * a.imag**2
-    assert a * a.conjugate == Quadratic(a.norm, 0, a.root)
-    assert a + a.conjugate == Quadratic(2*a.real, 0, a.root)
-    assert a - a.conjugate == Quadratic(0, 2*a.imag, a.root)
+    assert a * a.conjugate == a.norm
+    assert a + a.conjugate == 2 * a.real
+    assert a - a.conjugate == Quadratic(0, 2 * a.imag, a.root)
 
 #-----------------------------
 
@@ -155,7 +155,7 @@ def test_inverse(real_n, real_d, imag_n, imag_d, root):
     imag = frac(imag_n, imag_d)
     assume( real != 0 and imag != 0 )
     a = Quadratic(real, imag, root)
-    assert a * a.inverse == Quadratic(1, 0, root)
+    assert a * a.inverse == 1
     assert a.inverse.inverse == a
 
 #-----------------------------

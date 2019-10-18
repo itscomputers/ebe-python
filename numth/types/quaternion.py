@@ -1,14 +1,18 @@
 #   numth/types/quaternion.py
 #===========================================================
 import numbers
+import operator as op
 
 from .rational import frac
+from .quadratic import Quadratic
+from .quadratic_integer import QuadraticInteger
+from .gaussian_integer import GaussianInteger
 #===========================================================
 
 class Quaternion(numbers.Number):
 
     def __init__(self, *components):
-        self.components = list(map(frac, components))
+        self.components = tuple(map(frac, components))
 
     @property
     def r(self):
@@ -89,10 +93,22 @@ class Quaternion(numbers.Number):
     def from_quadratic_integer(self, quadratic_integer):
         return self.from_quadratic(quadratic_integer)
 
+    @classmethod
+    def from_gaussian_integer(self, gaussian_integer):
+        return self.from_quadratic_integer(gaussian_integer)
+
     @property
     def to_quadratic(self):
         if self.is_complex:
             return Quadratic(self.r, self.i, -1)
+
+        return NotImplemented
+
+    @property
+    def to_gaussian_integer(self):
+        if self.is_complex:
+            rounded = self.round
+            return GaussianInteger(rounded.r, rounded.i)
 
         return NotImplemented
 
@@ -139,6 +155,8 @@ class Quaternion(numbers.Number):
         if isinstance(other, numbers.Rational):
             return self.is_real and self.r == other
 
+        return NotImplemented
+
     def __lt__(self, other):
         if self.is_similar_type(other):
             return self.norm < other.norm
@@ -148,6 +166,8 @@ class Quaternion(numbers.Number):
     def __gt__(self, other):
         if self.is_similar_type(other):
             return self.norm > other.norm
+
+        return NotImplemented
 
     def __le__(self, other):
         return not (self > other)
@@ -312,11 +332,11 @@ class Quaternion(numbers.Number):
 
     def _floordiv_int(self, other):
         return self.from_components(
-            *map(lambda x: x // other, self.components)
+            *map(lambda x: (x / other).round_to_nearest_int, self.components)
         )
 
     def _floordiv_rational(self, other):
-        return self._floordiv_int(self, other)
+        return self._floordiv_int(other)
 
     def _floordiv_quadratic(self, other):
         return self._floordiv_same_type(self.from_quadratic(other))
@@ -349,52 +369,13 @@ class Quaternion(numbers.Number):
         if self.is_similar_type(other):
             return self._floordiv_similar_type(other)
 
-        return NotImplemented
-
     #=========================
 
-    def _mod_int(self, other):
-        def mod_with_small_remainder(x):
-            return div_with_small_remainder(x, other)[1]
-        return self.from_components(
-            *map(mod_with_small_remainder, self.components)
-        )
-
-    def _mod_rational(self, other):
-        return self._mod_int(other)
-
-    def _mod_quadratic(self, other):
-        return self._mod_same_type(self.from_quadratic(other))
-
-    def _mod_quadratic_integer(self, other):
-        return self._mod_same_type(self.from_qudratic_integer(other))
-
-    def _mod_same_type(self, other):
+    def __mod__(self, other):
         return self - (self // other) * other
 
-    def _mod_similar_type(self, other):
-        return self._mod_same_type(other)
-
-    def __mod__(self, other):
-        if isinstance(other, int):
-            return self._mod_int(other)
-
-        if isinstance(other, Rational):
-            return self._mod_rational(other)
-
-        if isinstance(other, QuadraticInteger) and other.is_complex:
-            return self._mod_quadratic_integer(other)
-
-        if isinstance(other, Quadratic) and other.is_complex:
-            return self._mod_quadratic(other)
-
-        if self.is_same_type(other):
-            return self._mod_same_type(other)
-
-        if self.is_similar_type(other):
-            return self._mod_similar_type(other)
-
-        return NotImplemented
+    def __rmod__(self, other):
+        return other - (other // self) * self
 
     #=========================
 
@@ -427,16 +408,25 @@ class Quaternion(numbers.Number):
         return -self + other
 
     def __rmul__(self, other):
-        return self * other
+        if isinstance(other, numbers.Rational):
+            return self * other
+
+        if isinstance(other, Quadratic):
+            return Quaternion.from_quadratic(other) * self
 
     def __rtruediv__(self, other):
-        return self.inverse * other
+        if isinstance(other, numbers.Rational):
+            return self.inverse * other
+
+        if isinstance(other, Quadratic):
+            return Quaternion.from_quadratic(other) / self
 
     def __rfloordiv__(self, other):
-        return (self.inverse * other).round
+        if isinstance(other, numbers.Rational):
+            return Quaternion(other, 0, 0, 0) // self
 
-    def __rmod__(self, other):
-        return other - (other // self) * self
+        if isinstance(other, Quadratic):
+            return Quaternion.from_quadratic(other) // self
 
 #===========================================================
 from ..basic import div_with_small_remainder

@@ -324,6 +324,11 @@ class Rational(Fraction):
             return math.floor(self / other)
         return NotImplemented
 
+    def __mod__(self, other):
+        if isinstance(other, (int, Rational)):
+            return self - (self // other) * other
+        return NotImplemented
+
     def __pow__(self, other):
         if isinstance(other, numbers.Rational) and other.denominator == 1:
             if other == 0:

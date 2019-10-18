@@ -153,6 +153,8 @@ class Quadratic(numbers.Number):
         if self.is_similar_type(other):
             return self.norm > other.norm
 
+        return NotImplemented
+
     def __le__(self, other):
         return not (self > other)
 

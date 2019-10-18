@@ -22,11 +22,11 @@ def quaternion_descent(quaternion, prime):
     return
     Quaternion
     """
-    m = quaternion.norm() // prime
+    m = quaternion.norm // prime
     if m == 1:
         return quaternion
     return quaternion_descent(
-        (quaternion.conjugate() * (quaternion % m)) // m,
+        (quaternion.conjugate * (quaternion % m)) // m,
         prime
     )
 
