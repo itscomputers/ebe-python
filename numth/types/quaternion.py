@@ -122,7 +122,7 @@ class Quaternion(numbers.Number):
 
     @property
     def conjugate(self):
-        return self.from_components(self.r, -self.i, -self.j, -self.k)
+        return self.from_components(self.components[0], *map(op.__neg__, self.components[1:]))
 
     @property
     def norm(self):

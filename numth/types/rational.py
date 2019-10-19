@@ -158,6 +158,12 @@ class Rational(Fraction):
     #-------------------------
 
     @property
+    def round_prefer_toward_zero(self):
+        return int(self) if self.denom == 2 else self.round_to_nearest_int
+
+    #-------------------------
+
+    @property
     def is_square(self):
         return is_square(self._numerator) and is_square(self._denominator)
 
