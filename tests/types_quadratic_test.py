@@ -88,12 +88,13 @@ def test_display(a, b):
 
 #=============================
 
-@given(quadratic())
-def test_from_components(a):
-    assert type(a.from_components(a.real, a.imag)) is Quadratic
-    assert a.from_components(a.real, a.imag) == a
-    assert a.from_components(a.real, -a.imag) == a.conjugate
-    assert a.from_components(-a.real, -a.imag) == -a
+@given(quadratic(), st.integers(), st.integers())
+def test_from_components(a, real, imag):
+    new = a.from_components(real, imag)
+    assert type(new) is Quadratic
+    assert new.real == real
+    assert new.imag == imag
+    assert new.root == a.root
 
 #=============================
 
@@ -112,17 +113,17 @@ def test_eq(pair, other):
 
 @given(quadratic(), st.integers())
 def test_eq_int(a, i):
-    if a.imag != 0 or a.real != i:
-        assert a != i
-    else:
+    if a.imag == 0 and a.real == i:
         assert a == i
+    else:
+        assert a != i
 
 @given(quadratic(), rational())
 def test_eq_rational(a, r):
-    if a.imag != 0 or a.real != r:
-        assert a != r
-    else:
+    if a.imag == 0 and a.real == r:
         assert a == r
+    else:
+        assert a != r
 
 #=============================
 
@@ -176,6 +177,7 @@ def test_add(pair):
 @given(quadratic(), st.integers())
 def test_add_int(a, i):
     assert type(a + i) is Quadratic
+    assert type(i + a) is Quadratic
     assert a + i == i + a
     assert a + i == Quadratic(a.real + i, a.imag, a.root)
 
@@ -197,12 +199,14 @@ def test_sub(pair):
 @given(quadratic(), st.integers())
 def test_sub_int(a, i):
     assert type(a - i) is Quadratic
+    assert type(i - a) is Quadratic
     assert a - i == -(i - a) == -i + a
     assert a - i == Quadratic(a.real - i, a.imag, a.root)
 
 @given(quadratic(), rational())
 def test_sub_Rational(a, r):
     assert type(a - r) is Quadratic
+    assert type(r - a) is Quadratic
     assert a - r == -(r - a) == -r + a
     assert a - r == Quadratic(a.real - r, a.imag, a.root)
 
@@ -220,12 +224,14 @@ def test_mul(pair):
 @given(quadratic(), st.integers())
 def test_mul_int(a, i):
     assert type(a * i) is Quadratic
+    assert type(i * a) is Quadratic
     assert a * i == i * a
     assert a * i == Quadratic(a.real * i, a.imag * i, a.root)
 
 @given(quadratic(), rational())
 def test_mul_Rational(a, r):
     assert type(a * r) is Quadratic
+    assert type(r * a) is Quadratic
     assert a * r == r * a
     assert a * r == Quadratic(a.real * r, a.imag * r, a.root)
 
@@ -316,6 +322,8 @@ def test_mod_Rational(a, r):
 )
 def test_pow(a, m, n):
     assert type(a**0) is Quadratic
+    assert type(a**1) is Quadratic
+    assert type(a**-1) is Quadratic
     assert type(a**m) is Quadratic
     assert a**0 == 1
     assert a**1 == a
@@ -327,6 +335,7 @@ def test_pow(a, m, n):
     sum_power = a**(m + n)
     assert mth_power * nth_power == sum_power
     assert sum_power / mth_power == nth_power
+    assert a**-m == mth_power.inverse
 
 #=============================
 

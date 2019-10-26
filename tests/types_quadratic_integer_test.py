@@ -55,12 +55,13 @@ def quadratic_integer_and_quadratic(draw, nonzero=False):
 
 #=============================
 
-@given(quadratic_integer())
-def test_from_components(a):
-    assert type(a.from_components(a.real, a.imag)) is QuadraticInteger
-    assert a.from_components(a.real, a.imag) == a
-    assert a.from_components(a.real, -a.imag) == a.conjugate
-    assert a.from_components(-a.real, -a.imag) == -a
+@given(quadratic_integer(), st.integers(), st.integers())
+def test_from_components(a, real, imag):
+    new = a.from_components(real, imag)
+    assert type(new) is QuadraticInteger
+    assert new.real == real
+    assert new.imag == imag
+    assert new.root == a.root
 
 @given(quadratic_integer())
 def test_to_quadratic(a):
@@ -86,8 +87,6 @@ def test_eq(pair, other):
 @given(quadratic_integer_and_quadratic())
 def test_eq_Quadratic(pair):
     a, b = pair
-    assert type(a) is QuadraticInteger
-    assert type(b) is Quadratic
     if a.components == b.components:
         assert a == b
     else:
@@ -95,17 +94,17 @@ def test_eq_Quadratic(pair):
 
 @given(quadratic_integer(), st.integers())
 def test_eq_int(a, i):
-    if a.imag != 0 or a.real != i:
-        assert a != i
-    else:
+    if a.imag == 0 and a.real == i:
         assert a == i
+    else:
+        assert a != i
 
 @given(quadratic_integer(), rational())
 def test_eq_Rational(a, r):
-    if a.imag != 0 or a.real != r:
-        assert a != r
-    else:
+    if a.imag == 0 and a.real == r:
         assert a == r
+    else:
+        assert a != r
 
 #=============================
 
@@ -113,8 +112,6 @@ def test_eq_Rational(a, r):
 def test_neg(a):
     assert type(-a) is QuadraticInteger
     assert -a == -(a.to_quadratic)
-    assert a + -a == -a + a == 0
-    assert -a == -1 * a
 
 @given(quadratic_integer())
 def test_norm_conjugate(a):
@@ -155,19 +152,22 @@ def test_add_Quadratic(pair):
     a, b = pair
     assert type(a + b) is Quadratic
     assert type(b + a) is Quadratic
-    assert a + b == b + a == a.to_quadratic + b
+    assert a + b == a.to_quadratic + b
+    assert b + a == b + a.to_quadratic
 
 @given(quadratic_integer(), st.integers())
 def test_add_int(a, i):
     assert type(a + i) is QuadraticInteger
     assert type(i + a) is QuadraticInteger
-    assert a + i == i + a == a.to_quadratic + i
+    assert a + i == a.to_quadratic + i
+    assert i + a == i + a.to_quadratic
 
 @given(quadratic_integer(), rational())
 def test_add_Rational(a, r):
     assert type(a + r) is Quadratic
     assert type(r + a) is Quadratic
-    assert a + r == r + a == a.to_quadratic + r
+    assert a + r == a.to_quadratic + r
+    assert r + a == r + a.to_quadratic
 
 #=============================
 
@@ -212,19 +212,22 @@ def test_mul_Quadratic(pair):
     a, b = pair
     assert type(a * b) is Quadratic
     assert type(b * a) is Quadratic
-    assert a * b == b * a == a.to_quadratic * b
+    assert a * b == a.to_quadratic * b
+    assert b * a == b * a.to_quadratic
 
 @given(quadratic_integer(), st.integers())
 def test_mul_int(a, i):
     assert type(a * i) is QuadraticInteger
     assert type(i * a) is QuadraticInteger
-    assert a * i == i * a == a.to_quadratic * i
+    assert a * i == a.to_quadratic * i
+    assert i * a == i * a.to_quadratic
 
 @given(quadratic_integer(), rational())
 def test_mul_Rational(a, r):
     assert type(a * r) is Quadratic
     assert type(r * a) is Quadratic
-    assert a * r == r * a == a.to_quadratic * r
+    assert a * r == a.to_quadratic * r
+    assert r * a == r * a.to_quadratic
 
 #=============================
 
@@ -242,7 +245,7 @@ def test_truediv_Quadratic(pair):
     assert a / b == a.to_quadratic / b
     assert b / a == b / a.to_quadratic
 
-@given(quadratic_integer(nonzero=True), st.integers(min_value=1))
+@given(quadratic_integer(nonzero=True), st.integers().filter(lambda x: x != 0))
 def test_truediv_int(a, i):
     assert type(a / i) is Quadratic
     assert type(i / a) is Quadratic
@@ -272,7 +275,7 @@ def test_floordiv_Quadratic(pair):
     assert a // b == a.to_quadratic // b
     assert b // a == b // a.to_quadratic
 
-@given(quadratic_integer(nonzero=True), st.integers(min_value=1))
+@given(quadratic_integer(nonzero=True), st.integers().filter(lambda x: x != 0))
 def test_floordiv_int(a, i):
     assert type(a // i) is QuadraticInteger
     assert type(i // a) is QuadraticInteger
@@ -302,7 +305,7 @@ def test_mod_Quadratic(pair):
     assert a % b == a.to_quadratic % b
     assert b % a == b % a.to_quadratic
 
-@given(quadratic_integer(nonzero=True), st.integers(min_value=1))
+@given(quadratic_integer(nonzero=True), st.integers().filter(lambda x: x != 0))
 def test_mod_int(a, i):
     assert type(a % i) is QuadraticInteger
     assert type(i % a) is QuadraticInteger
@@ -315,28 +318,6 @@ def test_mod_Rational(a, r):
     assert type(r % a) is Quadratic
     assert a % r == a.to_quadratic % r
     assert r % a == r % a.to_quadratic
-
-#-----------------------------
-
-def pair():
-    return 2 * [st.integers()]
-
-def coords(rmin=None, rmax=None):
-    if rmin is not None and rmax is not None:
-        rval = st.integers(min_value=rmin, max_value=rmax)
-    elif rmin is not None:
-        rval = st.integers(min_value=rmin)
-    elif rmax is not None:
-        rval = st.integers(max_value=rmax)
-    else:
-        rval = st.integers()
-    return [*pair(), rval.filter(root_filter)]
-
-def double_coords():
-    return [*pair(), *pair(), st.integers().filter(root_filter)]
-
-def rational():
-    return [st.integers(), st.integers(min_value=1)]
 
 #=============================
 
