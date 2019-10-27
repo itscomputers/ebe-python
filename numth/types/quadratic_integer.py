@@ -69,6 +69,9 @@ class QuadraticInteger(Quadratic):
             self.root
         )
 
+    def _rmul_Quadratic(self, other):
+        return self * other
+
     #=========================
 
     def _truediv_QuadraticInteger(self, other):

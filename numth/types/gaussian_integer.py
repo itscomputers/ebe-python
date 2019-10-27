@@ -94,6 +94,9 @@ class GaussianInteger(QuadraticInteger):
             return NotImplemented
         return self._mul_GaussianInteger(other)
 
+    def _rmul_QuadraticInteger(self, other):
+        return self * other
+
     #=========================
 
     def _truediv_GaussianInteger(self, other):

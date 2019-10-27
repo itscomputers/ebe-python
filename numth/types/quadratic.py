@@ -170,6 +170,12 @@ class Quadratic(ArithmeticType):
             self.root
         )
 
+    def _rmul_int(self, other):
+        return self * other
+
+    def _rmul_Rational(self, other):
+        return self * other
+
     #-------------------------
 
     def _truediv_int(self, other):
@@ -252,9 +258,6 @@ class Quadratic(ArithmeticType):
 
     def _inv_pow_mod_int(self, other, modulus):
         return self.__pow__(-other, modulus).inverse % modulus
-
-    def _zero_pow_mod_int(self, _other, _modulus):
-        return self.from_components(1, 0)
 
     #=========================
 

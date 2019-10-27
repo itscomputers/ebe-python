@@ -1,15 +1,15 @@
 #   numth/types/quaternion.py
 #===========================================================
-import numbers
 import operator as op
 
 from .rational import frac
+from .arithmetic_type import ArithmeticType
 from .quadratic import Quadratic
 from .quadratic_integer import QuadraticInteger
 from .gaussian_integer import GaussianInteger
 #===========================================================
 
-class Quaternion(numbers.Number):
+class Quaternion(ArithmeticType):
 
     def __init__(self, *components):
         self.components = tuple(map(frac, components))
@@ -70,59 +70,23 @@ class Quaternion(numbers.Number):
 
     #=========================
 
-    def is_same_type(self, other):
-        return type(self) is type(other)
+    def _eq_int(self, other):
+        return self.components == (other, 0, 0, 0)
 
-    def is_similar_type(self, other):
-        return self.is_same_type(other)
+    def _eq_Rational(self, other):
+        return self.components == (other, 0, 0, 0)
 
-    #-------------------------
-
-    @classmethod
-    def from_components(self, *components):
-        return Quaternion(*components)
-
-    @classmethod
-    def from_quadratic(self, quadratic):
-        if quadratic.is_complex:
-            return self.from_components(*quadratic.components, 0, 0)
-
-        return NotImplemented
-
-    @classmethod
-    def from_quadratic_integer(self, quadratic_integer):
-        return self.from_quadratic(quadratic_integer)
-
-    @classmethod
-    def from_gaussian_integer(self, gaussian_integer):
-        return self.from_quadratic_integer(gaussian_integer)
-
-    @property
-    def to_quadratic(self):
-        if self.is_complex:
-            return Quadratic(self.r, self.i, -1)
-
-        return NotImplemented
-
-    @property
-    def to_gaussian_integer(self):
-        if self.is_complex:
-            rounded = self.round
-            return GaussianInteger(rounded.r, rounded.i)
-
-        return NotImplemented
+    def _eq_Quaternion(self, other):
+        return self.components == other.components
 
     #=========================
 
-    def __pos__(self):
-        return self
-
     def __neg__(self):
-        return self.from_components(*map(op.__neg__, self.components))
+        return self.__class__(*map(op.__neg__, self.components))
 
     @property
     def conjugate(self):
-        return self.from_components(self.components[0], *map(op.__neg__, self.components[1:]))
+        return self.__class__(self.components[0], *map(op.__neg__, self.components[1:]))
 
     @property
     def norm(self):
@@ -130,116 +94,43 @@ class Quaternion(numbers.Number):
 
     @property
     def inverse(self):
-        norm = self.norm
-        return self.from_components(
+        norm = frac(self.norm)
+        return Quaternion(
             *map(lambda x: x / norm, self.conjugate.components)
         )
 
     @property
     def round(self):
-        return self.from_components(
+        return self.__class__(
             *map(lambda x: x.round_to_nearest_int, self.components)
         )
 
     #=========================
 
-    def __eq__(self, other):
-        if self.is_similar_type(other):
-            return self.components == other.components
-
-        if isinstance(other, Quadratic):
-            return other.is_complex \
-                and self.is_complex and \
-                self.components[:2] == other.components
-
-        if isinstance(other, numbers.Rational):
-            return self.is_real and self.r == other
-
-        return NotImplemented
-
-    def __lt__(self, other):
-        if self.is_similar_type(other):
-            return self.norm < other.norm
-
-        return NotImplemented
-
-    def __gt__(self, other):
-        if self.is_similar_type(other):
-            return self.norm > other.norm
-
-        return NotImplemented
-
-    def __le__(self, other):
-        return not (self > other)
-
-    def __ge__(self, other):
-        return not (self < other)
-
-    #=========================
-
     def _add_int(self, other):
-        return self.from_components(self.r + other, *self.components[1:])
+        return self.__class__(self.r + other, *self.components[1:])
 
-    def _add_rational(self, other):
-        return self._add_int(other)
+    def _add_Rational(self, other):
+        return Quaternion(self.r + other, *self.components[1:])
 
-    def _add_quadratic(self, other):
-        return self._add_same_type(self.from_quadratic(other))
-
-    def _add_quadratic_integer(self, other):
-        return self._add_same_type(self.from_quadratic_integer(other))
-
-    def _add_same_type(self, other):
-        return self.from_components(
+    def _add_Quaternion(self, other):
+        return self.__class__(
             *map(op.__add__, self.components, other.components)
         )
-
-    def _add_similar_type(self, other):
-        return self._add_same_type(other)
-
-    def __add__(self, other):
-        if isinstance(other, int):
-            return self._add_int(other)
-
-        if isinstance(other, Rational):
-            return self._add_rational(other)
-
-        if isinstance(other, QuadraticInteger) and other.is_complex:
-            return self._add_quadratic_integer(other)
-
-        if isinstance(other, Quadratic) and other.is_complex:
-            return self._add_quadratic(other)
-
-        if self.is_same_type(other):
-            return self._add_same_type(other)
-
-        if self.is_similar_type(other):
-            return self._add_similar_type(other)
-
-        return NotImplemented
-
-    #=========================
-
-    def __sub__(self, other):
-        return self + -other
 
     #=========================
 
     def _mul_int(self, other):
-        return self.from_components(
+        return self.__class__(
             *map(lambda x: x * other, self.components)
         )
 
     def _mul_rational(self, other):
-        return self._mul_int(other)
+        return Quaternion(
+            *map(lambda x: x * other, self.components)
+        )
 
-    def _mul_quadratic(self, other):
-        return self._mul_same_type(self.from_quadratic(other))
-
-    def _mul_quadratic_integer(self, other):
-        return self._mul_same_type(self.from_quadratic_integer(other))
-
-    def _mul_same_type(self, other):
+    def _mul_components(self, other):
         def mul_each(index, s_cmpt, o_cmpt):
             sign = [(1, -1, -1, -1),
                     (1, 1, 1, -1),
@@ -255,178 +146,98 @@ class Quaternion(numbers.Number):
                 s_cmpt,
                 (o_cmpt[i] for i in o_ind)
             ))
-
-        return self.from_components(*[
-            mul_each(index, self.components, quaternion(other).components)
+        return [
+            mul_each(index, self.components, other.components)
             for index in range(4)
-        ])
+        ]
 
-    def _mul_similar_type(self, other):
-        return self._mul_same_type(other)
+    def _mul_Quaternion(self, other):
+        return Quaternion(*self._mul_components(other))
 
-    def __mul__(self, other):
-        if isinstance(other, int):
-            return self._mul_int(other)
+    def _rmul_int(self, other):
+        return self.__class__(other, 0, 0, 0) * self
 
-        if isinstance(other, Rational):
-            return self._mul_rational(other)
-
-        if isinstance(other, QuadraticInteger) and other.is_complex:
-            return self._mul_quadratic_integer(other)
-
-        if isinstance(other, Quadratic) and other.is_complex:
-            return self._mul_quadratic(other)
-
-        if self.is_same_type(other):
-            return self._mul_same_type(other)
-
-        if self.is_similar_type(other):
-            return self._mul_similar_type(other)
-
-        return NotImplemented
+    def _rmul_Rational(self, other):
+        return self.__class__(other, 0, 0, 0) * self
 
     #=========================
 
-    def _div_int(self, other):
-        return self.from_components(
-            *map(lambda x: x / other, self.components)
+    def _truediv_int(self, other):
+        return Quaternion(
+            *map(lambda x: x / frac(other), self.components)
         )
 
-    def _div_rational(self, other):
-        return self._div_int(other)
+    def _truediv_rational(self, other):
+        return Quaternion(
+            *map(lambda x: x / frac(other), self.components)
+        )
 
-    def _div_quadratic(self, other):
-        return self._div_same_type(self.from_quadratic(other))
-
-    def _div_quadratic_integer(self, other):
-        return self._div_same_type(self.from_quadratic_integer(other))
-
-    def _div_same_type(self, other):
+    def _truediv_Quaternion(self, other):
         return self * other.inverse
 
-    def _div_similar_type(self, other):
-        return self._div_same_type(other)
+    def _rtruediv_int(self, other):
+        return Quaternion(other, 0, 0, 0) / self
 
-    def __truediv__(self, other):
-        if isinstance(other, int):
-            return self._div_int(other)
-
-        if isinstance(other, Rational):
-            return self._div_rational(other)
-
-        if isinstance(other, QuadraticInteger) and other.is_complex:
-            return self._div_quadratic_integer(other)
-
-        if isinstance(other, Quadratic) and other.is_complex:
-            return self._div_quadratic(other)
-
-        if self.is_same_type(other):
-            return self._div_same_type(other)
-
-        if self.is_similar_type(other):
-            return self._div_similar_type(other)
-
-        return NotImplemented
+    def _rtruediv_Rational(self, other):
+        return Quaternion(other, 0, 0, 0) / self
 
     #=========================
 
     def _floordiv_int(self, other):
-        return self.from_components(
-            *map(lambda x: (x / other).round_to_nearest_int, self.components)
+        return self.__class__(
+            *map(lambda x: x // other, self.components)
         )
 
-    def _floordiv_rational(self, other):
-        return self._floordiv_int(other)
+    def _floordiv_Rational(self, other):
+        return self.__class__(
+            *map(lambda x: x // other, self.components)
+        )
 
-    def _floordiv_quadratic(self, other):
-        return self._floordiv_same_type(self.from_quadratic(other))
-
-    def _floordiv_quadratic_integer(self, other):
-        return self._floordiv_same_type(self.from_quadratic_integer(other))
-
-    def _floordiv_same_type(self, other):
+    def _floordiv_Quaternion(self, other):
         return (self / other).round
 
-    def _floordiv_similar_type(self, other):
-        return self._floordiv_same_type(other)
+    def _rfloordiv_int(self, other):
+        return self.__class__(other, 0, 0, 0) // self
 
-    def __floordiv__(self, other):
-        if isinstance(other, int):
-            return self._floordiv_int(other)
-
-        if isinstance(other, Rational):
-            return self._floordiv_rational(other)
-
-        if isinstance(other, QuadraticInteger) and other.is_complex:
-            return self._floordiv_quadratic_integer(other)
-
-        if isinstance(other, Quadratic) and other.is_complex:
-            return self._floordiv_quadratic(other)
-
-        if self.is_same_type(other):
-            return self._floordiv_same_type(other)
-
-        if self.is_similar_type(other):
-            return self._floordiv_similar_type(other)
+    def _rfloordiv_Rational(self, other):
+        return self.__class__(other, 0, 0, 0) // self
 
     #=========================
 
-    def __mod__(self, other):
+    def _mod_int(self, other):
+        return self.__class__(
+            *map(lambda x: x % other, self.components)
+        )
+
+    def _mod_Rational(self, other):
+        return self.__class__(
+            *map(lambda x: x % other, self.components)
+        )
+
+    def _mod_Quaternion(self, other):
         return self - (self // other) * other
 
-    def __rmod__(self, other):
-        return other - (other // self) * self
+    def _rmod_int(self, other):
+        return Quaternion(other, 0, 0, 0) % self
+        return self._reverse('mod', other)
+
+    def _rmod_Rational(self, other):
+        return Quaternion(other, 0, 0, 0) % self
+        return self._reverse('mod', other)
 
     #=========================
 
-    def __pow__(self, other, modulus=None):
-        if not isinstance(other, int):
-            raise TypeError('Integre exponent is required')
+    def _inv_pow_int(self, other):
+        return self.__pow__(-other).inverse
 
-        if other < 0:
-            result = pow(self, -other).inverse
-            return result if modulus is None else result % modulus
+    def _zero_pow_int(self, other):
+        return self.__class__(1, 0, 0, 0)
 
-        if other == 0:
-            return self.from_components(1, 0, 0, 0)
+    def _inv_pow_mod_int(self, other, modulus):
+        return self.__pow__(-other, modulus).inverse % modulus
 
-        if other == 1:
-            return self if modulus is None else self % modulus
-
-        if other % 2 == 0:
-            return pow(self * self, other // 2, modulus)
-
-        result = self * pow(self * self, other // 2, modulus)
-        return result if modulus is None else result % modulus
-
-    #=========================
-
-    def __radd__(self, other):
-        return self + other
-
-    def __rsub__(self, other):
-        return -self + other
-
-    def __rmul__(self, other):
-        if isinstance(other, numbers.Rational):
-            return self * other
-
-        if isinstance(other, Quadratic):
-            return Quaternion.from_quadratic(other) * self
-
-    def __rtruediv__(self, other):
-        if isinstance(other, numbers.Rational):
-            return self.inverse * other
-
-        if isinstance(other, Quadratic):
-            return Quaternion.from_quadratic(other) / self
-
-    def __rfloordiv__(self, other):
-        if isinstance(other, numbers.Rational):
-            return Quaternion(other, 0, 0, 0) // self
-
-        if isinstance(other, Quadratic):
-            return Quaternion.from_quadratic(other) // self
+    def _zero_pow_mod_int(self, _other, _modulus):
+        return self.__class__(1, 0, 0, 0)
 
 #===========================================================
 from ..basic import div_with_small_remainder
