@@ -2,13 +2,14 @@
 #===========================================================
 import operator as op
 
-from .quadratic import Quadratic
-from .quadratic_integer import QuadraticInteger
+from ..basic import mod_inverse
+from .quadratic import *
+from .gaussian_rational import GaussianRational
 #===========================================================
 
-class GaussianInteger(QuadraticInteger):
+class GaussianInteger(GaussianRational):
 
-    def __init__(self, real, imag):
+    def __init__(self, real, imag, *args):
         self._real = int(real)
         self._imag = int(imag)
         self._root = -1
@@ -25,16 +26,9 @@ class GaussianInteger(QuadraticInteger):
 
     #=========================
 
-    def from_components(self, *components):
-        return GaussianInteger(*components)
-
     @property
-    def to_quadratic_integer(self):
-        return QuadraticInteger(*self.signature)
-
-    @property
-    def to_quadratic(self):
-        return Quadratic(*self.signature)
+    def to_gaussian_rational(self):
+        return GaussianRational(*self.components)
 
     #=========================
 
@@ -43,98 +37,58 @@ class GaussianInteger(QuadraticInteger):
 
     #=========================
 
-    @property
-    def canonical(self):
-        if abs(self.real) < abs(self.imag):
-            canonical = self * GaussianInteger(0, 1)
-        elif self.real == -self.imag:
-            canonical = self * GaussianInteger(0, -1)
-        else:
-            canonical = self
+    def _gcd_GaussianInteger(self, other):
+        a, b = self, other
+        while b.components != (0, 0):
+            a, b = b, a % b
+        return a.canonical
 
-        return -canonical if canonical.real < 0 else canonical
+    def _gcd_int(self, other):
+        return self.gcd_GaussianInteger(GaussianInteger(other, 0))
+
+    def _gcd_QuadraticInteger(self, other):
+        return self.gcd_GaussianInteger(GaussianInteger(*other.components))
 
     def gcd(self, other):
-        if isinstance(other, GaussianInteger):
-            a, b = self, other
-            while b.components != (0, 0):
-                a, b = b, a % b
-            return a.canonical
+        return self.execute('gcd', other)
 
-        if isinstance(other, int):
-            return self.gcd(GaussianInteger(other, 0))
+    @property
+    def round(self):
+        return self
 
-        if isinstance(other, QuadraticInteger) and other.is_complex:
-            return self.gcd(GaussianInteger(*other.components))
-
-        return NotImplemented
+    def mod_inverse(self, modulus):
+        norm_inverse = mod_inverse(self.norm, modulus)
+        return GaussianInteger(
+            *map(lambda x: (x * norm_inverse) % modulus, (self.real, -self.imag)),
+        )
 
     #=========================
 
     def _add_GaussianInteger(self, other):
-        return GaussianInteger(
-            *map(op.__add__, self.components, other.components)
-        )
-
-    def _add_QuadraticInteger(self, other):
-        if not other.is_complex:
-            return NotImplemented
-        return self._add_GaussianInteger(other)
+        return GaussianInteger(*add_(self, other))
 
     #=========================
 
     def _mul_GaussianInteger(self, other):
-        return GaussianInteger(
-            self.real * other.real - self.imag * other.imag,
-            self.real * other.imag + self.imag * other.real
-        )
-
-    def _mul_QuadraticInteger(self, other):
-        if not other.is_complex:
-            return NotImplemented
-        return self._mul_GaussianInteger(other)
-
-    def _rmul_QuadraticInteger(self, other):
-        return self * other
+        return GaussianInteger(*mul_(self, other))
 
     #=========================
 
     def _truediv_GaussianInteger(self, other):
         return self * other.inverse
 
-    def _rtruediv_QuadraticInteger(self, other):
-        if not other.is_complex:
-            return NotImplemented
-        return self.inverse * other
-
     #=========================
 
-    def _floordiv(self, other):
-        return GaussianInteger(*(self / other).round.components)
-
     def _floordiv_GaussianInteger(self, other):
-        return self._floordiv(other)
-
-    def _floordiv_QuadraticInteger(self, other):
-        if not other.is_complex:
-            return NotImplemented
-        return self._floordiv(other)
-
-    def _rfloordiv(self, other):
-        return GaussianInteger(*(self.inverse * other).round.components)
-
-    def _rfloordiv_QuadraticInteger(self, other):
-        if not other.is_complex:
-            return NotImplemented
-        return self._rfloordiv(other)
+        return GaussianInteger(*floordiv_(self, other))
 
     #=========================
 
     def _mod_GaussianInteger(self, other):
         return self - (self // other) * other
 
-    def _rmod_QuadraticInteger(self, other):
-        if not other.is_complex:
-            return NotImplemented
-        return other - (other // self) * self
+    #=========================
+
+    def _inv_pow_mod_int(self, other, modulus):
+        return self.__pow__(-other, modulus).mod_inverse(modulus)
 

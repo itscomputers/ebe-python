@@ -55,14 +55,6 @@ def quadratic_integer_and_quadratic(draw, nonzero=False):
 
 #=============================
 
-@given(quadratic_integer(), st.integers(), st.integers())
-def test_from_components(a, real, imag):
-    new = a.from_components(real, imag)
-    assert type(new) is QuadraticInteger
-    assert new.real == real
-    assert new.imag == imag
-    assert new.root == a.root
-
 @given(quadratic_integer())
 def test_to_quadratic(a):
     assert type(a.to_quadratic) is Quadratic

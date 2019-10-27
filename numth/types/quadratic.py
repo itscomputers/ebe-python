@@ -7,6 +7,42 @@ from .arithmetic_type import ArithmeticType
 from .rational import frac, Rational
 #===========================================================
 
+def add_(a, b):
+    return map(op.__add__, a.components, b.components)
+
+def add_constant(a, b):
+    return (a.real + b, a.imag)
+
+def mul_(a, b):
+    return (
+        a.real * b.real + a.imag * b.imag * a.root,
+        a.real * b.imag + a.imag * b.real
+    )
+
+def mul_constant(a, b):
+    return map(lambda x: x * b, a.components)
+
+def truediv_(a, b):
+    norm = frac(b.norm)
+    return (
+        (a.real * b.real - a.imag * b.imag * a.root) / norm,
+        (-a.real * b.imag + a.imag * b.real) / norm
+    )
+
+def truediv_constant(a, b):
+    return map(lambda x: x / frac(b), a.components)
+
+def floordiv_(a, b):
+    return (a / b).round.components
+
+def floordiv_constant(a, b):
+    return map(lambda x: x // b, a.components)
+
+def mod_constant(a, b):
+    return map(lambda x: x % b, a.components)
+
+#===========================================================
+
 
 class Quadratic(ArithmeticType):
     """
@@ -87,11 +123,6 @@ class Quadratic(ArithmeticType):
 
     #=========================
 
-    def from_components(self, *components):
-        return Quadratic(*components, self.root)
-
-    #=========================
-
     def _eq_int(self, other):
         return self.imag == 0 and self.real == other
 
@@ -104,14 +135,14 @@ class Quadratic(ArithmeticType):
     #=========================
 
     def __neg__(self):
-        return self.from_components(*map(op.__neg__, self.components))
+        return self.__class__(*map(op.__neg__, self.components), self.root)
 
     def __abs__(self):
         return abs(self.norm)
 
     @property
     def conjugate(self):
-        return self.from_components(self.real, -self.imag)
+        return self.__class__(self.real, -self.imag, self.root)
 
     @property
     def norm(self):
@@ -119,15 +150,11 @@ class Quadratic(ArithmeticType):
 
     @property
     def inverse(self):
-        norm = frac(self.norm)
-        return Quadratic(
-            *map(lambda x: x / norm, (self.real, -self.imag)),
-            self.root
-        )
+        return self.conjugate / frac(self.norm)
 
     @property
     def round(self):
-        return Quadratic(
+        return self.__class__(
             *map(lambda x: x.round_prefer_toward_zero, self.components),
             self.root
         )
@@ -135,117 +162,78 @@ class Quadratic(ArithmeticType):
     #=========================
 
     def _add_int(self, other):
-        return self.from_components(self.real + other, self.imag)
+        return self.__class__(*add_constant(self, other), self.root)
 
     def _add_Rational(self, other):
-        return Quadratic(self.real + other, self.imag, self.root)
+        return Quadratic(*add_constant(self, other), self.root)
 
     def _add_Quadratic(self, other):
-        if self.root != other.root:
-            return NotImplemented
-        return Quadratic(
-            *map(op.__add__, self.components, other.components),
-            self.root
-        )
+        if self.root == other.root:
+            return Quadratic(*add_(self, other), self.root)
+        return NotImplemented
 
     #-------------------------
 
     def _mul_int(self, other):
-        return self.from_components(
-            *map(lambda x: x * other, self.components)
-        )
+        return self.__class__(*mul_constant(self, other), self.root)
 
     def _mul_Rational(self, other):
-        return Quadratic(
-            *map(lambda x: x * other, self.components),
-            self.root
-        )
+        return Quadratic(*mul_constant(self, other), self.root)
 
     def _mul_Quadratic(self, other):
-        if self.root != other.root:
-            return NotImplemented
-        return Quadratic(
-            self.real * other.real + self.imag * other.imag * self.root,
-            self.real * other.imag + self.imag * other.real,
-            self.root
-        )
+        if self.root == other.root:
+            return Quadratic(*mul_(self, other), self.root)
+        return NotImplemented
 
-    def _rmul_int(self, other):
-        return self * other
-
-    def _rmul_Rational(self, other):
+    def __rmul__(self, other):
         return self * other
 
     #-------------------------
 
     def _truediv_int(self, other):
-        return Quadratic(
-            *map(lambda x: x / frac(other), self.components),
-            self.root
-        )
+        return Quadratic(*truediv_constant(self, other), self.root)
 
     def _truediv_Rational(self, other):
-        return Quadratic(
-            *map(lambda x: x / other, self.components),
-            self.root
-        )
+        return Quadratic(*truediv_constant(self, other), self.root)
 
     def _truediv_Quadratic(self, other):
-        if self.root != other.root:
-            return NotImplemented
-        return self * other.inverse
+        if self.root == other.root:
+            return Quadratic(*truediv_(self, other), self.root)
+        return NotImplemented
 
-    def _rtruediv_int(self, other):
-        return self.inverse * other
-
-    def _rtruediv_Rational(self, other):
+    def __rtruediv__(self, other):
         return self.inverse * other
 
     #-------------------------
 
     def _floordiv_int(self, other):
-        return self.from_components(
-            *map(lambda x: x // other, self.components)
-        )
+        return self.__class__(*floordiv_constant(self, other), self.root)
 
     def _floordiv_Rational(self, other):
-        return self.from_components(
-            *map(lambda x: x // other, self.components)
-        )
+        return self.__class__(*floordiv_constant(self, other), self.root)
 
     def _floordiv_Quadratic(self, other):
-        if self.root != other.root:
-            return NotImplemented
-        return (self * other.inverse).round
+        if self.root == other.root:
+            return self.__class__(*floordiv_(self, other), self.root)
+        return NotImplemented
 
-    def _rfloordiv_int(self, other):
-        return (self.inverse * other).round
-
-    def _rfloordiv_Rational(self, other):
-        return (self.inverse * other).round
+    def __rfloordiv__(self, other):
+        return self.__class__(*floordiv_(other, self), self.root)
 
     #-------------------------
 
     def _mod_int(self, other):
-        return self.from_components(
-            *map(lambda x: x % other, self.components)
-        )
+        return self.__class__(*mod_constant(self, other), self.root)
 
     def _mod_Rational(self, other):
-        return Quadratic(
-            *map(lambda x: x % other, self.components),
-            self.root
-        )
+        return Quadratic(*mod_constant(self, other), self.root)
 
     def _mod_Quadratic(self, other):
-        if self.root != other.root:
-            return NotImplemented
-        return self - (self // other) * other
+        if self.root == other.root:
+            return self - (self // other) * other
+        return NotImplemented
 
-    def _rmod_int(self, other):
-        return other - (other // self) * self
-
-    def _rmod_Rational(self, other):
+    def __rmod__(self, other):
         return other - (other // self) * self
 
     #-------------------------
@@ -254,7 +242,7 @@ class Quadratic(ArithmeticType):
         return self.__pow__(-other).inverse
 
     def _zero_pow_int(self, _other):
-        return self.from_components(1, 0)
+        return self.__class__(1, 0, self.root)
 
     #=========================
 

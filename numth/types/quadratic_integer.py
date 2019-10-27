@@ -3,8 +3,7 @@
 import operator as op
 
 from ..basic import mod_inverse
-from .quadratic import Quadratic
-from .rational import Rational
+from .quadratic import *
 #===========================================================
 
 class QuadraticInteger(Quadratic):
@@ -24,9 +23,6 @@ class QuadraticInteger(Quadratic):
 
     #=========================
 
-    def from_components(self, *components):
-        return QuadraticInteger(*components, self.root)
-
     @property
     def to_quadratic(self):
         return Quadratic(self._real, self._imag, self._root)
@@ -44,84 +40,48 @@ class QuadraticInteger(Quadratic):
 
     def mod_inverse(self, modulus):
         norm_inverse = mod_inverse(self.norm, modulus)
-        return self.from_components(
+        return QuadraticInteger(
             *map(lambda x: (x * norm_inverse) % modulus, (self.real, -self.imag)),
+            self.root
         )
 
     #=========================
 
     def _add_QuadraticInteger(self, other):
-        if self.root != other.root:
-            return NotImplemented
-        return QuadraticInteger(
-            *map(op.__add__, self.components, other.components),
-            self.root
-        )
+        if self.root == other.root:
+            return QuadraticInteger(*add_(self, other), self.root)
 
     #=========================
 
     def _mul_QuadraticInteger(self, other):
-        if self.root != other.root:
-            return NotImplemented
-        return QuadraticInteger(
-            self.real * other.real + self.imag * other.imag * self.root,
-            self.real * other.imag + self.imag * other.real,
-            self.root
-        )
-
-    def _rmul_Quadratic(self, other):
-        return self * other
+        if self.root == other.root:
+            return QuadraticInteger(*mul_(self, other), self.root)
 
     #=========================
 
     def _truediv_QuadraticInteger(self, other):
-        if self.root != other.root:
-            return NotImplemented
-        return self * other.inverse
-
-    def _rtruediv_Quadratic(self, other):
-        if self.root != other.root:
-            return NotImplemented
-        return self.inverse * other
+        if self.root == other.root:
+            return Quadratic(*truediv_(self, other), self.root)
+        return NotImplemented
 
     #=========================
 
-    def _floordiv(self, other):
-        return QuadraticInteger(*(self / other).round.signature)
-
     def _floordiv_Quadratic(self, other):
-        if self.root != other.root:
-            return NotImplemented
-        return self._floordiv(other)
+        if self.root == other.root:
+            return QuadraticInteger(*(self / other).round.signature)
+        return NotImplemented
 
     def _floordiv_QuadraticInteger(self, other):
-        if self.root != other.root:
-            return NotImplemented
-        return self._floordiv(other)
-
-    def _rfloordiv(self, other):
-        return QuadraticInteger(*(self.inverse * other).round.signature)
-
-    def _rfloordiv_int(self, other):
-        return self._rfloordiv(other)
-
-    def _rfloordiv_Rational(self, other):
-        return self._rfloordiv(other)
-
-    def _rfloordiv_Quadratic(self, other):
-        return self._rfloordiv(other)
+        if self.root == other.root:
+            return QuadraticInteger(*(self / other).round.signature)
+        return NotImplemented
 
     #=========================
 
     def _mod_QuadraticInteger(self, other):
-        if self.root != other.root:
-            return NotImplemented
-        return self - (self // other) * other
-
-    def _rmod_Quadratic(self, other):
-        if self.root != other.root:
-            return NotImplemented
-        return other - (other // self) * self
+        if self.root == other.root:
+            return self - (self // other) * other
+        return NotImplemented
 
     #=========================
 

@@ -88,16 +88,6 @@ def test_display(a, b):
 
 #=============================
 
-@given(quadratic(), st.integers(), st.integers())
-def test_from_components(a, real, imag):
-    new = a.from_components(real, imag)
-    assert type(new) is Quadratic
-    assert new.real == real
-    assert new.imag == imag
-    assert new.root == a.root
-
-#=============================
-
 @given(quadratic_pair(), quadratic())
 def test_eq(pair, other):
     a, b = pair
