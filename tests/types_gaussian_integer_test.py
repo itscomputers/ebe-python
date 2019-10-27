@@ -415,6 +415,24 @@ def test_pow(a, m):
     assert mth_power == a.to_quadratic_integer**m
     assert mth_inverse == mth_power.inverse
 
+@given(
+    gaussian_integer(nonzero=True),
+    st.integers(min_value=2, max_value=20),
+    st.integers(min_value=2)
+)
+def test_pow_mod(a, exp, mod):
+    power = a**exp
+    mod_power = pow(a, exp, mod)
+    assert type(power) is GaussianInteger
+    assert type(mod_power) is GaussianInteger
+    if gcd(a.norm, mod) > 1:
+        with pytest.raises(ValueError):
+            pow(a, -exp, mod)
+    else:
+        mod_power_inv = pow(a, -exp, mod)
+        assert type(mod_power_inv) is GaussianInteger
+        assert (mod_power * mod_power_inv) % mod == 1
+
 #=============================
 
 @given(gaussian_integer())

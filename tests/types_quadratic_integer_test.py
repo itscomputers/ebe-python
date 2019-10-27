@@ -339,6 +339,24 @@ def test_pow(a, m):
     assert mth_power == a.to_quadratic**m
     assert mth_inverse == mth_power.inverse
 
+@given(
+    quadratic_integer(nonzero=True),
+    st.integers(min_value=2, max_value=20),
+    st.integers(min_value=2)
+)
+def test_pow_mod(a, exp, mod):
+    power = a**exp
+    mod_power = pow(a, exp, mod)
+    assert type(power) is QuadraticInteger
+    assert type(mod_power) is QuadraticInteger
+    if gcd(a.norm, mod) > 1:
+        with pytest.raises(ValueError):
+            pow(a, -exp, mod)
+    else:
+        mod_power_inv = pow(a, -exp, mod)
+        assert type(mod_power_inv) is QuadraticInteger
+        assert (mod_power * mod_power_inv) % mod == 1
+
 #=============================
 
 @given(quadratic_integer())

@@ -102,7 +102,7 @@ class Quaternion(ArithmeticType):
     @property
     def round(self):
         return self.__class__(
-            *map(lambda x: x.round_to_nearest_int, self.components)
+            *map(lambda x: x.round_prefer_toward_zero, self.components)
         )
 
     #=========================
@@ -183,18 +183,17 @@ class Quaternion(ArithmeticType):
 
     #=========================
 
+    def _floordiv(self, other):
+        return (self / other).round
+
     def _floordiv_int(self, other):
-        return self.__class__(
-            *map(lambda x: x // other, self.components)
-        )
+        return self._floordiv(other)
 
     def _floordiv_Rational(self, other):
-        return self.__class__(
-            *map(lambda x: x // other, self.components)
-        )
+        return self._floordiv(other)
 
     def _floordiv_Quaternion(self, other):
-        return (self / other).round
+        return self._floordiv(other)
 
     def _rfloordiv_int(self, other):
         return self.__class__(other, 0, 0, 0) // self
@@ -204,26 +203,23 @@ class Quaternion(ArithmeticType):
 
     #=========================
 
+    def _mod(self, other):
+        return self - (self // other) * other
+
     def _mod_int(self, other):
-        return self.__class__(
-            *map(lambda x: x % other, self.components)
-        )
+        return self._mod(other)
 
     def _mod_Rational(self, other):
-        return self.__class__(
-            *map(lambda x: x % other, self.components)
-        )
+        return self._mod(other)
 
     def _mod_Quaternion(self, other):
-        return self - (self // other) * other
+        return self._mod(other)
 
     def _rmod_int(self, other):
         return Quaternion(other, 0, 0, 0) % self
-        return self._reverse('mod', other)
 
     def _rmod_Rational(self, other):
         return Quaternion(other, 0, 0, 0) % self
-        return self._reverse('mod', other)
 
     #=========================
 

@@ -99,12 +99,12 @@ class ArithmeticType:
             return self.execute('inv_pow_mod', other, modulus)
 
         if other == 0:
-            return self.execute('zero_pow', other, modulus)
+            return self.execute('zero_pow', other)
 
         if other == 1:
             return self % modulus
 
-        if other == 2:
+        if other % 2 == 0:
             return (self * self)._pow_mod(other // 2, modulus)
 
         return (self * (self * self)._pow_mod(other // 2, modulus)) % modulus

@@ -5,7 +5,7 @@ import pytest
 from hypothesis import assume, given, strategies as st
 
 import env
-from numth.basic import is_square
+from numth.basic import gcd, is_square
 from numth.types.rational import Rational
 from numth.types.quadratic import *
 #===========================================================
@@ -378,6 +378,19 @@ def test_pow(a, m, n):
     assert mth_power * nth_power == sum_power
     assert sum_power / mth_power == nth_power
     assert a**-m == mth_power.inverse
+
+@given(
+    quadratic(nonzero=True),
+    st.integers(min_value=2, max_value=20),
+    st.integers(min_value=2)
+)
+def test_pow_mod(a, exp, mod):
+    power = a**exp
+    mod_power = pow(a, exp, mod)
+    assert type(power) is Quadratic
+    assert type(mod_power) is Quadratic
+    with pytest.raises(TypeError):
+        pow(a, -exp, mod)
 
 #=============================
 

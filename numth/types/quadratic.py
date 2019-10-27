@@ -256,9 +256,6 @@ class Quadratic(ArithmeticType):
     def _zero_pow_int(self, _other):
         return self.from_components(1, 0)
 
-    def _inv_pow_mod_int(self, other, modulus):
-        return self.__pow__(-other, modulus).inverse % modulus
-
     #=========================
 
     def rational_approx(self, num_digits=None):
