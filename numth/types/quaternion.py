@@ -4,12 +4,52 @@ import operator as op
 
 from .rational import frac
 from .arithmetic_type import ArithmeticType
-from .quadratic import Quadratic
-from .quadratic_integer import QuadraticInteger
 from .gaussian_integer import GaussianInteger
+from .gaussian_rational import GaussianRational
 #===========================================================
 
+def add_(a, b):
+    return map(op.__add__, a.components, b.components)
+
+def add_constant(a, b):
+    return (a.components[0] + b, *a.components[1:])
+
+def _mul_helper(index, a, b):
+    sign = [(1, -1, -1, -1),
+            (1, 1, 1, -1),
+            (1, -1, 1, 1),
+            (1, 1, -1, 1)][index]
+    b_ind = [(0, 1, 2, 3),
+            (1, 0, 3, 2),
+            (2, 3, 0, 1),
+            (3, 2, 1, 0)][index]
+    return sum(map(
+        lambda x, y, z: x * y * z,
+        sign,
+        a.components,
+        (b.components[i] for i in b_ind)
+    ))
+
+def mul_(a, b):
+    return (_mul_helper(index, a, b) for index in range(4))
+
+def mul_constant(a, b):
+    return map(lambda x: x * b, a.components)
+
+def truediv_constant(a, b):
+    return map(lambda x: x / frac(b), a.components)
+
+def floordiv_(a, b):
+    return (a / b).round.components
+
+def floordiv_constant(a, b):
+    return floordiv_(a, b)
+
+#===========================================================
+
+
 class Quaternion(ArithmeticType):
+
 
     def __init__(self, *components):
         self.components = tuple(map(frac, components))
@@ -70,6 +110,16 @@ class Quaternion(ArithmeticType):
 
     #=========================
 
+    @classmethod
+    def from_gaussian_rational(self, gaussian_rational):
+        return Quaternion(*gaussian_rational.components, 0, 0)
+
+    @classmethod
+    def from_gaussian_integer(self, gaussian_integer):
+        return Quaternion(*gaussian_integer.components, 0, 0)
+
+    #=========================
+
     def _eq_int(self, other):
         return self.components == (other, 0, 0, 0)
 
@@ -94,10 +144,7 @@ class Quaternion(ArithmeticType):
 
     @property
     def inverse(self):
-        norm = frac(self.norm)
-        return Quaternion(
-            *map(lambda x: x / norm, self.conjugate.components)
-        )
+        return self.conjugate / frac(self.norm)
 
     @property
     def round(self):
@@ -108,69 +155,38 @@ class Quaternion(ArithmeticType):
     #=========================
 
     def _add_int(self, other):
-        return self.__class__(self.r + other, *self.components[1:])
+        return self.__class__(*add_constant(self, other))
 
     def _add_Rational(self, other):
-        return Quaternion(self.r + other, *self.components[1:])
+        return Quaternion(*add_constant(self, other))
 
     def _add_Quaternion(self, other):
-        return self.__class__(
-            *map(op.__add__, self.components, other.components)
-        )
+        return Quaternion(*add_(self, other))
 
     #=========================
 
     def _mul_int(self, other):
-        return self.__class__(
-            *map(lambda x: x * other, self.components)
-        )
+        return self.__class__(*mul_constant(self, other))
 
-    def _mul_rational(self, other):
-        return Quaternion(
-            *map(lambda x: x * other, self.components)
-        )
-
-    def _mul_components(self, other):
-        def mul_each(index, s_cmpt, o_cmpt):
-            sign = [(1, -1, -1, -1),
-                    (1, 1, 1, -1),
-                    (1, -1, 1, 1),
-                    (1, 1, -1, 1)][index]
-            o_ind = [(0, 1, 2, 3),
-                    (1, 0, 3, 2),
-                    (2, 3, 0, 1),
-                    (3, 2, 1, 0)][index]
-            return sum(map(
-                lambda x, y, z: x * y * z,
-                sign,
-                s_cmpt,
-                (o_cmpt[i] for i in o_ind)
-            ))
-        return [
-            mul_each(index, self.components, other.components)
-            for index in range(4)
-        ]
+    def _mul_Rational(self, other):
+        return Quaternion(*mul_constant(self, other))
 
     def _mul_Quaternion(self, other):
-        return Quaternion(*self._mul_components(other))
+        return Quaternion(*mul_(self, other))
 
     def _rmul_int(self, other):
-        return self.__class__(other, 0, 0, 0) * self
+        return self.__class__(*mul_constant(self, other))
 
     def _rmul_Rational(self, other):
-        return self.__class__(other, 0, 0, 0) * self
+        return Quaternion(*mul_constant(self, other))
 
     #=========================
 
     def _truediv_int(self, other):
-        return Quaternion(
-            *map(lambda x: x / frac(other), self.components)
-        )
+        return Quaternion(*truediv_constant(self, other))
 
     def _truediv_rational(self, other):
-        return Quaternion(
-            *map(lambda x: x / frac(other), self.components)
-        )
+        return Quaternion(*truediv_constant(self, other))
 
     def _truediv_Quaternion(self, other):
         return self * other.inverse
@@ -183,43 +199,28 @@ class Quaternion(ArithmeticType):
 
     #=========================
 
-    def _floordiv(self, other):
-        return (self / other).round
-
     def _floordiv_int(self, other):
-        return self._floordiv(other)
+        return self.__class__(*floordiv_constant(self, other))
 
     def _floordiv_Rational(self, other):
-        return self._floordiv(other)
+        return self.__class__(*floordiv_constant(self, other))
 
     def _floordiv_Quaternion(self, other):
-        return self._floordiv(other)
+        return self.__class__(*floordiv_(self, other))
 
     def _rfloordiv_int(self, other):
         return self.__class__(other, 0, 0, 0) // self
 
     def _rfloordiv_Rational(self, other):
-        return self.__class__(other, 0, 0, 0) // self
+        return Quaternion(other, 0, 0, 0) // self
 
     #=========================
 
-    def _mod(self, other):
+    def __mod__(self, other):
         return self - (self // other) * other
 
-    def _mod_int(self, other):
-        return self._mod(other)
-
-    def _mod_Rational(self, other):
-        return self._mod(other)
-
-    def _mod_Quaternion(self, other):
-        return self._mod(other)
-
-    def _rmod_int(self, other):
-        return Quaternion(other, 0, 0, 0) % self
-
-    def _rmod_Rational(self, other):
-        return Quaternion(other, 0, 0, 0) % self
+    def __rmod__(self, other):
+        return other - (other // self) * self
 
     #=========================
 
@@ -228,196 +229,4 @@ class Quaternion(ArithmeticType):
 
     def _zero_pow_int(self, other):
         return self.__class__(1, 0, 0, 0)
-
-    def _inv_pow_mod_int(self, other, modulus):
-        return self.__pow__(-other, modulus).inverse % modulus
-
-    def _zero_pow_mod_int(self, _other, _modulus):
-        return self.__class__(1, 0, 0, 0)
-
-#===========================================================
-from ..basic import div_with_small_remainder
-from .rational import frac, Rational
-#===========================================================
-
-def quaternion(number):
-    if type(number) in [int, float, Rational]:
-        return Quaternion(number, 0, 0, 0)
-    if type(number) is Quaternion:
-        return number
-
-#=============================
-
-class rQuaternion:
-    """
-    Quaternion number class.
-
-    params
-    + components = (a, b, c, d) : (int, int, int, int)
-
-    represents
-    a + b*i + c*j + d*k
-    """
-
-    def __init__(self, *components):
-        self.components = components
-        self.r, self.i, self.j, self.k = components
-
-    #-------------------------
-
-    def __repr__(self):
-        representation = ' ' + ' + '.join(
-            ''.join(format(y) for y in x) \
-            for x in zip(self.components, ['', ' i', ' j', ' k']))
-
-        return representation.replace(' + -', ' - ')\
-
-    #=========================
-
-    def __eq__(self, other):
-        return self.components == quaternion(other).components
-
-    def __ne__(self, other):
-        return not (self == other)
-
-    def __lt__(self, other):
-        return self.norm() < quaternion(other).norm()
-
-    def __gt__(self, other):
-        return self.norm() > quaternion(other).norm()
-
-    def __le__(self, other):
-        return not (self > other)
-
-    def __ge__(self, other):
-        return not (self < other)
-
-    #=========================
-
-    def component_map(self, function, other=None):
-        if other is not None:
-            return Quaternion(*map(
-                function,
-                self.components,
-                quaternion(other).components
-            ))
-
-        return Quaternion(*map(function, self.components))
-
-    #=========================
-
-    def norm(self):
-        return sum(self.component_map(lambda x: x**2).components)
-
-    #-------------------------
-
-    def conjugate(self):
-        return Quaternion(self.r, *map(lambda x: -x, self.components[1:]))
-
-    #-------------------------
-
-    def inverse(self):
-        norm = self.norm()
-        if abs(norm) == 1:
-            norm_inverse = norm
-        else:
-            norm_inverse = frac(norm).inverse
-
-        return self.conjugate().component_map(lambda x: x * norm_inverse)
-
-    #=========================
-
-    def __neg__(self):
-        return self.component_map(lambda x: -x)
-
-    #-------------------------
-
-    def round(self):
-        return self.component_map(lambda x: int(x + .5))
-
-    #=========================
-
-    def __add__(self, other):
-        return self.component_map(lambda x, y: x + y, other)
-
-    def __radd__(self, other):
-        return self + other
-
-    #-------------------------
-
-    def __sub__(self, other):
-        return self + (-other)
-
-    def __rsub__(self, other):
-        return -self + other
-
-    #-------------------------
-
-    def __mul__(self, other):
-        def mul_each(index, s_comp, o_comp):
-            sign = [(1, -1, -1, -1),
-                    (1, 1, 1, -1),
-                    (1, -1, 1, 1),
-                    (1, 1, -1, 1)][index]
-            o_ind = [(0, 1, 2, 3),
-                    (1, 0, 3, 2),
-                    (2, 3, 0, 1),
-                    (3, 2, 1, 0)][index]
-            return sum(map(
-                lambda x, y, z: x * y * z,
-                sign,
-                s_comp,
-                (o_comp[i] for i in o_ind)
-            ))
-
-        return Quaternion(*[
-            mul_each(index, self.components, quaternion(other).components)
-            for index in range(4)
-        ])
-
-    def __rmul__(self, other):
-        return self * other
-
-    #-------------------------
-
-    def __truediv__(self, other):
-        return self * quaternion(other).inverse()
-
-    def __rtruediv__(self, other):
-        return self.inverse() * other
-
-    #-------------------------
-
-    def __floordiv__(self, other):
-        return (self * quaternion(other).conjugate()).component_map(
-                lambda x: x // quaternion(other).norm())
-
-    def __rfloordiv__(self, other):
-        return (self.conjugate() * quaternion(other)) // self.norm()
-
-    #-------------------------
-
-    def __pow__(self, other):
-        if other < 0:
-            return self.inverse()**(-other)
-        if other == 0:
-            return Quaternion(1, 0, 0, 0)
-        if other == 1:
-            return self
-        if other % 2 == 0:
-            return (self * self) ** (other // 2)
-
-        return self * (self * self) ** (other // 2)
-
-    #-------------------------
-
-    def __mod__(self, other):
-        if type(other) is int:
-            def mod_with_small_remainder(x):
-                return div_with_small_remainder(x, other)[1]
-            return self.component_map(mod_with_small_remainder)
-        return self - (self // other) * other
-
-    def __rmod__(self, other):
-        return quaternion(other) % self
 

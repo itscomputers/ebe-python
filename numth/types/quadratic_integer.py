@@ -39,11 +39,7 @@ class QuadraticInteger(Quadratic):
         return self
 
     def mod_inverse(self, modulus):
-        norm_inverse = mod_inverse(self.norm, modulus)
-        return QuadraticInteger(
-            *map(lambda x: (x * norm_inverse) % modulus, (self.real, -self.imag)),
-            self.root
-        )
+        return (self.conjugate * mod_inverse(self.norm, modulus)) % modulus
 
     #=========================
 

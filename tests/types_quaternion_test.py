@@ -1,4 +1,4 @@
-#   tests/types_quadratic_test.py
+#   tests/types_quaternion_test.py
 #===========================================================
 import pytest
 from hypothesis import assume, given, strategies as st
@@ -44,6 +44,22 @@ def quaternion_rational(draw, nonzero=False):
     j = Rational(j_n, j_d)
     k = Rational(k_n, k_d)
     return Quaternion(r, i, j, k)
+
+@st.composite
+def gaussian_rational(draw, nonzero=False):
+    real = draw(st.integers())
+    imag = draw(st.integers())
+    if nonzero:
+        assume( (real, imag) != (0, 0) )
+    return GaussianRational(real, imag)
+
+@st.composite
+def gaussian_integer(draw, nonzero=False):
+    real = draw(st.integers())
+    imag = draw(st.integers())
+    if nonzero:
+        assume( (real, imag) != (0, 0) )
+    return GaussianInteger(real, imag)
 
 #=============================
 
@@ -107,6 +123,24 @@ def test_display(r, i, j, k):
     assert repr(Quaternion(-r, -i, -j, k)) == '-{} - {} i - {} j + {} k'.format(r, i, j, k)
 
     assert repr(Quaternion(-r, -i, -j, -k)) == '-{} - {} i - {} j - {} k'.format(r, i, j, k)
+
+#=============================
+
+@given(gaussian_rational())
+def test_from_gaussian_rational(a):
+    result = Quaternion.from_gaussian_rational(a)
+    assert type(result) is Quaternion
+    assert result.r == a.real
+    assert result.i == a.imag
+    assert result.j == result.k == 0
+
+@given(gaussian_integer())
+def test_from_gaussian_integer(a):
+    result = Quaternion.from_gaussian_integer(a)
+    assert type(result) is Quaternion
+    assert result.r == a.real
+    assert result.i == a.imag
+    assert result.j == result.k == 0
 
 #=============================
 
