@@ -43,7 +43,7 @@ def floordiv_(a, b):
     return (a / b).round.components
 
 def floordiv_constant(a, b):
-    return floordiv_(a, b)
+    return map(lambda x: x // b, a.components)
 
 #===========================================================
 

@@ -107,7 +107,7 @@ class ArithmeticType:
         if other % 2 == 0:
             return (self * self)._pow_mod(other // 2, modulus)
 
-        return (self * (self * self)._pow_mod(other // 2, modulus)) % modulus
+        return self * (self * self)._pow_mod(other // 2, modulus) % modulus
 
     def __pow__(self, other, modulus=None):
         if not isinstance(other, int):

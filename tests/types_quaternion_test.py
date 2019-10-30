@@ -343,7 +343,7 @@ def test_floordiv_int(a, b):
     reverse = b // a
     assert type(result) is Quaternion
     assert type(reverse) is Quaternion
-    assert result == a // Quaternion(b, 0, 0, 0)
+    assert result == Quaternion(a.r // b, a.i // b, a.j // b, a.k // b)
     assert reverse == Quaternion(b, 0, 0, 0) // a
 
 @given(quaternion(nonzero=True), rational(nonzero=True))
@@ -352,7 +352,7 @@ def test_floordiv_Rational(a, b):
     reverse = b // a
     assert type(result) is Quaternion
     assert type(reverse) is Quaternion
-    assert result == a // Quaternion(b, 0, 0, 0)
+    assert result == Quaternion(a.r // b, a.i // b, a.j // b, a.k // b)
     assert reverse == Quaternion(b, 0, 0, 0) // a
 
 #=============================
@@ -370,9 +370,8 @@ def test_mod_int(a, b):
     reverse = b % a
     assert type(result) is Quaternion
     assert type(reverse) is Quaternion
-    assert result == a % Quaternion(b, 0, 0, 0)
+    assert result == Quaternion(a.r % b, a.i % b, a.j % b, a.k % b)
     assert reverse == Quaternion(b, 0, 0, 0) % a
-    assert result.norm <= b**2
     assert a == (a // b) * b + result
     assert b == (b // a) * a + reverse
 
@@ -382,9 +381,8 @@ def test_mod_Rational(a, b):
     reverse = b % a
     assert type(result) is Quaternion
     assert type(reverse) is Quaternion
-    assert result == a % Quaternion(b, 0, 0, 0)
+    assert result == Quaternion(a.r % b, a.i % b, a.j % b, a.k % b)
     assert reverse == Quaternion(b, 0, 0, 0) % a
-    assert result.norm <= b**2
     assert a == (a // b) * b + result
     assert b == (b // a) * a + reverse
 
