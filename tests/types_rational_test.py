@@ -8,61 +8,62 @@ from hypothesis import given, strategies as st
 from numth.types.rational import *
 #===========================================================
 
-def coords(flag=None):
+@st.composite
+def rational(draw, flag=None):
     if flag == 'nonzero':
-        return [st.integers().filter(lambda x: x != 0),
-                st.integers(min_value=1)]
-    if flag == 'positive':
-        return [st.integers(min_value=0), st.integers(min_value=1)]
-    return [st.integers(), st.integers(min_value=1)]
+        numer = draw(st.integers().filter(lambda x: x != 0))
+    elif flag == 'positive':
+        numer = draw(st.integers(min_value=0))
+    else:
+        numer = draw(st.integers())
+    denom = draw(st.integers(min_value=1))
+    return Rational(numer, denom)
 
 #===========================================================
 
-@given(*coords())
-def test_numer_and_denom(n, d):
-    r = Rational(n, d)
-    assert r.numer == r.numerator == r._numerator
-    assert r.denom == r.denominator == r._denominator
+@given(rational())
+def test_numer_and_denom(a):
+    assert a.numer == a.numerator == a._numerator
+    assert a.denom == a.denominator == a._denominator
 
 #-----------------------------
 
 @given(
     st.integers(),
     st.floats().filter(lambda x: not (math.isnan(x) or math.isinf(x))),
-    *coords()
+    rational()
 )
-def test_constructors(i, fl, n, d):
+def test_constructors(i, fl, a):
     assert int(Rational.from_int(i)) == int(frac(i)) == i
     assert int(Rational.from_str(str(i))) == int(frac(str(i))) == i
     assert float(Rational.from_float(fl)) == float(frac(fl)) == fl
     assert float(Rational.from_str(str(fl))) == float(frac(fl)) == fl
 
-    r = Rational(n, d)
-    f = Fraction(n, d)
-    s1 = '{}/{}'.format(n, d)
-    s2 = '{} / {}'.format(n, d)
-    l = [n, d]
-    t = (n, d)
-    assert Rational.from_Rational(r) == frac(r) == r
-    assert Rational.from_Fraction(f) == frac(f) == r
-    assert Rational.from_str(s1) == frac(s1) == r
-    assert Rational.from_str(s2) == frac(s2) == r
-    assert Rational.from_list(l) == frac(l) == r
-    assert Rational.from_tuple(t) == frac(t) == r
+    f = Fraction(a.numer, a.denom)
+    s1 = '{}/{}'.format(a.numer, a.denom)
+    s2 = '{} / {}'.format(a.numer, a.denom)
+    l = [a.numer, a.denom]
+    t = (a.numer, a.denom)
+    assert Rational.from_Rational(a) == frac(a) == a
+    assert Rational.from_Fraction(f) == frac(f) == a
+    assert Rational.from_str(s1) == frac(s1) == a
+    assert Rational.from_str(s2) == frac(s2) == a
+    assert Rational.from_list(l) == frac(l) == a
+    assert Rational.from_tuple(t) == frac(t) == a
 
 #-----------------------------
 
 @given(st.integers(), st.integers(max_value=-1))
 def test_negative_denominator(n, d):
-    r = Rational(n, d)
-    assert r.numer * n <= 0
-    assert r.denom > 0
+    a = Rational(n, d)
+    assert a.numer * n <= 0
+    assert a.denom > 0
 
 #=============================
 
 def test_decimal():
-    a = 12837465999
-    r = Rational(a, 10000000000)
+    i = 12837465999
+    a = Rational(i, 10000000000)
     expected = [
         '1',
         '1.3',
@@ -78,150 +79,151 @@ def test_decimal():
         '1.28374659990'
     ]
     for digits, decimal in enumerate(expected):
-        assert r.decimal(digits) == decimal
+        assert a.decimal(digits) == decimal
     for digits, decimal in enumerate(expected):
-        assert (-r).decimal(digits) == '-{}'.format(decimal)
+        assert (-a).decimal(digits) == '-{}'.format(decimal)
 
 #=============================
 
-@given(*coords('nonzero'))
-def test_inverse(n, d):
-    r = Rational(n, d)
-    assert r.inverse == Rational(d, n)
-    assert r * r.inverse == 1
+@given(rational('nonzero'))
+def test_inverse(a):
+    assert type(a.inverse) is Rational
+    assert a.inverse == Rational(a.denom, a.numer)
+    assert a * a.inverse == 1
 
 #-----------------------------
 
-@given(*coords())
-def test_round_to_nearest_int(n, d):
-    r = Rational(n, d)
-    i = r.round_to_nearest_int
-    assert abs(r - i) <= Rational(1, 2)
+@given(rational())
+def test_round_to_nearest_int(a):
+    assert type(a.round_to_nearest_int) is int
+    assert abs(a - a.round_to_nearest_int) <= Rational(1, 2)
 
 #-----------------------------
 
-@given(*coords())
-def test_is_square(n, d):
-    r2 = Rational(n**2, d**2)
-    assert r2.is_square
+@given(rational())
+def test_is_square(a):
+    assert (a**2).is_square
 
 #=============================
 
-@given(*coords(), *coords(), st.integers(min_value=0, max_value=30))
-def test_approx_equal(n1, d1, n2, d2, num_digits):
-    r = Rational(n1, d1)
-    rr = Rational(n2, d2)
-    in_range = abs(r - rr) < Rational(1, 10**num_digits)
-    assert r.approx_equal(rr, num_digits) == in_range
+@given(rational(), rational(), st.integers(min_value=0, max_value=30))
+def test_approx_equal(a, b, num_digits):
+    in_range = abs(a - b) < Rational(1, 10**num_digits)
+    assert a.approx_equal(b, num_digits) == in_range
 
-@given(*coords(), st.integers(), st.integers(min_value=0, max_value=30))
-def test_approx_equal_2(n, d, integer, num_digits):
-    r = Rational(n, d)
+@given(rational(), st.integers(), st.integers(min_value=0, max_value=30))
+def test_approx_equal_2(a, integer, num_digits):
     delta = Rational(integer, 10**(num_digits + 1))
     in_range = abs(delta) < Rational(1, 10**(num_digits))
-    assert r.approx_equal(r + delta, num_digits) == in_range
+    assert a.approx_equal(a + delta, num_digits) == in_range
 
 #=============================
 
-@given(*coords('positive'), st.integers(min_value=10, max_value=20))
-def test_sqrt(n, d, num_digits):
-    r = Rational(n, d)
-    s = r.sqrt(num_digits)
-    lhs = 10**num_digits * abs(r - s**2)
+@given(rational('positive'), st.integers(min_value=10, max_value=20))
+def test_sqrt(a, num_digits):
+    s = a.sqrt(num_digits)
+    assert type(s) is Rational
+    lhs = 10**num_digits * abs(a - s**2)
     rhs = s + int(s) + 1
 
     assert lhs < rhs
 
 #=============================
 
-@given(*coords())
-def test_pos(n, d):
-    r = Rational(n, d)
-    assert type(+r) is Rational
-    assert r == +r
+@given(rational())
+def test_pos(a):
+    assert type(+a) is Rational
+    assert a == +a
 
 #-----------------------------
 
-@given(*coords())
-def test_neg(n, d):
-    r = Rational(n, d)
-    assert type(-r) is Rational
-    assert -r == Rational(-n, d)
-    assert r == -(-r)
+@given(rational())
+def test_neg(a):
+    assert type(-a) is Rational
+    assert (-a).numer == -(a.numer)
+    assert (-a).denom == a.denom
+    assert a == -(-a)
 
 #-----------------------------
 
-@given(*coords())
-def test_abs(numer, denom):
-    r = Rational(numer, denom)
-    assert type(abs(r)) is Rational
-    if r < 0:
-        assert abs(r) == -r
+@given(rational())
+def test_abs(a):
+    assert type(abs(a)) is Rational
+    if a < 0:
+        assert abs(a) == -a
     else:
-        assert abs(r) == r
+        assert abs(a) == a
 
 #=============================
 
-@given(st.integers(), *coords(), *coords())
-def test_add(i, n1, d1, n2, d2):
-    r1 = Rational(n1, d1)
-    r2 = Rational(n2, d2)
-    f1 = Fraction(n1, d1)
-    f2 = Fraction(n2, d2)
-    assert r1 + r2 == r2 + r1 == f1 + f2
-    assert r1 + f2 == f2 + r1 == f1 + f2
-    assert f1 + r2 == r2 + f1 == f1 + f2
-    assert r1 + i == i + r1 == f1 + i
+@given(st.integers(), rational(), rational())
+def test_add(i, a, b):
+    fa = Fraction(a.numer, a.denom)
+    fb = Fraction(b.numer, b.denom)
+    assert type(a + b) is Rational
+    assert a + b == b + a == fa + fb
+    assert type(a + fb) is Rational
+    assert type(fb + a) is Rational
+    assert a + fb == fb + a == fa + fb
+    assert type(a + i) is Rational
+    assert type(i + a) is Rational
+    assert a + i == i + a == fa + i
 
-@given(st.integers(), *coords(), *coords())
-def test_sub(i, n1, d1, n2, d2):
-    r1 = Rational(n1, d1)
-    r2 = Rational(n2, d2)
-    f1 = Fraction(n1, d1)
-    f2 = Fraction(n2, d2)
-    assert r1 - r2 == -(r2 - r1) == f1 - f2
-    assert r1 - f2 == -(f2 - r1) == f1 - f2
-    assert f1 - r2 == -(r2 - f1) == f1 - f2
-    assert r1 - i == -(i - r1) == f1 - i
+@given(st.integers(), rational(), rational())
+def test_sub(i, a, b):
+    fa = Fraction(a.numer, a.denom)
+    fb = Fraction(b.numer, b.denom)
+    assert type(a - b) is Rational
+    assert a - b == -(b - a) == -b + a == fa - fb
+    assert type(a - fb) is Rational
+    assert type(fb - a) is Rational
+    assert a - fb == -(fb - a) == -fb + a == fa - fb
+    assert type(a - i) is Rational
+    assert type(i - a) is Rational
+    assert a - i == -(i - a) == -i + a == fa - i
 
-@given(st.integers(), *coords(), *coords())
-def test_mul(i, n1, d1, n2, d2):
-    r1 = Rational(n1, d1)
-    r2 = Rational(n2, d2)
-    f1 = Fraction(n1, d1)
-    f2 = Fraction(n2, d2)
-    assert r1 * r2 == r2 * r1 == f1 * f2
-    assert r1 * f2 == f2 * r1 == f1 * f2
-    assert f1 * r2 == r2 * f1 == f1 * f2
-    assert r1 * i == i * r1 == f1 * i
+@given(st.integers(), rational(), rational())
+def test_mul(i, a, b):
+    fa = Fraction(a.numer, a.denom)
+    fb = Fraction(b.numer, b.denom)
+    assert type(a * b) is Rational
+    assert a * b == b * a == fa * fb
+    assert type(a * fb) is Rational
+    assert type(fb * a) is Rational
+    assert a * fb == fb * a == fa * fb
+    assert type(a * i) is Rational
+    assert type(i * a) is Rational
+    assert a * i == i * a == fa * i
 
 @given(
     st.integers().filter(lambda x: x != 0),
-    *coords('nonzero'),
-    *coords('nonzero')
+    rational('nonzero'),
+    rational('nonzero')
 )
-def test_div(i, n1, d1, n2, d2):
-    r1 = Rational(n1, d1)
-    r2 = Rational(n2, d2)
-    f1 = Fraction(n1, d1)
-    f2 = Fraction(n2, d2)
-    assert r1 / r2 == (r2 / r1).inverse == f1 / f2
-    assert r1 / f2 == (f2 / r1).inverse == f1 / f2
-    assert f1 / r2 == (r2 / f1).inverse == f1 / f2
-    assert r1 / i == (i / r1).inverse == f1 / i
+def test_div(i, a, b):
+    fa = Fraction(a.numer, a.denom)
+    fb = Fraction(b.numer, b.denom)
+    assert type(a / b) is Rational
+    assert a / b == (b / a).inverse== 1/b * a == fa / fb
+    assert type(a / fb) is Rational
+    assert type(fb / a) is Rational
+    assert a / fb == (fb / a).inverse == 1/fb * a == fa / fb
+    assert type(a / i) is Rational
+    assert type(i / a) is Rational
+    assert a / i == (i / a).inverse == Rational(1, i) * a == fa / i
 
 #=============================
 
-@given(*coords('nonzero'), st.integers(min_value=0, max_value=15))
-def test_pow(n, d, e):
-    r = Rational(n, d)
-    r_e = r**e
-    f = Fraction(n, d)
+@given(rational('nonzero'), st.integers(min_value=0, max_value=15))
+def test_pow(a, e):
+    a_e = a**e
+    f = Fraction(a.numer, a.denom)
     f_e = f**e
-    s = Rational(n**e, d**e)
-    assert r_e == f_e
-    assert r_e == s
-    assert r**(-e) == s.inverse
-    assert r**Rational(e, 1) == s
-    assert n**Rational(e, 1) == n**e
+    s = Rational(a.numer**e, a.denom**e)
+    assert type(a_e) is Rational
+    assert a_e == f_e
+    assert a_e == s
+    assert a**(-e) == s.inverse
+    assert a**Rational(e, 1) == s
+    assert a.numer**Rational(e, 1) == a.numer**e
 
