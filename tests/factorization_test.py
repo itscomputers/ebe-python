@@ -54,7 +54,7 @@ def test_williams_p_plus_one(number):
 def test_quaternion_divisor(number):
     prime = next_prime(number)
     q = quaternion_divisor(prime)
-    assert( q.norm() == prime )
+    assert( q.norm == prime )
     assert( Quaternion(prime, 0, 0, 0) % q == Quaternion(0, 0, 0, 0) )
 
 #-----------------------------

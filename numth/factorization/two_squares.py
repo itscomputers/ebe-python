@@ -53,10 +53,27 @@ def two_squares_from_factorization(factorization):
     return
     tuple
     """
-    square = square_part(factorization)
     square_free = square_free_part(factorization)
-    if is_sum_of_two_squares(square_free):
-        return _square_and_square_free_to_pair(square, square_free)
+    if not is_sum_of_two_squares(square_free):
+        return None
+
+    gaussian_square_free = reduce(
+        lambda x, y: x * y,
+        map(gaussian_divisor, square_free.keys()),
+        1
+    )
+
+    square_root = reduce(
+        lambda x, y: x * y,
+        map(lambda z: z[0] ** (z[1] // 2), square_part(factorization).items()),
+        1
+    )
+    gaussian_square = GaussianInteger(square_root, 0)
+
+    return tuple(sorted(
+        map(abs, (gaussian_square * gaussian_square_free).components),
+        reverse=True
+    ))
 
 #-----------------------------
 
@@ -71,39 +88,4 @@ def two_squares(number):
     tuple
     """
     return two_squares_from_factorization(factor(number))
-
-#===========================================================
-
-def _square_to_quadratic(square_factorization):
-    """Convert square_part of factorization to quadratic integer."""
-    return GaussianInteger(
-        reduce(
-            lambda x, y: x * y,
-            map(lambda z: z[0] ** (z[1] // 2), square_factorization.items()),
-            1
-        ), 0)
-
-#-----------------------------
-
-def _square_free_to_quadratic(square_free_factorization):
-    """Convert square_free_part of factorization to quadratic integer."""
-    return reduce(
-        lambda x, y: x * y,
-        map(gaussian_divisor, square_free_factorization.keys()),
-        1
-    )
-
-#-----------------------------
-
-def _quadratic_to_pair(quadratic_element):
-    """Convert quadratic integer to tuple."""
-    return tuple(sorted(map(abs, quadratic_element.components), reverse=True))
-
-#-----------------------------
-
-def _square_and_square_free_to_pair(square, square_free):
-    """Convert square and square_free parts to tuple."""
-    return _quadratic_to_pair(
-        _square_to_quadratic(square) * _square_free_to_quadratic(square_free)
-    )
 

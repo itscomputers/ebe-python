@@ -1,484 +1,409 @@
 #   tests/types_gaussian_integer_test.py
 #===========================================================
-import env
+import pytest
 from hypothesis import assume, given, strategies as st
 
-from numth.types import frac, Rational, Quadratic, QuadraticInteger
+import env
+from numth.basic import gcd
+from numth.types import (
+    frac, Rational, GaussianRational, Quadratic, QuadraticInteger
+)
 from numth.types.gaussian_integer import *
 #===========================================================
 
-def coords():
-    return 2 * [st.integers()]
+@st.composite
+def rational(draw, nonzero=False):
+    numer = draw(st.integers())
+    denom = draw(st.integers(min_value=1))
+    if nonzero:
+        assume( numer != 0 )
+    return Rational(numer, denom)
 
-def double_coords():
-    return [*coords(), *coords()]
+@st.composite
+def gaussian_integer(draw, nonzero=False):
+    real = draw(st.integers())
+    imag = draw(st.integers())
+    if nonzero:
+        assume( (real, imag) != (0, 0) )
+    return GaussianInteger(real, imag)
 
-def rational():
-    return [st.integers(), st.integers(min_value=1)]
+@st.composite
+def gaussian_rational(draw, nonzero=False):
+    real = draw(st.integers())
+    imag = draw(st.integers())
+    if nonzero:
+        assume( (real, imag) != (0, 0) )
+    return GaussianRational(real, imag)
 
-#=============================
+@st.composite
+def quadratic(draw, nonzero=False):
+    real = draw(st.integers())
+    imag = draw(st.integers())
+    if nonzero:
+        assume( (real, imag) != (0, 0) )
+    return Quadratic(real, imag, -1)
 
-@given(*coords())
-def test_to_quadratic_integer(real, imag):
-    a = GaussianInteger(real, imag)
-    b = a.to_quadratic_integer
-    assert a == b
-    assert type(a) is GaussianInteger
-    assert type(b) is QuadraticInteger
-    assert set(map(type, b.signature)) == set([int])
-
-#=============================
-
-@given(*coords())
-def test_to_quadratic(real, imag):
-    a = GaussianInteger(real, imag)
-    b = a.to_quadratic
-    assert a == b
-    assert type(a) is GaussianInteger
-    assert type(b) is Quadratic
-    assert set(map(type, b.signature)) == set([Rational])
-    assert GaussianInteger.from_quadratic(b).signature == a.signature
-
-#=============================
-
-@given(*coords())
-def test_from_complex(real, imag):
-    if abs(real) < 2**53 and abs(imag) < 2**53:
-        a = GaussianInteger.from_complex(complex(real, imag))
-        assert type(a) is GaussianInteger
-        assert a == Quadratic.from_complex(complex(real, imag))
-
-#-----------------------------
-
-@given(*coords())
-def test_from_components(real, imag):
-    a = GaussianInteger(real, imag)
-    assert type(a.from_components(real, imag)) is GaussianInteger
-    assert a.from_components(real, imag) == a
-    assert a.from_components(real, -imag) == a.conjugate
-    assert a.from_components(-real, -imag) == -a
+@st.composite
+def quadratic_integer(draw, nonzero=False):
+    real = draw(st.integers())
+    imag = draw(st.integers())
+    if nonzero:
+        assume( (real, imag) != (0, 0) )
+    return QuadraticInteger(real, imag, -1)
 
 #=============================
 
-@given(*coords())
-def test_neg(real, imag):
-    a = GaussianInteger(real, imag)
+@given(gaussian_integer())
+def test_to_gaussian_rational(a):
+    assert type(a.to_gaussian_rational) is GaussianRational
+    assert a.to_gaussian_rational == GaussianRational(a.real, a.imag)
+    assert a.to_gaussian_rational == a
+
+#=============================
+
+@given(gaussian_integer(), gaussian_integer())
+def test_eq(a, b):
+    assert a == a
+    if a.components == b.components:
+        assert a == b
+    else:
+        assert a != b
+
+@given(gaussian_integer(), gaussian_rational())
+def test_gaussian_rational(a, b):
+    if a.components == b.components:
+        assert a == b
+    else:
+        assert a != b
+
+@given(gaussian_integer(), quadratic_integer())
+def test_eq_quadratic_integer(a, b):
+    if b.is_complex and a.components == b.components:
+        assert a == b
+    else:
+        assert a != b
+
+@given(gaussian_integer(), quadratic())
+def test_eq_quadratic(a, b):
+    if b.is_complex and a.components == b.components:
+        assert a == b
+    else:
+        assert a != b
+
+@given(gaussian_integer(), st.integers())
+def test_eq_int(a, i):
+    if a.imag == 0 and a.real == i:
+        assert a == i
+    else:
+        assert a != i
+
+@given(gaussian_integer(), rational())
+def test_eq_Rational(a, r):
+    if a.imag == 0 and a.real == r:
+        assert a == r
+    else:
+        assert a != r
+
+#=============================
+
+@given(gaussian_integer())
+def test_neg(a):
     assert type(-a) is GaussianInteger
-    assert -a == -(a.to_quadratic)
+    assert -a == -(a.to_gaussian_rational)
 
-#-----------------------------
-
-@given(*coords())
-def test_conjugate(real, imag):
-    a = GaussianInteger(real, imag)
+@given(gaussian_integer())
+def test_norm_conjugate(a):
     assert type(a.conjugate) is GaussianInteger
-    assert a.conjugate == (a.to_quadratic).conjugate
-
-#-----------------------------
-
-@given(*coords())
-def test_norm(real, imag):
-    a = GaussianInteger(real, imag)
     assert type(a.norm) is int
-    assert a.norm == (a.to_quadratic).norm
+    assert a.conjugate == a.to_gaussian_rational.conjugate
+    assert a.norm == a.to_gaussian_rational.norm
 
-#-----------------------------
+@given(gaussian_integer(nonzero=True))
+def test_inverse(a):
+    assert type(a.inverse) is GaussianRational
+    assert a.inverse == a.to_gaussian_rational.inverse
 
-@given(*coords())
-def test_inverse(real, imag):
-    assume( real != 0 or imag != 0 )
-    a = GaussianInteger(real, imag)
-    if a.norm in [1, -1]:
-        assert type(a.inverse) is GaussianInteger
-    else:
-        assert type(a.inverse) is Quadratic
-    assert a.inverse == (a.to_quadratic).inverse
-
-#-----------------------------
-
-@given(*coords())
-def test_round(real, imag):
-    a = GaussianInteger(real, imag)
+@given(gaussian_integer())
+def test_round(a):
     assert type(a.round) is GaussianInteger
-    assert a.round == a
+    assert a.round == a.to_gaussian_rational.round
 
-#=============================
-
-@given(*double_coords())
-def test_add(real1, imag1, real2, imag2):
-    a = GaussianInteger(real1, imag1)
-    b = GaussianInteger(real2, imag2)
-    z = a.to_quadratic + b.to_quadratic
-    assert type(a + b) is GaussianInteger
-    assert type(b + a) is GaussianInteger
-    assert a + b == z
-    assert b + a == z
-
-#-----------------------------
-
-@given(*double_coords())
-def test_add_quadratic_integer(real1, imag1, real2, imag2):
-    a = GaussianInteger(real1, imag1)
-    b = QuadraticInteger(real2, imag2, -1)
-    z = a.to_quadratic + b
-    assert type(a + b) is GaussianInteger
-    assert type(b + a) is GaussianInteger
-    assert a + b == z
-    assert b + a == z
-
-#-----------------------------
-
-@given(*double_coords())
-def test_add_quadratic(real1, imag1, real2, imag2):
-    a = GaussianInteger(real1, imag1)
-    b = Quadratic(real2, imag2, -1)
-    z = a.to_quadratic + b
-    assert type(a + b) is Quadratic
-    assert type(b + a) is Quadratic
-    assert a + b == z
-    assert b + a == z
-
-#-----------------------------
-
-@given(*coords(), st.integers())
-def test_add_int(real, imag, integer):
-    a = GaussianInteger(real, imag)
-    b = integer
-    z = a.to_quadratic + b
-    assert type(a + b) is GaussianInteger
-    assert type(b + a) is GaussianInteger
-    assert a + b == z
-    assert b + a == z
-
-#-----------------------------
-
-@given(*coords(), *rational())
-def test_add_rational(real, imag, numer, denom):
-    a = GaussianInteger(real, imag)
-    b = frac(numer, denom)
-    z = a.to_quadratic + b
-    assert type(a + b) is Quadratic
-    assert type(b + a) is Quadratic
-    assert a + b == z
-    assert b + a == z
-
-#=============================
-
-@given(*double_coords())
-def test_sub(real1, imag1, real2, imag2):
-    a = GaussianInteger(real1, imag1)
-    b = GaussianInteger(real2, imag2)
-    z = a.to_quadratic - b.to_quadratic
-    assert type(a - b) is GaussianInteger
-    assert type(b - a) is GaussianInteger
-    assert a - b == z
-    assert b - a == -z
-
-#-----------------------------
-
-@given(*double_coords())
-def test_sub_quadratic_integer(real1, imag1, real2, imag2):
-    a = GaussianInteger(real1, imag1)
-    b = QuadraticInteger(real2, imag2, -1)
-    z = a.to_quadratic - b
-    assert type(a - b) is GaussianInteger
-    assert type(b - a) is GaussianInteger
-    assert a - b == z
-    assert b - a == -z
-
-#-----------------------------
-
-@given(*double_coords())
-def test_sub_quadratic(real1, imag1, real2, imag2):
-    a = GaussianInteger(real1, imag1)
-    b = Quadratic(real2, imag2, -1)
-    z = a.to_quadratic - b
-    assert type(a - b) is Quadratic
-    assert type(b - a) is Quadratic
-    assert a - b == z
-    assert b - a == -z
-
-#-----------------------------
-
-@given(*coords(), st.integers())
-def test_sub_int(real, imag, integer):
-    a = GaussianInteger(real, imag)
-    b = integer
-    z = a.to_quadratic - b
-    assert type(a - b) is GaussianInteger
-    assert type(b - a) is GaussianInteger
-    assert a - b == z
-    assert b - a == -z
-
-#-----------------------------
-
-@given(*coords(), *rational())
-def test_sub_rational(real, imag, numer, denom):
-    a = GaussianInteger(real, imag)
-    b = frac(numer, denom)
-    z = a.to_quadratic - b
-    assert type(a - b) is Quadratic
-    assert type(b - a) is Quadratic
-    assert a - b == z
-    assert b - a == -z
-
-#=============================
-
-@given(*double_coords())
-def test_mul(real1, imag1, real2, imag2):
-    a = GaussianInteger(real1, imag1)
-    b = GaussianInteger(real2, imag2)
-    z = a.to_quadratic * b.to_quadratic
-    assert type(a * b) is GaussianInteger
-    assert type(b * a) is GaussianInteger
-    assert a * b == z
-    assert b * a == z
-
-#-----------------------------
-
-@given(*double_coords())
-def test_mul_quadratic_integer(real1, imag1, real2, imag2):
-    a = GaussianInteger(real1, imag1)
-    b = QuadraticInteger(real2, imag2, -1)
-    z = a.to_quadratic * b
-    assert type(a * b) is GaussianInteger
-    assert type(b * a) is GaussianInteger
-    assert a * b == z
-    assert b * a == z
-
-#-----------------------------
-
-@given(*double_coords())
-def test_mul_quadratic(real1, imag1, real2, imag2):
-    a = GaussianInteger(real1, imag1)
-    b = Quadratic(real2, imag2, -1)
-    z = a.to_quadratic * b
-    assert type(a * b) is Quadratic
-    assert type(b * a) is Quadratic
-    assert a * b == z
-    assert b * a == z
-
-#-----------------------------
-
-@given(*coords(), st.integers())
-def test_mul_int(real, imag, integer):
-    a = GaussianInteger(real, imag)
-    b = integer
-    z = a.to_quadratic * b
-    assert type(a * b) is GaussianInteger
-    assert type(b * a) is GaussianInteger
-    assert a * b == z
-    assert b * a == z
-
-#-----------------------------
-
-@given(*coords(), *rational())
-def test_mul_rational(real, imag, numer, denom):
-    a = GaussianInteger(real, imag)
-    b = frac(numer, denom)
-    z = a.to_quadratic * b
-    assert type(a * b) is Quadratic
-    assert type(b * a) is Quadratic
-    assert a * b == z
-    assert b * a == z
-
-#=============================
-
-@given(*double_coords())
-def test_div(real1, imag1, real2, imag2):
-    assume(real1 != 0 or imag1 != 0)
-    assume(real2 != 0 or imag2 != 0)
-    a = GaussianInteger(real1, imag1)
-    b = GaussianInteger(real2, imag2)
-    z = a.to_quadratic / b.to_quadratic
-    assert type(a / b) is Quadratic
-    assert type(b / a) is Quadratic
-    assert a / b == z
-    assert b / a == z.inverse
-
-#-----------------------------
-
-@given(*double_coords())
-def test_div_quadratic_integer(real1, imag1, real2, imag2):
-    assume(real1 != 0 or imag1 != 0)
-    assume(real2 != 0 or imag2 != 0)
-    a = GaussianInteger(real1, imag1)
-    b = QuadraticInteger(real2, imag2, -1)
-    z = a.to_quadratic / b
-    assert type(a / b) is Quadratic
-    assert type(b / a) is Quadratic
-    assert a / b == z
-    assert b / a == z.inverse
-
-#-----------------------------
-
-@given(*double_coords())
-def test_div_quadratic(real1, imag1, real2, imag2):
-    assume(real1 != 0 or imag1 != 0)
-    assume(real2 != 0 or imag2 != 0)
-    a = GaussianInteger(real1, imag1)
-    b = Quadratic(real2, imag2, -1)
-    z = a.to_quadratic / b
-    assert type(a / b) is Quadratic
-    assert type(b / a) is Quadratic
-    assert a / b == z
-    assert b / a == z.inverse
-
-#-----------------------------
-
-@given(*coords(), st.integers().filter(lambda x: x != 0))
-def test_div_int(real, imag, integer):
-    assume(real != 0 or imag != 0)
-    a = GaussianInteger(real, imag)
-    b = integer
-    z = a.to_quadratic / b
-    assert type(a / b) is Quadratic
-    assert type(b / a) is Quadratic
-    assert a / b == z
-    assert b / a == z.inverse
-
-#-----------------------------
-
-@given(*coords(), *rational())
-def test_div_rational(real, imag, numer, denom):
-    assume(real != 0 or imag != 0)
-    assume(numer != 0)
-    a = GaussianInteger(real, imag)
-    b = frac(numer, denom)
-    z = a.to_quadratic / b
-    assert type(a / b) is Quadratic
-    assert type(b / a) is Quadratic
-    assert a / b == z
-    assert b / a == z.inverse
-
-#=============================
-
-@given(*double_coords())
-def test_floor_div(real1, imag1, real2, imag2):
-    assume(real1 != 0 or imag1 != 0)
-    assume(real2 != 0 or imag2 != 0)
-    a = GaussianInteger(real1, imag1)
-    b = GaussianInteger(real2, imag2)
-    z = a.to_quadratic / b.to_quadratic
-    assert type(a // b) is GaussianInteger
-    assert type(b // a) is GaussianInteger
-    assert a // b == z.round
-    assert b // a == z.inverse.round
-
-#-----------------------------
-
-@given(*double_coords())
-def test_floor_div_quadratic_integer(real1, imag1, real2, imag2):
-    assume(real1 != 0 or imag1 != 0)
-    assume(real2 != 0 or imag2 != 0)
-    a = GaussianInteger(real1, imag1)
-    b = QuadraticInteger(real2, imag2, -1)
-    z = a.to_quadratic / b
-    assert type(a // b) is GaussianInteger
-    assert type(b // a) is GaussianInteger
-    assert a // b == z.round
-    assert b // a == z.inverse.round
-
-#-----------------------------
-
-@given(*double_coords())
-def test_floor_div_quadratic(real1, imag1, real2, imag2):
-    assume(real1 != 0 or imag1 != 0)
-    assume(real2 != 0 or imag2 != 0)
-    a = GaussianInteger(real1, imag1)
-    b = Quadratic(real2, imag2, -1)
-    z = a.to_quadratic / b
-    assert type(a // b) is GaussianInteger
-    assert type(b // a) is GaussianInteger
-    assert a // b == z.round
-    assert b // a == z.inverse.round
-
-#-----------------------------
-
-@given(*coords(), st.integers().filter(lambda x: x != 0))
-def test_floor_div_int(real, imag, integer):
-    assume(real != 0 or imag != 0)
-    a = GaussianInteger(real, imag)
-    b = integer
-    z = Quadratic(real // b, imag // b, -1)
-    y = (b / a.to_quadratic).round
-    assert type(a // b) is GaussianInteger
-    assert type(b // a) is GaussianInteger
-    assert a // b == z
-    assert b // a == y
-
-#-----------------------------
-
-@given(*coords(), *rational())
-def test_floor_div_rational(real, imag, numer, denom):
-    assume(real != 0 or imag != 0)
-    assume(numer != 0)
-    a = GaussianInteger(real, imag)
-    b = frac(numer, denom)
-    z = Quadratic(real // b, imag // b, -1)
-    y = (b / a.to_quadratic).round
-    assert type(a // b) is GaussianInteger
-    assert type(b // a) is GaussianInteger
-    assert a // b == z
-    assert b // a == y
-
-#=============================
-
-@given(*double_coords())
-def test_mod(real1, imag1, real2, imag2):
-    assume( real2 != 0 or imag2 != 0 )
-    a = GaussianInteger(real1, imag1)
-    b = GaussianInteger(real2, imag2)
-    z = a.to_quadratic % b.to_quadratic
-    assert type(a % b) is GaussianInteger
-    assert a % b == z
-
-#-----------------------------
-
-@given(*double_coords())
-def test_mod_quadratic(real1, imag1, real2, imag2):
-    assume( real1 != 0 or imag1 != 0 )
-    assume( real2 != 0 or imag2 != 0 )
-    a = GaussianInteger(real1, imag1)
-    b = Quadratic(real2, imag2, -1)
-    z = a.to_quadratic % b
-    y = b % a.to_quadratic
-    assert type(a % b) is Quadratic
-    assert type(b % a) is Quadratic
-    assert a % b == z
-    assert b % a == y
-
-#=============================
-
-@given(*coords(), st.integers(min_value=-20, max_value=20))
-def test_pow(real, imag, exponent):
-    assume( real != 0 or imag != 0 )
-    a = GaussianInteger(real, imag)
-    y = a ** exponent
-    z = a.to_quadratic ** exponent
-    if exponent >= 0 or a.norm in [1, -1]:
-        assert type(y) is GaussianInteger
+@given(gaussian_integer(), st.integers(min_value=2))
+def test_mod_inverse(a, m):
+    if gcd(a.norm, m) > 1:
+        with pytest.raises(ValueError):
+            a.mod_inverse(m)
     else:
-        assert type(y) is Quadratic
-    assert y == z
+        assert type(a.mod_inverse(m)) is GaussianInteger
+        assert (a * a.mod_inverse(m)) % m == 1
 
 #=============================
 
-@given(*coords())
-def test_canonical(real, imag):
-    a = GaussianInteger(real, imag)
+@given(gaussian_integer())
+def test_canonical(a):
     z = a.canonical
     assert z.real >= abs(z.imag)
 
-#=============================
-
-@given(*double_coords())
-def test_gcd(real1, imag1, real2, imag2):
-    assume( real1 != 0 or imag1 != 0)
-    assume( real2 != 0 or imag2 != 0)
-    a = GaussianInteger(real1, imag1)
-    b = GaussianInteger(real2, imag2)
+@given(gaussian_integer(), gaussian_integer(nonzero=True))
+def test_gcd(a, b):
     z = a.gcd(b)
     assert a % z == b % z == 0
     assert (a // z).gcd(b // z) == 1
 
+#=============================
+
+@given(gaussian_integer(), gaussian_integer())
+def test_add(a, b):
+    assert type(a + b) is GaussianInteger
+    assert a + b == a.to_gaussian_rational + b.to_gaussian_rational
+
+@given(gaussian_integer(), quadratic_integer())
+def test_add_QuadraticInteger(a, b):
+    assert type(a + b) is GaussianInteger
+    assert type(b + a) is GaussianInteger
+    assert a + b == a.to_gaussian_rational + b
+    assert b + a == b + a.to_gaussian_rational
+
+@given(gaussian_integer(), quadratic())
+def test_add_Quadratic(a, b):
+    assert type(a + b) is GaussianRational
+    assert type(b + a) is GaussianRational
+    assert a + b == a.to_quadratic + b
+    assert b + a == b + a.to_quadratic
+
+@given(gaussian_integer(), st.integers())
+def test_add_int(a, b):
+    assert type(a + b) is GaussianInteger
+    assert type(b + a) is GaussianInteger
+    assert a + b == a.to_quadratic + b
+    assert b + a == b + a.to_quadratic
+
+@given(gaussian_integer(), rational())
+def test_add_Rational(a, b):
+    assert type(a + b) is GaussianRational
+    assert type(b + a) is GaussianRational
+    assert a + b == a.to_quadratic + b
+    assert b + a == b + a.to_quadratic
+
+#=============================
+
+@given(gaussian_integer(), gaussian_integer())
+def test_sub(a, b):
+    assert type(a - b) is GaussianInteger
+    assert a - b == a.to_gaussian_rational - b.to_gaussian_rational
+
+@given(gaussian_integer(), quadratic_integer())
+def test_sub_QuadraticInteger(a, b):
+    assert type(a - b) is GaussianInteger
+    assert type(b - a) is GaussianInteger
+    assert a - b == a.to_gaussian_rational - b
+    assert b - a == b - a.to_gaussian_rational
+
+@given(gaussian_integer(), quadratic())
+def test_sub_Quadratic(a, b):
+    assert type(a - b) is GaussianRational
+    assert type(b - a) is GaussianRational
+    assert a - b == a.to_quadratic - b
+    assert b - a == b - a.to_quadratic
+
+@given(gaussian_integer(), st.integers())
+def test_sub_int(a, b):
+    assert type(a - b) is GaussianInteger
+    assert type(b - a) is GaussianInteger
+    assert a - b == a.to_quadratic - b
+    assert b - a == b - a.to_quadratic
+
+@given(gaussian_integer(), rational())
+def test_sub_Rational(a, b):
+    assert type(a - b) is GaussianRational
+    assert type(b - a) is GaussianRational
+    assert a - b == a.to_quadratic - b
+    assert b - a == b - a.to_quadratic
+
+#=============================
+
+@given(gaussian_integer(), gaussian_integer())
+def test_mul(a, b):
+    assert type(a * b) is GaussianInteger
+    assert a * b == a.to_gaussian_rational * b.to_gaussian_rational
+
+@given(gaussian_integer(), quadratic_integer())
+def test_mul_QuadraticInteger(a, b):
+    assert type(a * b) is GaussianInteger
+    assert type(b * a) is GaussianInteger
+    assert a * b == a.to_gaussian_rational * b
+    assert b * a == b * a.to_gaussian_rational
+
+@given(gaussian_integer(), quadratic())
+def test_mul_Quadratic(a, b):
+    assert type(a * b) is GaussianRational
+    assert type(b * a) is GaussianRational
+    assert a * b == a.to_quadratic * b
+    assert b * a == b * a.to_quadratic
+
+@given(gaussian_integer(), st.integers())
+def test_mul_int(a, b):
+    assert type(a * b) is GaussianInteger
+    assert type(b * a) is GaussianInteger
+    assert a * b == a.to_quadratic * b
+    assert b * a == b * a.to_quadratic
+
+@given(gaussian_integer(), rational())
+def test_mul_Rational(a, b):
+    assert type(a * b) is GaussianRational
+    assert type(b * a) is GaussianRational
+    assert a * b == a.to_quadratic * b
+    assert b * a == b * a.to_quadratic
+
+#=============================
+
+@given(gaussian_integer(), gaussian_integer(nonzero=True))
+def test_truediv(a, b):
+    assert type(a / b) is GaussianRational
+    assert a / b == a.to_gaussian_rational / b.to_gaussian_rational
+
+@given(gaussian_integer(nonzero=True), quadratic_integer(nonzero=True))
+def test_truediv_QuadraticInteger(a, b):
+    assert type(a / b) is GaussianRational
+    assert type(b / a) is GaussianRational
+    assert a / b == a.to_gaussian_rational / b
+    assert b / a == b / a.to_gaussian_rational
+
+@given(gaussian_integer(nonzero=True), quadratic(nonzero=True))
+def test_truediv_Quadratic(a, b):
+    assert type(a / b) is GaussianRational
+    assert type(b / a) is GaussianRational
+    assert a / b == a.to_quadratic / b
+    assert b / a == b / a.to_quadratic
+
+@given(gaussian_integer(nonzero=True), st.integers().filter(lambda x: x != 0))
+def test_truediv_int(a, b):
+    assert type(a / b) is GaussianRational
+    assert type(b / a) is GaussianRational
+    assert a / b == a.to_quadratic / b
+    assert b / a == b / a.to_quadratic
+
+@given(gaussian_integer(nonzero=True), rational(nonzero=True))
+def test_truediv_Rational(a, b):
+    assert type(a / b) is GaussianRational
+    assert type(b / a) is GaussianRational
+    assert a / b == a.to_quadratic / b
+    assert b / a == b / a.to_quadratic
+
+#=============================
+
+@given(gaussian_integer(), gaussian_integer(nonzero=True))
+def test_floordiv(a, b):
+    assert type(a // b) is GaussianInteger
+    assert a // b == a.to_gaussian_rational // b.to_gaussian_rational
+
+@given(gaussian_integer(nonzero=True), quadratic_integer(nonzero=True))
+def test_floordiv_QuadraticInteger(a, b):
+    assert type(a // b) is GaussianInteger
+    assert type(b // a) is GaussianInteger
+    assert a // b == a.to_gaussian_rational // b
+    assert b // a == b // a.to_gaussian_rational
+
+@given(gaussian_integer(nonzero=True), quadratic(nonzero=True))
+def test_floordiv_Quadratic(a, b):
+    assert type(a // b) is GaussianInteger
+    assert type(b // a) is GaussianInteger
+    assert a // b == a.to_quadratic // b
+    assert b // a == b // a.to_quadratic
+
+@given(gaussian_integer(nonzero=True), st.integers().filter(lambda x: x != 0))
+def test_floordiv_int(a, b):
+    assert type(a // b) is GaussianInteger
+    assert type(b // a) is GaussianInteger
+    assert a // b == a.to_quadratic // b
+    assert b // a == b // a.to_quadratic
+
+@given(gaussian_integer(nonzero=True), rational(nonzero=True))
+def test_floordiv_Rational(a, b):
+    assert type(a // b) is GaussianInteger
+    assert type(b // a) is GaussianInteger
+    assert a // b == a.to_quadratic // b
+    assert b // a == b // a.to_quadratic
+
+#=============================
+
+@given(gaussian_integer(), gaussian_integer(nonzero=True))
+def test_mod(a, b):
+    assert type(a % b) is GaussianInteger
+    assert a % b == a.to_gaussian_rational % b.to_gaussian_rational
+
+@given(gaussian_integer(nonzero=True), quadratic_integer(nonzero=True))
+def test_mod_QuadraticInteger(a, b):
+    assert type(a % b) is GaussianInteger
+    assert type(b % a) is GaussianInteger
+    assert a % b == a.to_gaussian_rational % b
+    assert b % a == b % a.to_gaussian_rational
+
+@given(gaussian_integer(nonzero=True), quadratic(nonzero=True))
+def test_mod_Quadratic(a, b):
+    assert type(a % b) is GaussianRational
+    assert type(b % a) is GaussianRational
+    assert a % b == a.to_quadratic % b
+    assert b % a == b % a.to_quadratic
+
+@given(gaussian_integer(nonzero=True), st.integers().filter(lambda x: x != 0))
+def test_mod_int(a, b):
+    assert type(a % b) is GaussianInteger
+    assert type(b % a) is GaussianInteger
+    assert a % b == a.to_quadratic % b
+    assert b % a == b % a.to_quadratic
+
+@given(gaussian_integer(nonzero=True), rational(nonzero=True))
+def test_mod_Rational(a, b):
+    assert type(a % b) is GaussianRational
+    assert type(b % a) is GaussianRational
+    assert a % b == a.to_quadratic % b
+    assert b % a == b % a.to_quadratic
+
+#=============================
+
+@given(
+    gaussian_integer(nonzero=True),
+    st.integers(min_value=2, max_value=20)
+)
+def test_pow(a, m):
+    mth_power = a**m
+    mth_inverse = a**-m
+    assert type(a**0) is GaussianInteger
+    assert type(a**1) is GaussianInteger
+    assert type(a**-1) is GaussianRational
+    assert type(mth_power) is GaussianInteger
+    assert type(mth_inverse) is GaussianRational
+    assert a**0 == 1
+    assert a**1 == a
+    assert a**-1 == a.inverse
+    assert mth_power == a.to_gaussian_rational**m
+    assert mth_inverse == mth_power.inverse
+
+@given(
+    gaussian_integer(nonzero=True),
+    st.integers(min_value=2, max_value=20),
+    st.integers(min_value=2)
+)
+def test_pow_mod(a, exp, mod):
+    power = a**exp
+    mod_power = pow(a, exp, mod)
+    assert type(power) is GaussianInteger
+    assert type(mod_power) is GaussianInteger
+    if gcd(a.norm, mod) > 1:
+        with pytest.raises(ValueError):
+            pow(a, -exp, mod)
+    else:
+        mod_power_inv = pow(a, -exp, mod)
+        assert type(mod_power_inv) is GaussianInteger
+        assert (mod_power * mod_power_inv) % mod == 1
+
+#=============================
+
+@given(gaussian_integer())
+def test_rational_approx(a):
+    if a.imag == 0:
+        assert a.rational_approx(25) == a.real
+    else:
+        with pytest.raises(ValueError):
+            a.rational_approx(25)

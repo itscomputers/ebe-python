@@ -3,12 +3,12 @@
 from functools import reduce
 
 from ..basic import jacobi
-from ..types import Quaternion
+from ..types import QuaternionInteger
 from .main import factor, square_part, square_free_part
-from .two_squares import gaussian_divisor, _square_to_quadratic
+from .two_squares import gaussian_divisor
 #===========================================================
 
-def quaternion_descent(quaternion, prime):
+def quaternion_descent(quaternion_integer, prime):
     """
     Method of descent for quaternions.
 
@@ -22,11 +22,12 @@ def quaternion_descent(quaternion, prime):
     return
     Quaternion
     """
-    m = quaternion.norm() // prime
+    m = quaternion_integer.norm // prime
     if m == 1:
-        return quaternion
+        return quaternion_integer
+    m_q = QuaternionInteger(m, 0, 0, 0)
     return quaternion_descent(
-        (quaternion.conjugate() * (quaternion % m)) // m,
+        (quaternion_integer.conjugate * (quaternion_integer % m_q)) // m_q,
         prime
     )
 
@@ -45,13 +46,13 @@ def quaternion_divisor(prime):
     Quaternion
     """
     if prime == 2 or prime % 4 == 1:
-        return _quadratic_to_quaternion(gaussian_divisor(prime))
+        return QuaternionInteger.from_gaussian_integer(gaussian_divisor(prime))
 
     if prime % 8 == 3:
         s = pow(2, (prime + 1) // 4, prime)
         if 2 * s > prime:
             s = prime - s
-        return quaternion_descent(Quaternion(s, 1, 1, 0), prime)
+        return quaternion_descent(QuaternionInteger(s, 1, 1, 0), prime)
 
     t, a = 2, 5
     while jacobi(a, prime) == 1:
@@ -62,7 +63,7 @@ def quaternion_divisor(prime):
     if 2 * s > prime:
         s = prime - s
 
-    return quaternion_descent(Quaternion(s, t, 1, 0), prime)
+    return quaternion_descent(QuaternionInteger(s, t, 1, 0), prime)
 
 #-----------------------------
 
@@ -77,9 +78,23 @@ def four_squares_from_factorization(factorization):
     return
     tuple
     """
-    square = square_part(factorization)
-    square_free = square_free_part(factorization)
-    return _square_and_square_free_to_quadruple(square, square_free)
+    quaternion_square_free = reduce(
+        lambda x, y: x * y,
+        map(quaternion_divisor, square_free_part(factorization).keys()),
+        1
+    )
+
+    square_root = reduce(
+        lambda x, y: x * y,
+        map(lambda z: z[0] ** (z[1] // 2), square_part(factorization).items()),
+        1
+    )
+    quaternion_square = QuaternionInteger(square_root, 0, 0, 0)
+
+    return tuple(sorted(
+        map(abs, (quaternion_square * quaternion_square_free).components),
+        reverse=True
+    ))
 
 #-----------------------------
 
@@ -94,40 +109,4 @@ def four_squares(number):
     tuple
     """
     return four_squares_from_factorization(factor(number))
-
-#===========================================================
-
-def _quaternion_to_quadruple(quaternion_element):
-    """Convert quaternion to tuple."""
-    return tuple(sorted(map(abs, quaternion_element.components), reverse=True))
-
-#-----------------------------
-
-def _square_and_square_free_to_quadruple(square, square_free):
-    """Convert square and square_free parts to tuple."""
-    return _quaternion_to_quadruple(
-        _square_to_quaternion(square) * _square_free_to_quaternion(square_free)
-    )
-
-#-----------------------------
-
-def _square_free_to_quaternion(square_free_factorization):
-    """Convert square_free_part to Quaternion."""
-    return reduce(
-        lambda x, y: x * y,
-        map(quaternion_divisor, square_free_factorization.keys()),
-        1
-    )
-
-#-----------------------------
-
-def _square_to_quaternion(square_factorization):
-    """Convert square_part to Quaternion."""
-    return _quadratic_to_quaternion(_square_to_quadratic(square_factorization))
-
-#-----------------------------
-
-def _quadratic_to_quaternion(quadratic_element):
-    """Convert Quadratic to Quaternion."""
-    return Quaternion(quadratic_element.real, quadratic_element.imag, 0, 0)
 
