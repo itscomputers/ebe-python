@@ -57,6 +57,10 @@ class Rational(Fraction):
     def denom(self):
         return self._denominator
 
+    @property
+    def to_fraction(self):
+        return Fraction(self.numer, self.denom, _normalize=False)
+
     @classmethod
     def from_int(self, integer):
         return Rational(integer, 1, _normalize=False)
@@ -96,8 +100,6 @@ class Rational(Fraction):
             return '{}'.format(self._numerator)
         return '{}/{}'.format(self._numerator, self._denominator)
 
-    #-------------------------
-
     @property
     def display(self):
         """Pretty-print rational number."""
@@ -111,8 +113,6 @@ class Rational(Fraction):
         denom = ' '*(minus + denom_offset + 1) + denom
         line = '-'*minus + ' ' + '\u2500'*length
         return '{}\n{}\n{}'.format(numer, line, denom)
-
-    #-------------------------
 
     def decimal(self, num_digits=None):
         """
@@ -149,19 +149,13 @@ class Rational(Fraction):
             return Rational(-self._denominator, -self._numerator, _normalize=False)
         return Rational(self._denominator, self._numerator, _normalize=False)
 
-    #-------------------------
-
     @property
     def round_to_nearest_int(self):
         return math.floor(self + Rational(1, 2))
 
-    #-------------------------
-
     @property
     def round_prefer_toward_zero(self):
         return int(self) if self.denom == 2 else self.round_to_nearest_int
-
-    #-------------------------
 
     @property
     def is_square(self):
