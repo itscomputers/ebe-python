@@ -1,6 +1,7 @@
 #   numth/types/__init__.py
 #===========================================================
 
+from .arithmetic_type import ArithmeticType
 from .gaussian_integer import GaussianInteger
 from .gaussian_rational import GaussianRational
 from .polynomial import polyn, Polynomial
