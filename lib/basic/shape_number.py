@@ -1,24 +1,29 @@
-#   numth/basic/shape_number.py
+#   lib/basic/shape_number.py
+#   - contains basic function related to shape numbers
+
 #===========================================================
 from .division import div
 from .sqrt import integer_sqrt, is_square
 #===========================================================
+__all__ = [
+    'shape_number_by_index',
+    'which_shape_number',
+]
+#===========================================================
 
 def shape_number_by_index(k, sides):
     """
-    Computes the `k`th shape number for number of `sides`.
+    Computes the `k`th polygonal shape number.
+
+    k: int --at least 0
+    sides: int --at least 3
+        ~>  int
 
     example:
-        `shape_number_by_index(5, 3) => 15`
+        `shape_number_by_index(5, 3) ~> 15`
         since 15 is the 5th triangular number
-
-    params:
-        `k : int --nonnegative`,
-        `sides : int --at least 3`
-
-    returns:
-        `int`
     """
+
     return k * (k * (sides - 2) - sides + 4) // 2
 
 #=============================
@@ -26,20 +31,18 @@ def shape_number_by_index(k, sides):
 def which_shape_number(number, sides):
     """
     Computes, if possible, shape number index for `number` with
-    given number of `sides`.
-    Inverse of `numth.basic.shape_number.shape_number_by_index`.
+    given number of `sides`. Inverse of
+    `lib.basic.shape_number.shape_number_by_index`.
+
+    number: int
+    sides: int --at least 3
+        ~> int
 
     examples:
-        `which_shape_number(15, 3) => 5`,
-        `which_shape_number(20, 3) => None`
-
-    params:
-        `number : int`,
-        `sides : int --at least 3`
-
-    returns:
-        `k : int` or `None`
+        `which_shape_number(15, 3) ~> 5`,
+        `which_shape_number(20, 3) ~> None`
     """
+
     denom = 2 * (sides - 2)
     root = 8 * (sides - 2) * number + (sides - 4)**2
 

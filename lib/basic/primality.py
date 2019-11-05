@@ -1,11 +1,27 @@
-#   numth/basic/primality.py
+#   lib/basic/primality.py
+#   - contains basic functions related to prime numbers
+
 #===========================================================
 import itertools as it
 
 from .sqrt import integer_sqrt
 #===========================================================
+__all__ = [
+    'prime_gen',
+    'iter_primes_up_to',
+    'primes_up_to',
+    'is_prime__naive',
+]
+#===========================================================
 
 def prime_gen():
+    """
+    Generator that yields prime numbers using Sieve of Eratosthenes.
+
+    None
+        ~>  Iterator[int]
+    """
+
     primes = it.count(2)
     while True:
         prime = next(primes)
@@ -15,23 +31,30 @@ def prime_gen():
 #-----------------------------
 
 def iter_primes_up_to(number):
+    """
+    Iterator of primes up to a given number.
+
+    number: int
+        ~>  Iterator[int]
+    """
+
     return it.takewhile(lambda x: x <= number, prime_gen())
 
 #-----------------------------
 
 def primes_up_to(max_value, primes=None, numbers_left=None):
     """
-    Uses the sieve of Eratosthenes to find all prime numbers up to `max_value`.
+    Primes up to `max_value`.
+
+    max_value: int
+    primes: List[int] --used for recursive call
+    numbers_left: Iterator[int] --used for recursive call
+        ~>  List[int]
 
     example:
-        `prime_sieve(19) => [2, 3, 5, 7, 11, 13, 17, 19]`
-
-    params:
-        `max_value : int`
-
-    returns:
-        `list of int`
+        `prime_up_to(19) ~> [2, 3, 5, 7, 11, 13, 17, 19]`
     """
+
     if primes is None and numbers_left is None:
         primes = []
         numbers_left = iter(range(2, max_value + 1))
@@ -56,18 +79,16 @@ def is_prime__naive(number, numbers_left=None):
     """
     Uses the sieve of Eratosthenes to determine if `number` is prime.
 
+    number: int
+    numbers_left: Iterator[int] --used for recursive call
+        ~> bool
+
     example:
-        `is_prime__naive(19) => True` and
-        `is_prime__naive(20) => False`
+        `is_prime__naive(19) ~> True` and
+        `is_prime__naive(20) ~> False`
         since 19 is not divisible by 2 or 3 but 20 is
-
-    params:
-        `number : int`
-
-    returns:
-        `bool`
-    of whether `number` is prime.
     """
+
     if number < 2:
         return False
 

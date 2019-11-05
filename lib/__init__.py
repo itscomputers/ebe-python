@@ -1,30 +1,11 @@
-#   numth/__init__.py
+#   lib/__init__.py
 #===========================================================
 
 from .algebraic_structures import (
     ModularRing
 )
 
-from .basic import (
-    bezout,
-    div,
-    div_with_small_remainder,
-    gcd,
-    lcm,
-    chinese_remainder_theorem,
-    jacobi,
-    mod_inverse,
-    mod_power,
-    prime_to,
-    is_prime__naive,
-    iter_primes_up_to,
-    prime_gen,
-    primes_up_to,
-    shape_number_by_index,
-    which_shape_number,
-    integer_sqrt,
-    is_square
-)
+from .basic import *
 
 from .continued_fraction import (
     continued_fraction_quotients,

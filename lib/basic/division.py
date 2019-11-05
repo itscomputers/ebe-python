@@ -1,26 +1,36 @@
-#   numth/basic/division.py
+#   lib/basic/division
+#   - contains division algorithm and its applications
+
 #===========================================================
 import math
+#===========================================================
+__all__ = [
+    'div',
+    'div_with_small_remainder',
+    'gcd',
+    'lcm',
+    'bezout',
+    'padic',
+]
 #===========================================================
 
 def div(a, b):
     """
     Division with remainder of `a` by `b`.
+
+    a: int
+    b: int --nonzero
+        ~>  (quotient, remainder): Tuple[int, int]
+
     Computes `quotient` and `remainder` such that
         `0 <= remainder < abs(b)` and
-        `a == b * quotient + remainder`.
+        `a == b * quotient + remainder`
 
     example:
-        `div(55, 21) => (2, 13)`
+        `div(55, 21) ~> (2, 13)`
         since `55 == 21 * 2 + 13`
-
-    params:
-        `a : int`,
-        `b : int --nonzero`
-
-    returns:
-        `(quotient : int, remainder : int)`
     """
+
     quotient = a // b
     remainder = a % b
     if b < 0 and remainder != 0:
@@ -33,22 +43,21 @@ def div(a, b):
 
 def div_with_small_remainder(a, b):
     """
-    Like `numth.basic.division.div`.  Computes `quotient` and `remainder` such
-    that
+    Modified division with remainder of `a` by `b`.
+
+    a: int
+    b: int --nonzero
+        ~>  (quotient, remainder): Tuple[int, int]
+
+    Computes `quotient` and `remainder` such that
         `-abs(b) / 2 < remainder <= abs(b) / 2` and
-        `a == b * quotient + remainder`.
+        `a == b * quotient + remainder`
 
     example:
-        `div_with_small_remainder(55, 21) => (3, -8)`
+        `div_with_small_remainder(55, 21) ~> (3, -8)`
         since `55 == 21 * 3 - 8`
-
-    params:
-        `a : int`,
-        `b : int --nonzero`
-
-    returns:
-        `(quotient : int, remainder : int)`
     """
+
     quotient, remainder = div(a, b)
 
     if 2 * remainder > abs(b):
@@ -61,19 +70,17 @@ def div_with_small_remainder(a, b):
 
 def gcd(*numbers):
     """
-    Greatest common divisor.  Computes largest positive integer that divides
+    Greatest common divisor, ie, the largest positive integer that divides
     each of given `numbers`.
 
+    numbers: Iterable[int] --not all zero
+        ~>  int
+
     examples:
-        `gcd(12, 8) => 4`,
-        `gcd(12, 8, 10) => 2`
-
-    params:
-        `numbers : list of int --not all zero`
-
-    returns:
-        `int`
+        `gcd(12, 8) ~> 4`,
+        `gcd(12, 8, 10) ~> 2`
     """
+
     if 0 in numbers:
         return gcd(*filter(lambda x: x != 0, numbers))
 
@@ -89,23 +96,21 @@ def gcd(*numbers):
 
     return math.gcd(*numbers)
 
-#=============================
+#-----------------------------
 
 def lcm(*numbers):
     """
-    Least common multiple.  Computes smallest positive integer that is divisible
+    Least common multiple, ie, the smallest positive integer that is divisible
     by each of given `numbers`.
 
+    numbers: Iterable[int] --not all zero
+        ~>  int
+
     examples:
-        `lcm(12, 8) => 24`,
-        `lcm(12, 8, 10) => 120`
-
-    params:
-        `numbers : list of int --not all zero`
-
-    returns:
-        `int`
+        `lcm(12, 8) ~> 24`,
+        `lcm(12, 8, 10) ~> 120`
     """
+
     if len(numbers) == 1:
         return abs(*numbers)
 
@@ -120,21 +125,17 @@ def lcm(*numbers):
 
 def bezout(a, b):
     """
-    Finds a solution `(x, y)` to Bezout's identity:
-        `a*x + b*y == gcd(a, b)`.
+    Solution `(x, y)` to Bezout's identity: `a*x + b*y == gcd(a, b)`.
+
+    a: int
+    b: int --not both zero
+        ~>  (x, y): Tuple[int, int]
 
     example:
-        `bezout(5, 7) => (3, -2)`
+        `bezout(5, 7) ~> (3, -2)`
         since `5*3 - 7*2 == 1 == gcd(5, 7)`
-
-    params:
-        `a : int`,
-        `b : int`
-        `--not both zero`
-
-    returns:
-        `(x : int, y : int)`
     """
+
     if (a, b) == (0, 0):
         raise ValueError('bezout(0, 0) is undefined')
     if b == 0:
@@ -160,22 +161,20 @@ def bezout(a, b):
 
 def padic(number, base):
     """
-    Computes p-adic `exponent` and `unit` part of `number` relative to `base`,
-    ie satisfying
+    Compute p-adic `exponent` and `unit` part of nonzero `number`
+    relative to `base` greater than 1, ie, satisfying
         `number == (base ** exponent) * unit`,
         `gcd(number, unit) == 1`.
+
+    number: int
+    base: int
+        ~>  (exp, unit): Tuple[int, int]
 
     example:
         `padic(48, 2) == (4, 3)`
         since `48 == (2**4) * 3`.
-
-    params:
-        `number : int --nonzero`,
-        `base : int --at least 2`
-
-    returns:
-        `(exp : int, unit : int)`
     """
+
     if number == 0:
         raise ValueError('number must be nonzero')
 
