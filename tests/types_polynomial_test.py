@@ -3,10 +3,10 @@
 import env
 from hypothesis import assume, given, strategies as st
 
-from numth.basic import is_square, lcm
-from numth.types import Rational, QuadraticInteger
-from numth.types.polynomial import *
-from numth.types.polynomial import (
+from lib.basic import is_square, lcm
+from lib.types import Rational, QuadraticInteger
+from lib.types.polynomial import *
+from lib.types.polynomial import (
     _term_pattern,
     _term_to_exp_coeff,
     _exp_coeff_to_term,

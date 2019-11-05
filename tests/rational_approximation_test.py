@@ -3,10 +3,10 @@
 import env
 from hypothesis import assume, given, strategies as st
 
-from numth.basic import is_square
-from numth.continued_fraction import continued_fraction_pell_numbers
-from numth.types import Polynomial
-from numth.rational_approximation import *
+from lib.basic import is_square
+from lib.continued_fraction import continued_fraction_pell_numbers
+from lib.types import Polynomial
+from lib.rational_approximation import *
 #===========================================================
 
 def assert_convergence_and_advance(curr, diff, gen):

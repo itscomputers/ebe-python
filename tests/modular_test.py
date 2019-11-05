@@ -3,9 +3,9 @@
 import env
 from hypothesis import given, strategies as st
 
-from numth.basic import gcd, primes_up_to, jacobi
-from numth.factorization import factor, divisors
-from numth.modular import *
+from lib.basic import gcd, primes_up_to, jacobi
+from lib.factorization import factor, divisors
+from lib.modular import *
 #===========================================================
 
 primes = primes_up_to(500)

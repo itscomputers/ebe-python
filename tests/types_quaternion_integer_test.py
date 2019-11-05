@@ -4,10 +4,10 @@ import pytest
 from hypothesis import assume, given, strategies as st
 
 import env
-from numth.basic import gcd
-from numth.types import Rational
-from numth.types.quaternion import Quaternion
-from numth.types.quaternion_integer import *
+from lib.basic import gcd
+from lib.types import Rational
+from lib.types.quaternion import Quaternion
+from lib.types.quaternion_integer import *
 #===========================================================
 
 @st.composite

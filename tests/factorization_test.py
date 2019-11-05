@@ -4,11 +4,11 @@ import env
 from functools import reduce
 from hypothesis import given, strategies as st
 
-from numth.basic import is_square
-from numth.primality import is_prime, next_prime
-from numth.types import GaussianInteger, Quaternion
-from numth.factorization import *
-from numth.factorization.main import _combine_counters
+from lib.basic import is_square
+from lib.primality import is_prime, next_prime
+from lib.types import GaussianInteger, Quaternion
+from lib.factorization import *
+from lib.factorization.main import _combine_counters
 #===========================================================
 
 def build_composite(*numbers):

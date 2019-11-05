@@ -3,9 +3,9 @@
 import env
 from hypothesis import assume, given, strategies as st
 
-from numth.basic import is_square
-from numth.types import Quadratic, frac
-from numth.continued_fraction.quadratic import *
+from lib.basic import is_square
+from lib.types import Quadratic, frac
+from lib.continued_fraction.quadratic import *
 #===========================================================
 
 @st.composite

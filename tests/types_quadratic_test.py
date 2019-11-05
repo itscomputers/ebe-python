@@ -5,9 +5,9 @@ import pytest
 from hypothesis import assume, given, strategies as st
 
 import env
-from numth.basic import gcd, is_square
-from numth.types.rational import Rational
-from numth.types.quadratic import *
+from lib.basic import gcd, is_square
+from lib.types.rational import Rational
+from lib.types.quadratic import *
 #===========================================================
 
 def root_filter(x):

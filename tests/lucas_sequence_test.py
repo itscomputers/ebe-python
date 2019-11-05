@@ -3,8 +3,8 @@
 import env
 from hypothesis import given, strategies as st
 
-from numth.types import QuadraticInteger
-from numth.lucas_sequence.modular import *
+from lib.types import QuadraticInteger
+from lib.lucas_sequence.modular import *
 #===========================================================
 #   modular
 #===========================================================

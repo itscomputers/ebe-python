@@ -4,9 +4,9 @@ import pytest
 from hypothesis import assume, given, strategies as st
 
 import env
-from numth.basic import div_with_small_remainder
-from numth.types import Rational
-from numth.types.quaternion import *
+from lib.basic import div_with_small_remainder
+from lib.types import Rational
+from lib.types.quaternion import *
 #===========================================================
 
 @st.composite

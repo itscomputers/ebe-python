@@ -3,9 +3,9 @@
 import env
 from hypothesis import given, strategies as st
 
-from numth.basic import gcd, jacobi, mod_power
-from numth.primality import is_prime
-from numth.algebraic_structures import *
+from lib.basic import gcd, jacobi, mod_power
+from lib.primality import is_prime
+from lib.algebraic_structures import *
 #===========================================================
 
 @given(

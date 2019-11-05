@@ -3,17 +3,17 @@
 import env
 from hypothesis import given, strategies as st
 
-from numth.basic import is_prime__naive, primes_up_to
-from numth.primality.miller_rabin import (
+from lib.basic import is_prime__naive, primes_up_to
+from lib.primality.miller_rabin import (
     _generate_witnesses,
     miller_rabin_max_cutoff,
     miller_rabin_cutoffs
 )
-from numth.primality.lucas import (
+from lib.primality.lucas import (
     _generate_witness_pairs,
     _good_parameters,
 )
-from numth.primality import *
+from lib.primality import *
 #===========================================================
 #   lucas
 #===========================================================
