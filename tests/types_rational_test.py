@@ -161,10 +161,10 @@ def test_round_to_nearest_int(a):
 def test_round_prefer_toward_zero(a):
     rounded = a.round_prefer_toward_zero
     assert type(rounded) is int
-    if abs(a - rounded) == Rational(1, 2):
+    if a > 0 and abs(a - rounded) == Rational(1, 2):
         assert abs(rounded) == abs(a.round_to_nearest_int) - 1
     else:
-        assert abs(a - rounded) < Rational(1, 2)
+        assert rounded == a.round_to_nearest_int
 
 #-----------------------------
 
