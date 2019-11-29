@@ -1,9 +1,9 @@
 #   tests/basic_test.py
 #===========================================================
-import env
 from hypothesis import assume, given, strategies as st
 from random import sample
 
+import env
 from lib.factorization import factor
 from lib.modular import euler_phi
 from lib.basic import *

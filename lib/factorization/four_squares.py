@@ -1,31 +1,38 @@
-#   numth/factorization/four_squares.py
+#   lib/factorization/four_squares.py
+#   - module to express integer as sum of four squares
+
 #===========================================================
 from functools import reduce
 
 from ..basic import jacobi
 from ..types import QuaternionInteger
-from .main import factor, square_part, square_free_part
+from .main import factor, square_and_square_free
 from .two_squares import gaussian_divisor
+#===========================================================
+__all__ = [
+    'quaternion_descent',
+    'quaternion_divisor',
+    'four_squares',
+]
 #===========================================================
 
 def quaternion_descent(quaternion_integer, prime):
     """
-    Method of descent for quaternions.
+    Given `quaternion_integer` whose norm is divisible by `prime`,
+    find quaternion integer whose norm is equal to `prime`.
 
-    Given a quaternion and a prime dividing its norm, compute a quaternion
-    whose norm is equal to the prime.
+    example: for `q = QuaternionInteger(1, -2, 3, -4)`,
+        `quaternion_descent(q, 5) ~> QuaternionInteger(0, 0, 2, 1)`
 
-    params
-    + quaternion : Quaternion
-    + prime : int
-
-    return
-    Quaternion
+    + quaternion_integer: QuaternionInteger
+    + prime: int --prime
+    ~> QuaternionInteger
     """
     m = quaternion_integer.norm // prime
     if m == 1:
         return quaternion_integer
     m_q = QuaternionInteger(m, 0, 0, 0)
+
     return quaternion_descent(
         (quaternion_integer.conjugate * (quaternion_integer % m_q)) // m_q,
         prime
@@ -35,15 +42,12 @@ def quaternion_descent(quaternion_integer, prime):
 
 def quaternion_divisor(prime):
     """
-    Find a quaternion divisor of a prime.
+    Find quaternion integer whose norm is equal to `prime`.
 
-    Given a prime, compute a quaternion whose norm is equal to the prime.
+    example: `quaternion_divisor(23) ~> QuaternionInteger(-3, -2, 2, -1)`
 
-    params
-    + prime : int
-
-    return
-    Quaternion
+    + prime: int
+    ~> QuaternionInteger
     """
     if prime == 2 or prime % 4 == 1:
         return QuaternionInteger.from_gaussian_integer(gaussian_divisor(prime))
@@ -69,24 +73,23 @@ def quaternion_divisor(prime):
 
 def four_squares_from_factorization(factorization):
     """
-    Find four numbers whose squares sum to a given number.
+    Find four integers whose squares sum to corresponding `number`.
 
-    params
-    + factorization : dict
-        corresponding to the number in question
+    example: `four_squares_from_factorization({5: 1, 19: 1}) ~> (7, 6, 3, 1)`
 
-    return
-    tuple
+    + factorization: Dict[int, int] --with shape {prime: multiplicity}
+    ~> Tuple[int, int, int, int]
     """
+    square, square_free = square_and_square_free(factorization)
     quaternion_square_free = reduce(
         lambda x, y: x * y,
-        map(quaternion_divisor, square_free_part(factorization).keys()),
+        map(quaternion_divisor, square_free.keys()),
         1
     )
 
     square_root = reduce(
         lambda x, y: x * y,
-        map(lambda z: z[0] ** (z[1] // 2), square_part(factorization).items()),
+        map(lambda z: z[0] ** (z[1] // 2), square.items()),
         1
     )
     quaternion_square = QuaternionInteger(square_root, 0, 0, 0)
@@ -98,15 +101,20 @@ def four_squares_from_factorization(factorization):
 
 #-----------------------------
 
-def four_squares(number):
+def four_squares(number_or_factorization):
     """
-    Find four numbers whose squares sum to a number.
+    Find four integers whose squares sum to `number`.
 
-    params
-    + number : int
+    example: `four_squares(95) ~> (7, 6, 3, 1)`
+             `four_squares({5: 1, 19: 1}) ~> (7, 6, 3, 1)`
 
-    return
-    tuple
+    + number_or_factorization: Union[int, Dict[int, int]]
+    ~> Tuple[int, int, int, int]
     """
-    return four_squares_from_factorization(factor(number))
+    if isinstance(number_or_factorization, int):
+        factorization = factor(number_or_factorization)
+    else:
+        factorization = number_or_factorization
+
+    return four_squares_from_factorization(factorization)
 

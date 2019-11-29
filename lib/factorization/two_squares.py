@@ -1,23 +1,28 @@
-#   numth/factorization/two_squares.py
+#   lib/factorization/two_squares.py
+#   - module to express integer as sum of two squares
+
 #===========================================================
 from functools import reduce
 
 from ..modular import mod_sqrt
 from ..types import GaussianInteger
-from .main import factor, square_part, square_free_part
+from .main import factor, square_and_square_free
+#===========================================================
+__all__ = [
+    'gaussian_divisor',
+    'two_squares',
+]
 #===========================================================
 
 def gaussian_divisor(prime):
     """
-    Find a Gaussian Integer divisor of a prime number.
+    Find Gaussian integer with norm equal to `prime`.
 
-    Computes a Gaussian Integer whose norm is equal to the given prime.
+    example: `gaussian_divisor(13) ~> 3 - 2 i`
+        with `(3 - 2 i).norm == 13`
 
-    params
-    + prime : int
-
-    return
-    GaussianInteger
+    + prime: int --prime
+    ~> GaussianInteger
     """
     if prime % 4 == 3:
         raise ValueError('{} does not split over Z[i]'.format(prime))
@@ -29,31 +34,31 @@ def gaussian_divisor(prime):
 
 def is_sum_of_two_squares(factorization):
     """
-    Determine whether a number can be written as a sum of two squares.
+    Determine if corresponding `number` can be written as a sum of two squares,
+    whether all primes that are 3 mod 4 occur with even multiplicity.
 
-    params
-    + factorization : dict
-        corresponding to the number in question
+    example: `is_sum_of_two_squares({5: 1, 19: 1}) ~> False`
+             `is_sum_of_two_squares({5: 1, 17: 1}) ~> True`
 
-    return
-    bool
+    + factorization: Dict[int, int] --with shape {prime: multiplicity}
+    ~> bool
     """
-    return 3 not in map(lambda x: x % 4, square_free_part(factorization).keys())
+    square, square_free = square_and_square_free(factorization)
+    return 3 not in map(lambda x: x % 4, square_free.keys())
 
 #-----------------------------
 
 def two_squares_from_factorization(factorization):
     """
-    Find two numbers whose squares sum to corresponding number.
+    Find two integers whose squares sum to corresponding `number`.
 
-    params
-    + factorization : dict
-        corresponding to the number in question
+    example: `two_squares_from_factorization({5: 1, 17: 1}) ~> (7, 6)`
+        with `7**2 + 6**2 == 85 == 5 * 17`
 
-    return
-    tuple
+    + factorization: Dict[int, int] --with shape {prime: multiplicity}
+    ~> Tuple[int, int]
     """
-    square_free = square_free_part(factorization)
+    square, square_free = square_and_square_free(factorization)
     if not is_sum_of_two_squares(square_free):
         return None
 
@@ -65,7 +70,7 @@ def two_squares_from_factorization(factorization):
 
     square_root = reduce(
         lambda x, y: x * y,
-        map(lambda z: z[0] ** (z[1] // 2), square_part(factorization).items()),
+        map(lambda z: z[0] ** (z[1] // 2), square.items()),
         1
     )
     gaussian_square = GaussianInteger(square_root, 0)
@@ -77,15 +82,20 @@ def two_squares_from_factorization(factorization):
 
 #-----------------------------
 
-def two_squares(number):
+def two_squares(number_or_factorization):
     """
-    Find two numbers whose squares sum to the number.
+    Find two integers whose squares sum to `number`.
 
-    params
-    + number : int
+    example: `two_squares(85) = (7, 6)`
+             `two_squares({5: 1, 17: 1}) ~> (7, 6)`
 
-    return
-    tuple
+    + number_or_factorization: Union[int, Dict[int, int]]
+    ~> Tuple[int, int]
     """
-    return two_squares_from_factorization(factor(number))
+    if isinstance(number_or_factorization, int):
+        factorization = factor(number_or_factorization)
+    else:
+        factorization = number_or_factorization
+
+    return two_squares_from_factorization(factorization)
 

@@ -1,4 +1,6 @@
 #   lib/__init__.py
+#   - a number theory library in python 3
+
 #===========================================================
 
 from .algebraic_structures import (
@@ -6,6 +8,7 @@ from .algebraic_structures import (
 )
 
 from .basic import *
+from .factorization import *
 
 from .continued_fraction import (
     continued_fraction_quotients,
@@ -13,21 +16,6 @@ from .continued_fraction import (
     continued_fraction_pell_numbers,
     continued_fraction_table,
     continued_fraction_all
-)
-
-from .factorization import (
-    pollard_rho,
-    pollard_p_minus_one,
-    williams_p_plus_one,
-    divisors,
-    find_divisor,
-    factor,
-    square_part,
-    square_free_part,
-    gaussian_divisor,
-    two_squares,
-    quaternion_divisor,
-    four_squares
 )
 
 from .lucas_sequence import (

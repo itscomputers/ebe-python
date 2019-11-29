@@ -1,5 +1,5 @@
 #   lib/basic/primality.py
-#   - contains basic functions related to prime numbers
+#   - module for basic functions related to prime numbers
 
 #===========================================================
 import itertools as it
@@ -18,10 +18,8 @@ def prime_gen():
     """
     Generator that yields prime numbers using Sieve of Eratosthenes.
 
-    None
-        ~>  Iterator[int]
+    ~> Iterator[int]
     """
-
     primes = it.count(2)
     while True:
         prime = next(primes)
@@ -32,29 +30,28 @@ def prime_gen():
 
 def iter_primes_up_to(number):
     """
-    Iterator of primes up to a given number.
+    Iterator of primes up to `number`.
 
-    number: int
-        ~>  Iterator[int]
+    example: `list(iter_primes_up_to(10)) ~> [2, 3, 5, 7]`
+
+    + number: int
+    ~> Iterator[int]
     """
-
     return it.takewhile(lambda x: x <= number, prime_gen())
 
 #-----------------------------
 
 def primes_up_to(max_value, primes=None, numbers_left=None):
     """
-    Primes up to `max_value`.
+    Compute primes up to `max_value`.
 
-    max_value: int
-    primes: List[int] --used for recursive call
-    numbers_left: Iterator[int] --used for recursive call
-        ~>  List[int]
+    example: `primes_up_to(19) ~> [2, 3, 5, 7, 11, 13, 17, 19]`
 
-    example:
-        `prime_up_to(19) ~> [2, 3, 5, 7, 11, 13, 17, 19]`
+    + max_value: int
+    + primes: List[int] --used for recursive call
+    + numbers_left: Iterator[int] --used for recursive call
+    ~> List[int]
     """
-
     if primes is None and numbers_left is None:
         primes = []
         numbers_left = iter(range(2, max_value + 1))
@@ -77,18 +74,15 @@ def primes_up_to(max_value, primes=None, numbers_left=None):
 
 def is_prime__naive(number, numbers_left=None):
     """
-    Uses the sieve of Eratosthenes to determine if `number` is prime.
+    Determine if `number` is prime using sieve of Eratosthenes.
 
-    number: int
-    numbers_left: Iterator[int] --used for recursive call
-        ~> bool
+    example: `is_prime__naive(19) ~> True`
+             `is_prime__naive(20) ~> False`
 
-    example:
-        `is_prime__naive(19) ~> True` and
-        `is_prime__naive(20) ~> False`
-        since 19 is not divisible by 2 or 3 but 20 is
+    + number: int
+    + numbers_left: Iterator[int] --used for recursive call
+    ~> bool
     """
-
     if number < 2:
         return False
 

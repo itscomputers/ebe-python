@@ -1,4 +1,6 @@
-#   numth/factorization/main.py
+#   lib/factorization/main.py
+#   - module for main factorization functionality
+
 #===========================================================
 from collections import Counter
 from functools import reduce
@@ -8,75 +10,83 @@ from ..basic import integer_sqrt, iter_primes_up_to, padic
 from ..primality import is_prime
 from .algorithms import pollard_rho_gen, pollard_p_minus_one_gen
 #===========================================================
+__all__ = [
+    'find_divisor',
+    'factor_trivial',
+    'factor',
+    'divisors',
+    'square_and_square_free',
+    'number_from_factorization',
+]
+#===========================================================
 
 def find_divisor(number, rho_seeds=None, minus_seeds=None):
     """
-    Find a divisor of a number.
+    Find divisor of `number`.
 
-    params
-    + number : int
-        composite number
-    + rho_seeds : list
-    + minus_seeds : list
+    example: `find_divisor(143) ~> Set([13])`
+             `find_divisor(143, [5, 7], [2]) ~> Set([11])`
 
-    return
-    set
-        set of first divisors found using all given seeds
+    + number: int --composite
+    + rho_seeds: List[int]
+    + minus_seeds: List[int]
+    ~> Set[int] --first divisors found from given seeds
     """
     divisor_search = _divisor_search_generators(number, rho_seeds, minus_seeds)
 
     divisor_found = False
     while not divisor_found:
-        divisor_search, divisor_found = \
-            _advance_to_next(number, divisor_search, divisor_found)
+        for value in divisor_search.values():
+            divisor = next(value['generator'])
+            if divisor == number:
+                value['generator'] = _trivial_generator()
+            else:
+                if divisor > 1:
+                    divisor_found = True
+                value['divisor'] = divisor
 
-    return {value['divisor'] for value in divisor_search.values() \
-            if value['divisor'] != 1}
+    return set(filter(
+        lambda x: x != 1,
+        map(lambda x: x['divisor'], divisor_search.values())
+    ))
 
 #=============================
 
 def factor_trivial(number, prime_base=None):
     """
-    Factor out the trivial primes.
+    Factor out `prime_base` primes from `number` using trial division.
 
-    params
-    + number : int
-    + prime_base : list
+    example: `factor_trivial(1200, [2, 3, 7]) ~> (25, {2: 4, 3: 1})`
+        since `1200 == 25 * 2**4 * 3`
 
-    return
-    + remaining : int
-        number leftover after division by trivial primes
-    + prime_divisors : dict
-        prime divisors of number from prime base with multiplicity
+    + number: int
+    + prime_base: List[int]
+    ~> (remaining, factorization): Tuple[int, Dict[int, int]]
     """
     prime_base = prime_base or iter_primes_up_to(default('prime_base_max'))
     remaining = number
     factorization = dict()
+
     for prime in prime_base:
-        if remaining % prime == 0:
-            exp, remaining = padic(remaining, prime)
-            factorization = _combine_counters(factorization, {prime : exp})
+        exp, remaining = padic(remaining, prime)
+        if exp > 0:
+            factorization[prime] = exp
 
     return remaining, factorization
 
 #-----------------------------
 
-def factor_nontrivial(
-    number,
-    rho_seeds=None,
-    minus_seeds=None
-):
+def factor_nontrivial(number, rho_seeds=None, minus_seeds=None):
     """
-    Factor out the nontrivial primes.
+    Factor `number` into primes using `lib.factorization.find_factor`.
 
-    params
-    + number : int
-    + rho_seeds : list
-    + minus_seeds : list
+    example: `factor_nontrivial(1200) ~> {2: 4, 3: 1, 5: 2}`
+        since `1200 == 2**4 * 3 * 5**2
 
-    return
-    dict
-        nontrivial prime divisors with multiplicity
+    + number: int
+    + rho_seeds: List[int]
+    + minus_seeds: List[int]
+    ~> Dict[int, int]
     """
     if number == 1:
         return dict()
@@ -86,17 +96,17 @@ def factor_nontrivial(
 
     sqrt_number = integer_sqrt(number)
     if sqrt_number**2 == number:
-        return _apply_multiplicity(factor_nontrivial(sqrt_number), 2)
+        return _combine_counters(dict(), factor_nontrivial(sqrt_number), 2)
 
     remaining = number
     factorization = dict()
 
     divisors = find_divisor(remaining, rho_seeds, minus_seeds)
-    for d in divisors:
-        exp, remaining = padic(remaining, d)
+    for divisor in divisors:
+        exp, remaining = padic(remaining, divisor)
         factorization = _combine_counters(
             factorization,
-            factor_nontrivial(d),
+            factor_nontrivial(divisor),
             exp
         )
 
@@ -106,23 +116,16 @@ def factor_nontrivial(
 
 def factor(number, prime_base=None, rho_seeds=None, minus_seeds=None):
     """
-    Factor number into its prime divisors with multiplicity.
+    Factor `number` into primes.
 
-    For example, ``{2 : 4, 3 : 1, 5 : 2}`` means ``2**4 * 3**1 * 5**2 == 1200``
+    example: `factor(1200) ~> {2: 4, 3: 1, 5: 2}`
+        since `1200 == 2**4 * 3 * 5**2`
 
-    params
-    + number : int
-        number to factor
-    + prime_base : list
-        list of primes to factor by trial division
-    + rho_seeds : list
-        list of seeds to use in Pollard's rho algorithm
-    + minus_seeds : list
-        list of seeds to use in Pollard's p-1 algorithm
-
-    return
-    dict
-        prime divisors of number with multiplicity
+    + number: int
+    + prime_base: List[int] --primes to factor using trial division
+    + rho_seeds: List[int] --seeds for Pollard's rho algorithm
+    + minus_seeds: List[int] --seeds for Pollard's p-1 algorithm
+    ~> Dict[int, int]
     """
     remaining, trivial_divisors = factor_trivial(number, prime_base)
     nontrivial_divisors = factor_nontrivial(remaining, rho_seeds, minus_seeds)
@@ -133,14 +136,12 @@ def factor(number, prime_base=None, rho_seeds=None, minus_seeds=None):
 
 def divisors_from_factorization(factorization):
     """
-    Compute the divisors of a number using its factorization.
+    Compute the divisors of corresponding `number`.
 
-    params
-    + factorization : dict
-        prime divisors with multiplicity
+    example: `divisors_from_factorization({2: 1, 3: 2}) ~> [1, 2, 3, 6, 9, 18]`
 
-    return
-    list
+    + factorization: Dict[int, int]
+    ~> List[int]
     """
     divs = set([1])
     for p in Counter(factorization).elements():
@@ -149,32 +150,33 @@ def divisors_from_factorization(factorization):
 
 #-----------------------------
 
-def divisors(number):
+def divisors(number_or_factorization):
     """
-    Compute the divisors of a number.
+    Compute the divisors of `number`.
 
-    params
-    + number : int
+    example: `divisors(18) ~> [1, 2, 3, 6, 9, 18]`
+             `divisors({2: 1, 3: 2}) ~> [1, 2, 3, 6, 9, 18]`
 
-    return
-    list
+    + number_or_factorization: Union[int, Dict[int, int]]
+    ~> List[int]
     """
-    return divisors_from_factorization(factor(number))
+    if isinstance(number_or_factorization, int):
+        factorization = factor(number_or_factorization)
+    else:
+        factorization = number_or_factorization
+
+    return divisors_from_factorization(factorization)
 
 #=============================
 
 def square_part(factorization):
     """
-    Square part of a factorization.
+    Compute square part of `factorization`.
 
-    Computes factorization of largest square number that divides the number.
+    example: `square_part({2: 5, 3: 1, 5: 2}) ~> {2: 4, 5: 2}`
 
-    params
-    + factorization : dict
-        prime divisors with multiplicity
-
-    return
-    dict
+    + factorization: Dict[int, int]
+    ~> Dict[int, int]
     """
     return {k : v - v % 2 for k, v in factorization.items() if v > 1}
 
@@ -182,32 +184,36 @@ def square_part(factorization):
 
 def square_free_part(factorization):
     """
-    Square free part of a factorization.
+    Compute square-free part of `factorization`.
 
-    Computes the factorization of a number divided by its square part.
+    example: `square_free_part({2: 5, 3: 1, 5: 2}) ~> {2: 1, 3: 1}`
 
-    params
-    + factorization : dict
-        prime divisors with multiplicity
-
-    return
-    dict
+    + factorization: Dict[int, int]
+    ~> Dict[int, int]
     """
     return {k : 1 for k, v in factorization.items() if v % 2 == 1}
+
+#-----------------------------
+
+def square_and_square_free(factorization):
+    """
+    Split factorization into its square and square-free parts.
+
+    + factorization: Dict[int, int]
+    ~> Tuple[Dict[int, int], Dict[int, int]
+    """
+    return square_part(factorization), square_free_part(factorization)
 
 #=============================
 
 def number_from_factorization(factorization):
     """
-    Compute number from its factorization.
+    Compute number from its `factorization`.
 
-    params
-    + factorization : dict
-        prime divisors with multiplicty
+    example: `number_from_factorization({2: 5, 3: 1, 5: 2}) ~> 2400`
 
-    return
-    int
-        product of prime divisors
+    + factorization: Dict[int, int]
+    ~> int
     """
     return reduce(lambda x, y: x * y, Counter(factorization).elements(), 1)
 
@@ -217,15 +223,10 @@ def _divisor_search_generators(number, rho_seeds, minus_seeds):
     """
     Build generators to search for a divisor.
 
-    params
-    + number : int
-    + rho_seeds : list
-    + minus_seeds : list
-
-    return
-    dict
-        * key is a tuple of the seed and the type of seed
-        * value is a dict with key 'generator' and value the generator
+    + number: int
+    + rho_seeds: List[int]
+    + minus_seeds: List[int]
+    ~> Dict[Tuple[int, str], Dict[str, Iterator[int]]]
     """
     divisor_search = dict()
     for seed in (rho_seeds or default('rho_seeds')):
@@ -238,66 +239,24 @@ def _divisor_search_generators(number, rho_seeds, minus_seeds):
         }
     return divisor_search
 
-#-----------------------------
-
-def _advance_to_next(number, divisor_search, divisor_found):
-    """
-    Advance the divisor search to the next step.
-
-    Transforms data as follows:
-    ``
-    { (seed, 'rho') : { 'generator' : gen, 'divisor' : d } }
-        ->  { (seed, 'rho') : { 'generator' : gen, 'divisor' : next(gen) } }
-    ``
-
-    params
-    + number : int
-    + divisor_search : dict
-    + divisor_found : bool
-
-    return
-    + divisor_search : dict
-    + divisor_found : bool
-    """
-    for key in divisor_search:
-        divisor = next(divisor_search[key]['generator'])
-        if divisor == number:
-            divisor_search[key]['generator'] = _trivial_generator()
-        else:
-            if divisor > 1:
-                divisor_found = True
-            divisor_search[key]['divisor'] = divisor
-    return divisor_search, divisor_found
-
-#=============================
-
 def _combine_counters(counter_1, counter_2, m_2=1):
     """
-    Combine two dictionaries with integer values to sum across keys.
+    Sum the values of two dictionaries.
 
-    params
-    + counter_1 : dict
-    + counter_2 : dict
-    + m_2 : int
-        multiplicity to be applied to counter_2
+    example: `_combine_counters({2: 1, 5: 2}, {2: 2}) ~> {2: 3, 5: 2}`
 
-    return
-    dict
+    + counter_1: Dict[Any, int]
+    + counter_2: Dict[Any, int]
+    + m_2: int --multiplicity to be applied to counter_2
+    ~> Dict[Any, int]
     """
-    new_counter = _apply_multiplicity(counter_2, m_2)
+    new_counter = dict((k, m_2 * v) for k, v in counter_2.items())
     for k, v in counter_1.items():
         if k in new_counter:
             new_counter[k] += v
         else:
             new_counter[k] = v
     return new_counter
-
-#-----------------------------
-
-def _apply_multiplicity(counter, multiplicity):
-    return {k : multiplicity * v for k, v in counter.items()}
-
-#-----------------------------
 
 def _trivial_generator():
     while True:

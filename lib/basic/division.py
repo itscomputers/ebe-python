@@ -1,5 +1,5 @@
 #   lib/basic/division
-#   - contains division algorithm and its applications
+#   - module for division algorithm and its applications
 
 #===========================================================
 import math
@@ -16,21 +16,17 @@ __all__ = [
 
 def div(a, b):
     """
-    Division with remainder of `a` by `b`.
-
-    a: int
-    b: int --nonzero
-        ~>  (quotient, remainder): Tuple[int, int]
-
-    Computes `quotient` and `remainder` such that
+    Compute quotient and remainder such that
         `0 <= remainder < abs(b)` and
         `a == b * quotient + remainder`
 
-    example:
-        `div(55, 21) ~> (2, 13)`
+    example: `div(55, 21) ~> (2, 13)`
         since `55 == 21 * 2 + 13`
-    """
 
+    + a: int
+    + b: int --nonzero
+    ~> (quotient, remainder): Tuple[int, int]
+    """
     quotient = a // b
     remainder = a % b
     if b < 0 and remainder != 0:
@@ -43,21 +39,17 @@ def div(a, b):
 
 def div_with_small_remainder(a, b):
     """
-    Modified division with remainder of `a` by `b`.
-
-    a: int
-    b: int --nonzero
-        ~>  (quotient, remainder): Tuple[int, int]
-
-    Computes `quotient` and `remainder` such that
+    Compute quotient and remainder such that
         `-abs(b) / 2 < remainder <= abs(b) / 2` and
         `a == b * quotient + remainder`
 
-    example:
-        `div_with_small_remainder(55, 21) ~> (3, -8)`
+    example: `div_with_small_remainder(55, 21) ~> (3, -8)`
         since `55 == 21 * 3 - 8`
-    """
 
+    + a: int
+    + b: int --nonzero
+    ~> (quotient, remainder): Tuple[int, int]
+    """
     quotient, remainder = div(a, b)
 
     if 2 * remainder > abs(b):
@@ -70,17 +62,15 @@ def div_with_small_remainder(a, b):
 
 def gcd(*numbers):
     """
-    Greatest common divisor, ie, the largest positive integer that divides
-    each of given `numbers`.
+    Compute largest positive integer (greatest common divisor)
+    that divides each of `numbers`.
 
-    numbers: Iterable[int] --not all zero
-        ~>  int
+    examples: `gcd(12, 8) ~> 4`
+              `gcd(12, 8, 10) ~> 2`
 
-    examples:
-        `gcd(12, 8) ~> 4`,
-        `gcd(12, 8, 10) ~> 2`
+    + numbers: Iterable[int] --not all zero
+    ~> int
     """
-
     if 0 in numbers:
         return gcd(*filter(lambda x: x != 0, numbers))
 
@@ -100,17 +90,15 @@ def gcd(*numbers):
 
 def lcm(*numbers):
     """
-    Least common multiple, ie, the smallest positive integer that is divisible
-    by each of given `numbers`.
+    Compute smallest positive integer (least common multiple)
+    that is divisible by each of `numbers`.
 
-    numbers: Iterable[int] --not all zero
-        ~>  int
+    examples: `lcm(12, 8) ~> 24`
+              `lcm(12, 8, 10) ~> 120`
 
-    examples:
-        `lcm(12, 8) ~> 24`,
-        `lcm(12, 8, 10) ~> 120`
+    + numbers: Iterable[int] --not all zero
+    ~> int
     """
-
     if len(numbers) == 1:
         return abs(*numbers)
 
@@ -125,17 +113,15 @@ def lcm(*numbers):
 
 def bezout(a, b):
     """
-    Solution `(x, y)` to Bezout's identity: `a*x + b*y == gcd(a, b)`.
+    Find a solution to Bezout's identity: `a*x + b*y == gcd(a, b)`.
 
-    a: int
-    b: int --not both zero
-        ~>  (x, y): Tuple[int, int]
-
-    example:
-        `bezout(5, 7) ~> (3, -2)`
+    example: `bezout(5, 7) ~> (3, -2)`
         since `5*3 - 7*2 == 1 == gcd(5, 7)`
-    """
 
+    + a: int
+    + b: int --not both zero
+    ~> (x, y): Tuple[int, int]
+    """
     if (a, b) == (0, 0):
         raise ValueError('bezout(0, 0) is undefined')
     if b == 0:
@@ -161,20 +147,17 @@ def bezout(a, b):
 
 def padic(number, base):
     """
-    Compute p-adic `exponent` and `unit` part of nonzero `number`
-    relative to `base` greater than 1, ie, satisfying
-        `number == (base ** exponent) * unit`,
+    Compute exponent and unit part of `number` relative to base, satisfying
+        `number == (base ** exponent) * unit` and
         `gcd(number, unit) == 1`.
 
-    number: int
-    base: int
-        ~>  (exp, unit): Tuple[int, int]
+    example: `padic(96, 2) == (5, 3)`
+        since `96 == (2**5) * 3`.
 
-    example:
-        `padic(48, 2) == (4, 3)`
-        since `48 == (2**4) * 3`.
+    + number: int --nonzero
+    + base: int --greater than 1
+    ~> (exp, unit): Tuple[int, int]
     """
-
     if number == 0:
         raise ValueError('number must be nonzero')
 

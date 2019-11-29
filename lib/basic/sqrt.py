@@ -1,5 +1,5 @@
 #   lib/basic/sqrt.py
-#   - contains basic functions around integer square roots
+#   - module for basic functions around integer square roots
 
 #===========================================================
 import math
@@ -12,16 +12,14 @@ __all__ = [
 
 def integer_sqrt(number, guess=None):
     """
-    Computes the integer part of the square root of `number`.
+    Compute the integer part of the square root of `number`.
 
-    number: int --at least 0
-        ~>  int
-
-    example:
-        `integer_sqrt(30) ~> 5`
+    example: `integer_sqrt(30) ~> 5`
         since `5**2 == 25 <= 30 < 36 == 6**2`
-    """
 
+    + number: int --at least 0
+    ~> int
+    """
     if guess is None:
         guess = int(math.sqrt(number))
 
@@ -34,16 +32,14 @@ def integer_sqrt(number, guess=None):
 
 def is_square(number):
     """
-    Determines whether `number` is a perfect square.
+    Determine whether `number` is a perfect square.
 
-    number: int
-        ~>  bool
+    examples: `is_square(25) ~> True`
+              `is_square(30) ~> False`
+              `is_square(-25) ~> False`
 
-    examples:
-        `is_square(25) ~> True`,
-        `is_square(30) ~> False`,
-        `is_square(-25) ~> False`
+    + number: int
+    ~> bool
     """
-
     return number >= 0 and integer_sqrt(number)**2 == number
 

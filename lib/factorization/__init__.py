@@ -1,37 +1,33 @@
-#   numth/factorization/__init__.py
+#   lib/factorization/__init__.py
+#   - module for prime factorization and its applications
+
 #===========================================================
-
-from .algorithms import (
-    pollard_rho_gen,
-    pollard_rho,
-    pollard_p_minus_one_gen,
-    pollard_p_minus_one,
-    williams_p_plus_one
-)
-
-
-from .main import (
-    divisors_from_factorization,
-    divisors,
-    find_divisor,
-    factor_trivial,
-    factor_nontrivial,
-    factor,
-    number_from_factorization,
-    square_part,
-    square_free_part
-)
-
-from .two_squares import (
-    gaussian_divisor,
-    is_sum_of_two_squares,
-    two_squares_from_factorization,
-    two_squares
-)
-
-from .four_squares import (
-    quaternion_divisor,
-    four_squares_from_factorization,
-    four_squares
-)
+from .algorithms import *
+from .main import *
+from .two_squares import *
+from .four_squares import *
+#===========================================================
+__all__ = [
+    #algorithms
+    'pollard_rho',
+    'pollard_rho_gen',
+    'pollard_p_minus_one',
+    'pollard_p_minus_one_gen',
+    'williams_p_plus_one',
+    'williams_p_plus_one_gen',
+    #main
+    'divisors',
+    'factor',
+    'factor_trivial',
+    'find_divisor',
+    'number_from_factorization',
+    'square_and_square_free',
+    #two_squares
+    'gaussian_divisor',
+    'two_squares',
+    #four_squares
+    'quaternion_descent',
+    'quaternion_divisor',
+    'four_squares',
+]
 
