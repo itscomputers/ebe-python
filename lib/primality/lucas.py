@@ -4,8 +4,8 @@ from random import randint
 
 from ..basic import gcd, is_square, jacobi, padic
 from ..lucas_sequence import (
-    lucas_sequence_by_index,
-    lucas_sequence_double_index
+    lucas_mod_by_index,
+    lucas_mod_double_index
 )
 #===========================================================
 
@@ -39,16 +39,16 @@ def lucas_witness_pair(number, P, Q):
     s, d = padic(delta, 2)
     strong = False
 
-    U, V, Q_k = lucas_sequence_by_index(d, P, Q, number)
+    U, V, Q_k = lucas_mod_by_index(d, P, Q, number)
     if U == 0:
         strong = True
 
     for j in range(s - 1):
-        U, V, Q_k = lucas_sequence_double_index(U, V, Q_k, number)
+        U, V, Q_k = lucas_mod_double_index(U, V, Q_k, number)
         if V == 0:
             strong = True
 
-    U, V, Q_ = lucas_sequence_double_index(U, V, Q_k, number)
+    U, V, Q_ = lucas_mod_double_index(U, V, Q_k, number)
     if U == 0:
         if _trivially_composite(V, Q, Q_k, number, delta):
             return 'composite', False

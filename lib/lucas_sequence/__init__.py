@@ -1,9 +1,11 @@
-#   numth/lucas_sequence/__init__.py
-#===========================================================
+#   lib/lucas_sequence/__init__.py
+#   - module for lucas sequences
 
-from .modular import (
-    by_index as lucas_sequence_by_index,
-    double_index as lucas_sequence_double_index,
-    lucas_sequence_gen
-)
+#===========================================================
+from .modular import *
+#===========================================================
+__all__ = [
+    'lucas_mod_gen',
+    'lucas_mod_by_index',
+]
 
