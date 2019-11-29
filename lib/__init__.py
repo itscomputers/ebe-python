@@ -10,6 +10,7 @@ from .algebraic_structures import (
 from .basic import *
 from .factorization import *
 from .lucas_sequence import *
+from .modular import *
 
 from .continued_fraction import (
     continued_fraction_quotients,
@@ -17,12 +18,6 @@ from .continued_fraction import (
     continued_fraction_pell_numbers,
     continued_fraction_table,
     continued_fraction_all
-)
-
-from .modular import (
-    carmichael_lambda,
-    euler_phi,
-    mod_sqrt
 )
 
 from .primality import (
