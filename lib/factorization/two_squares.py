@@ -10,6 +10,7 @@ from .main import factor, square_and_square_free
 #===========================================================
 __all__ = [
     'gaussian_divisor',
+    'is_sum_of_two_squares',
     'two_squares',
 ]
 #===========================================================

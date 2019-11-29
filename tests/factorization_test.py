@@ -7,9 +7,11 @@ import env
 from lib.basic import is_square
 from lib.primality import is_prime, next_prime
 from lib.types import GaussianInteger, Quaternion
-from lib.factorization import *
-from lib.factorization.main import _combine_counters, factor_nontrivial
-from lib.factorization.two_squares import is_sum_of_two_squares
+from lib.factorization.algorithms import *
+from lib.factorization.main import *
+from lib.factorization.main import _combine_counters
+from lib.factorization.two_squares import *
+from lib.factorization.four_squares import *
 #===========================================================
 
 @st.composite

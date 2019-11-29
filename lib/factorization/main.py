@@ -13,6 +13,7 @@ from .algorithms import pollard_rho_gen, pollard_p_minus_one_gen
 __all__ = [
     'find_divisor',
     'factor_trivial',
+    'factor_nontrivial',
     'factor',
     'divisors',
     'square_and_square_free',
