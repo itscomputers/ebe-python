@@ -8,6 +8,7 @@ from functools import reduce
 from ..config import default
 from ..basic import integer_sqrt, iter_primes_up_to, padic
 from ..primality import is_prime
+from ..utils import combine_counters
 from .algorithms import pollard_rho_gen, pollard_p_minus_one_gen
 #===========================================================
 __all__ = [
@@ -97,7 +98,7 @@ def factor_nontrivial(number, rho_seeds=None, minus_seeds=None):
 
     sqrt_number = integer_sqrt(number)
     if sqrt_number**2 == number:
-        return _combine_counters(dict(), factor_nontrivial(sqrt_number), 2)
+        return combine_counters(dict(), factor_nontrivial(sqrt_number), 1, 2)
 
     remaining = number
     factorization = dict()
@@ -105,13 +106,14 @@ def factor_nontrivial(number, rho_seeds=None, minus_seeds=None):
     divisors = find_divisor(remaining, rho_seeds, minus_seeds)
     for divisor in divisors:
         exp, remaining = padic(remaining, divisor)
-        factorization = _combine_counters(
+        factorization = combine_counters(
             factorization,
             factor_nontrivial(divisor),
+            1,
             exp
         )
 
-    return _combine_counters(factorization, factor_nontrivial(remaining))
+    return combine_counters(factorization, factor_nontrivial(remaining))
 
 #-----------------------------
 
@@ -239,25 +241,6 @@ def _divisor_search_generators(number, rho_seeds, minus_seeds):
             'generator' : pollard_p_minus_one_gen(number, seed)
         }
     return divisor_search
-
-def _combine_counters(counter_1, counter_2, m_2=1):
-    """
-    Sum the values of two dictionaries.
-
-    example: `_combine_counters({2: 1, 5: 2}, {2: 2}) ~> {2: 3, 5: 2}`
-
-    + counter_1: Dict[Any, int]
-    + counter_2: Dict[Any, int]
-    + m_2: int --multiplicity to be applied to counter_2
-    ~> Dict[Any, int]
-    """
-    new_counter = dict((k, m_2 * v) for k, v in counter_2.items())
-    for k, v in counter_1.items():
-        if k in new_counter:
-            new_counter[k] += v
-        else:
-            new_counter[k] = v
-    return new_counter
 
 def _trivial_generator():
     while True:

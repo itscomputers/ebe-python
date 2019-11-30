@@ -7,9 +7,9 @@ import env
 from lib.basic import is_square
 from lib.primality import is_prime, next_prime
 from lib.types import GaussianInteger, Quaternion
+from lib.utils import combine_counters
 from lib.factorization.algorithms import *
 from lib.factorization.main import *
-from lib.factorization.main import _combine_counters
 from lib.factorization.two_squares import *
 from lib.factorization.four_squares import *
 #===========================================================
@@ -100,7 +100,7 @@ def test_square_and_square_free(number):
         assert set(map(lambda v: v % 2, square.values())) == set([0])
     if square_free != dict():
         assert set(square_free.values()) == set([1])
-    assert _combine_counters(square, square_free) == factorization
+    assert combine_counters(square, square_free) == factorization
     assert is_square(square_number)
     assert square_number * square_free_number == number
 
