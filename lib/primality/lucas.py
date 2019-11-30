@@ -1,4 +1,5 @@
-#   numth/primality/lucas.py
+#   lib/primality/lucas.py
+#   - module for lucas primalit testing
 #===========================================================
 from random import randint
 
@@ -8,24 +9,26 @@ from ..lucas_sequence import (
     lucas_mod_double_index
 )
 #===========================================================
+__all__ = [
+    'lucas_witness_pair',
+    'lucas_witness_pairs',
+    'lucas_test',
+]
+#===========================================================
 
 def lucas_witness_pair(number, P, Q):
     """
-    Lucas sequence witness for primality.
+    Determine if `number` is composite or probably prime
+    according `(P, Q)`-Lucas sequence pair.
 
-    Determines if number is composite or probably prime,
-    according to a witness pair.
+    examples: `lucas_witness_pair(561, 4, 8) ~> ('probable prime', True)`
+              `lucas_witness_pair(561, 13, 2) ~> ('probable prime', False)`
+              `lucas_witness_pair(561, 3, 5) ~> ('composite', False)`
 
-    params
-    + number : int
-    + P : int
-    + Q : int
-
-    return
-    (primality, strong) : (str, bool)
-        * ('composite', _) means number is composite
-        * ('probable prime', false) means P, Q think number is prime
-        * ('probable prime', true) means P, Q strongly think number is priem
+    + number: int
+    + P: int
+    + Q: int
+    ~> (primality, strong): Tuple[str, bool]
     """
     D = P**2 - 4*Q
 
@@ -52,7 +55,6 @@ def lucas_witness_pair(number, P, Q):
     if U == 0:
         if _trivially_composite(V, Q, Q_k, number, delta):
             return 'composite', False
-
         return 'probable prime', strong
 
     return 'composite', False
@@ -61,18 +63,17 @@ def lucas_witness_pair(number, P, Q):
 
 def lucas_witness_pairs(number, witness_pairs):
     """
-    Combination of Lucas sequence witnesses for primality
+    Determine if `number` is composite or probably prime
+    according `witness_pairs` number of Lucas sequence pairs.
 
-    params
-    + number : int
-    + witness_pairs : iterable of witness pairs
+    examples:
+        `lucas_witness_pair(561, [4, 8], [13, 2]) ~> ('probable prime', True)`
+        `lucas_witness_pair(561, [13, 2], [14, -1]) ~> ('probable prime', False)`
+        `lucas_witness_pair(561, [4, 8], [3, 5]) ~> ('composite', False)`
 
-    return
-    (primality, strong) : (str, bool)
-        * ('composite', _) if any pair thinks number is composite
-        * ('probable prime', false) if all pairs think number is probable prime
-        * ('probable prime', true) if all pairs think number is probable prime
-        with at least one strong opinion
+    + number: int
+    + witness_pairs: int
+    ~> (primality, strong): Tuple[str, bool]
     """
     strong = False
     for pair in witness_pairs:
@@ -88,19 +89,16 @@ def lucas_witness_pairs(number, witness_pairs):
 
 def lucas_test(number, num_witnesses):
     """
-    Lucas test for primality.
+    Lucas test for primality of `number` with `num_witnesses` witness pairs.
+    The test returns `composite`, `probable prime`, or `strong probable prime`.
+    The probability of incorrectness is less than `(4/15)**num_witnesses`.
 
-    Probabilistic primality test using Lucas sequences.
+    example: `lucas_test(9958780815586951, 10) ~> 'strong probable prime'`
+        so is probably prime with certainty > 0.99999818160879269759.
 
-    params
-    + number : int
-    + num_witnesses : int
-
-    return
-    str
-        * 'composite' is deterministic
-        * 'probable prime' and 'strong probable prime' are probabilistic
-        and incorrect with probability < (4/15) ** num_witnesses
+    + number: int
+    + num_witnesses: int
+    ~> str
     """
     if number < 3:
         raise ValueError('Number should be at least 3')
@@ -118,6 +116,7 @@ def lucas_test(number, num_witnesses):
 #=============================
 
 def _generate_witness_pairs(number, num_witnesses):
+    """Generate witness pairs for Lucas test."""
     witnesses = set()
 
     if not is_square(number):
@@ -140,6 +139,7 @@ def _generate_witness_pairs(number, num_witnesses):
 #=============================
 
 def _good_parameters(number, P, Q, D):
+    """Validate parameters are good."""
     for d in (gcd(P, number), gcd(Q, number), gcd(D, number)):
         if d == number:
             return False
@@ -150,6 +150,7 @@ def _good_parameters(number, P, Q, D):
 #-----------------------------
 
 def _trivially_composite(V, Q, Q_power, number, delta):
+    """Determine if `number` is trivially composite."""
     if delta == number + 1:
         if V != (2*Q) % number:
             return True
