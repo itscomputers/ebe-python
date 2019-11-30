@@ -1,12 +1,12 @@
 #   tests/basic_test.py
 #===========================================================
-import env
 from hypothesis import assume, given, strategies as st
 from random import sample
 
-from numth.factorization import factor
-from numth.modular import euler_phi
-from numth.basic import *
+import env
+from lib.factorization import factor
+from lib.modular import euler_phi
+from lib.basic import *
 #===========================================================
 #   division
 #===========================================================

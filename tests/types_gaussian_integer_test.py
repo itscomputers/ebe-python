@@ -4,11 +4,11 @@ import pytest
 from hypothesis import assume, given, strategies as st
 
 import env
-from numth.basic import gcd
-from numth.types import (
+from lib.basic import gcd
+from lib.types import (
     frac, Rational, GaussianRational, Quadratic, QuadraticInteger
 )
-from numth.types.gaussian_integer import *
+from lib.types.gaussian_integer import *
 #===========================================================
 
 @st.composite

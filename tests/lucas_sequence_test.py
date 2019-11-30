@@ -3,8 +3,8 @@
 import env
 from hypothesis import given, strategies as st
 
-from numth.types import QuadraticInteger
-from numth.lucas_sequence.modular import *
+from lib.types import QuadraticInteger
+from lib.lucas_sequence.modular import *
 #===========================================================
 #   modular
 #===========================================================
@@ -27,7 +27,7 @@ def test_by_index(k, P, Q, mod):
     U = (2 * kth_power.imag) % mod
     V = (2 * kth_power.real) % mod
 
-    assert( (U, V, pow(Q, k, mod)) == by_index(k, P, Q, mod) )
+    assert( (U, V, pow(Q, k, mod)) == lucas_mod_by_index(k, P, Q, mod) )
 
 #-----------------------------
 
@@ -38,7 +38,7 @@ def test_by_index(k, P, Q, mod):
 )
 def test_lucas_sequence(P, Q, mod):
     mod += 1 - mod % 2
-    gen = lucas_sequence_gen(P, Q, mod)
+    gen = lucas_mod_gen(P, Q, mod)
     for i in range(100):
-        assert( by_index(i, P, Q, mod) == next(gen) )
+        assert( lucas_mod_by_index(i, P, Q, mod) == next(gen) )
 

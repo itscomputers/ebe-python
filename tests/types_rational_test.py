@@ -5,7 +5,7 @@ import math
 from fractions import Fraction
 from hypothesis import given, strategies as st
 
-from numth.types.rational import *
+from lib.types.rational import *
 #===========================================================
 
 @st.composite
