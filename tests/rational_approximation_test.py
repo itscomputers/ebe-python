@@ -6,13 +6,15 @@ from hypothesis import assume, given, strategies as st
 from lib.basic import is_square
 from lib.continued_fraction import continued_fraction_pell_numbers
 from lib.types import Polynomial
-from lib.rational_approximation import *
+from lib.rational_approximation.general import *
+from lib.rational_approximation.pi import *
+from lib.rational_approximation.sqrt import *
 #===========================================================
 
 def assert_convergence_and_advance(curr, diff, gen):
     prev, curr = curr, next(gen)
     next_diff = abs(curr - prev)
-    assert( next_diff <= diff )
+    assert next_diff <= diff
     return curr, next_diff
 
 #-----------------------------
@@ -28,21 +30,21 @@ def approx_sqrt(number):
 
 @given(st.integers(min_value=-1, max_value=100))
 def test_newton_gen(x_coeff):
-    p = Polynomial({3:1, 1:x_coeff, 0:-5})
+    p = Polynomial({3: 1, 1: x_coeff, 0: -5})
     gen = newton_gen(p, 1)
     for i in range(5):
         next(gen)
-    assert( p.eval(next(gen)).approx_equal(0, 3) )
+    assert p.eval(next(gen)).approx_equal(0, 3)
 
 #-----------------------------
 
 @given(st.integers(min_value=-1, max_value=100))
 def test_halley_gen(x_coeff):
-    p = Polynomial({3:1, 1:x_coeff, 0:-5})
+    p = Polynomial({3: 1, 1: x_coeff, 0: -5})
     gen = halley_gen(p, 1)
     for i in range(3):
         next(gen)
-    assert( p.eval(next(gen)).approx_equal(0, 3) )
+    assert p.eval(next(gen)).approx_equal(0, 3)
 
 #===========================================================
 #   pi
@@ -71,7 +73,7 @@ pi_string = '3.14159265358979323846264338327950288419716939937510' \
 
 def test_pi():
     for digits in [1, 10, 50, 100, 500, 1000]:
-        assert( pi(digits).decimal(digits)[:-2] == pi_string[:digits] )
+        assert pi(digits).decimal(digits)[:-2] == pi_string[:digits]
 
 #-----------------------------
 
@@ -81,7 +83,7 @@ def test_ramanujan_hardy():
     curr = next(gen)
 
     for i in range(20):
-        assert( prev.approx_equal(curr, 8*i) )
+        assert prev.approx_equal(curr, 8*i)
         prev, curr = curr, next(gen)
 
 #===========================================================
@@ -98,7 +100,7 @@ def test_babylonian(number):
     for i in range(5):
         curr, diff = assert_convergence_and_advance(curr, diff, gen)
 
-    assert( (curr**2).approx_equal(number, 30) )
+    assert (curr**2).approx_equal(number, 30)
 
 #-----------------------------
 
@@ -112,7 +114,7 @@ def test_halley_sqrt(number):
     for i in range(3):
         curr, diff = assert_convergence_and_advance(curr, diff, gen)
 
-    assert( (curr**2).approx_equal(number, 30) )
+    assert (curr**2).approx_equal(number, 30)
 
 #-----------------------------
 
@@ -121,7 +123,7 @@ def test_bakshali(number):
     bak = bakhshali_gen(number)
     bab = babylonian_gen(number)
     for i in range(4):
-        assert( next(bab) == next(bak) )
+        assert next(bab) == next(bak)
         next(bab)
 
 #-----------------------------
@@ -130,7 +132,7 @@ def test_bakshali(number):
     st.integers(
         min_value=2,
         max_value=10**5
-    ).filter(lambda x: not is_square(x))
+   ).filter(lambda x: not is_square(x))
 )
 def test_continued_fraction_convergent(number):
     gen = continued_fraction_convergent_gen(number)
@@ -146,11 +148,11 @@ def test_continued_fraction_convergent(number):
     for i in range(50):
         pell = curr.numer**2 - number * curr.denom**2
         expected = last**(counter // period) * pell_numbers[counter % period]
-        assert( pell == expected )
+        assert pell == expected
         prev, curr = curr, next(gen)
         next_diff = abs(curr - prev)
         counter += 1
-        assert( next_diff < diff )
+        assert next_diff < diff
 
 #-----------------------------
 
@@ -164,7 +166,7 @@ def test_goldschmidt(number):
 
     for i in range(3):
         x, y = next(gen)
-        assert( (x * y).approx_equal(1, i) )
+        assert (x * y).approx_equal(1, i)
 
 #-----------------------------
 
@@ -178,7 +180,7 @@ def test_ladder_arithmetic(number):
     for i in range(5):
         curr, diff = assert_convergence_and_advance(curr, diff, gen)
 
-    assert( (curr**2).approx_equal(number, 10) )
+    assert (curr**2).approx_equal(number, 10)
 
 #-----------------------------
 
@@ -192,5 +194,5 @@ def test_linear_fractional_transformation(number):
     for i in range(5):
         curr, diff = assert_convergence_and_advance(curr, diff, gen)
 
-    assert( (curr**2).approx_equal(number, 10) )
+    assert (curr**2).approx_equal(number, 10)
 

@@ -1,19 +1,22 @@
-#   numth/rational_approximation/pi.py
+#   lib/rational_approximation/pi.py
+#   - module for rational approximation of pi
+
 #===========================================================
 from ..config import default
 from ..types import Rational
 #===========================================================
+__all__ = [
+    'ramanujan_hardy',
+    'pi',
+]
+#===========================================================
 
 def ramanujan_hardy(sqrt_digits):
     """
-    Generator for Ramanujan-Hardy series that approximates 1 / pi.
+    Generate Ramanujan-Hardy sequence that approximates 1 / pi.
 
-    params
-    + sqrt_digits : int
-        number of digits of accuracy for approximation of sqrt(2)
-
-    return
-    generator -> Rational
+    + sqrt_digits: int --number of digits for approximation of sqrt(2)
+    ~> Iterator[Rational]
     """
     k = 0
     multiplier = Rational(2, 9801) * Rational(2, 1).sqrt(sqrt_digits)
@@ -33,14 +36,10 @@ def ramanujan_hardy(sqrt_digits):
 
 def pi(num_digits=None):
     """
-    Rational approximation of pi.
+    Compute rational approximation of pi.
 
-    params
-    + num_digits : int
-        number of digits of accuracy for approximation
-
-    return
-    Rational
+    + num_digits: int
+    ~> Rational
     """
     if num_digits is None:
         num_digits = default('pi_digits')

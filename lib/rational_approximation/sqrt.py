@@ -1,33 +1,32 @@
-#   numth/rational_approximation/sqrt.py
+#   lib/rational_approximation/sqrt.py
+#   - module for rational approximation of square roots
+
 #===========================================================
 from ..basic import integer_sqrt
 from ..continued_fraction import continued_fraction_convergents
 from ..types import frac, QuadraticInteger
 #===========================================================
-
-def first_approximation(number, initial=None):
-    """Returns integer square root or initial value as a Rational."""
-    if initial is None:
-        return frac(integer_sqrt(number))
-    return frac(initial)
-
-#=============================
+__all__ = [
+    'babylonian_gen',
+    'halley_sqrt_gen',
+    'bakhshali_gen',
+    'continued_fraction_convergent_gen',
+    'goldschmidt_gen',
+    'ladder_arithmetic_gen',
+    'linear_fractional_transformation_gen',
+]
+#===========================================================
 
 def babylonian_gen(number, initial=None):
     """
-    Babylonian method for approximating the square root of number.
-
+    Generate approximations of `sqrt(number)` using Babylonian method.
     This is equivalent to Newton's method applied to `x^2 - number`.
 
-    params
-    + number : int, float, Rational
-    + initial : int, float, Rational
-        initial guess
-
-    return
-    generator -> Rational
+    + number: Union[int, float, Rational]
+    + initial: Union[int, float, Rational]
+    ~> Iterator[Rational]
     """
-    approx = first_approximation(number, initial)
+    approx = _first_approximation(number, initial)
 
     while True:
         yield approx
@@ -37,19 +36,13 @@ def babylonian_gen(number, initial=None):
 
 def halley_sqrt_gen(number, initial=None):
     """
-    Halleys's method for approximating the square root of number.
+    Generate approximations of `sqrt(number)` using Halley's method.
 
-    This is equivalent to Halley's method applied to `x^2 - number`.
-
-    params
-    + number : int, float, Rational
-    + initial : int, float, Rational
-        initial guess
-
-    return
-    generator -> Rational
+    + number: Union[int, float, Rational]
+    + initial: Union[int, float, Rational]
+    ~> Iterator[Rational]
     """
-    approx = first_approximation(number, initial)
+    approx = _first_approximation(number, initial)
 
     while True:
         yield approx
@@ -59,19 +52,14 @@ def halley_sqrt_gen(number, initial=None):
 
 def bakhshali_gen(number, initial=None):
     """
-    Bakhshali's method for approximating the square root of number.
-
+    Generate approximations of `sqrt(number)` using Bakhshali's method.
     This is equivalent to two iterations of the Babylonian method.
 
-    params
-    + number : int, float, Rational
-    + initial : int, float, Rational
-        initial guess
-
-    return
-    generator -> Rational
+    + number: Union[int, float, Rational]
+    + initial: Union[int, float, Rational]
+    ~> Iterator[Rational]
     """
-    approx = first_approximation(number, initial)
+    approx = _first_approximation(number, initial)
 
     while True:
         yield approx
@@ -83,13 +71,10 @@ def bakhshali_gen(number, initial=None):
 
 def continued_fraction_convergent_gen(number):
     """
-    Continued fraction convergent approximations for square root of number.
+    Generate approximations of `sqrt(number)` using continued fractions.
 
-    params
-    + number : int
-
-    return
-    geneartor -> Rational
+    + number: int
+    ~> Iterator[Rational]
     """
     def to_quadratic_integer(pair):
         return QuadraticInteger(pair[0], pair[1], number)
@@ -111,20 +96,15 @@ def continued_fraction_convergent_gen(number):
 
 def goldschmidt_gen(number, initial=None):
     """
-    Goldschmidt's method for approximating the square root of number.
+    Generate approximations of `sqrt(number)` using Goldschmidt's method.
+    This simultaneously approximates `sqrt(number)` and `sqrt(1 / number)`.
 
-    This simultaneously approimates sqrt(number) and sqrt(1 / number).
-
-    params
-    + number : int, float, Rational
-    + initial : int, float, Rational
-        initial guess
-
-    return
-    generator -> (Rational, Rational)
+    + number: Union[int, float, Rational]
+    + initial: Union[int, float, Rational]
+    ~> Iterator[Tuple[Rational, Rational]]
     """
     b = number
-    Y = first_approximation(number, initial).inverse
+    Y = _first_approximation(number, initial).inverse
     y = Y
     x = number * y
 
@@ -139,19 +119,14 @@ def goldschmidt_gen(number, initial=None):
 
 def ladder_arithmetic_gen(number, initial=None):
     """
-    Ladder arithmetic method for approximating the square root of number.
-
+    Generate approximations of `sqrt(number)` using ladder arithmetic.
     Similar to a continued fraction method, likely known to the Babylonians.
 
-    params
-    + number : int, float, Rational
-    + initial : int, float, Rational
-        initial guess
-
-    return
-    generator -> Rational
+    + number: Union[int, float, Rational]
+    + initial: Union[int, float, Rational]
+    ~> Iterator[Rational]
     """
-    m = first_approximation(number, initial)
+    m = _first_approximation(number, initial)
     m2 = m**2
     s0, s1 = 0, 1
     s = frac(0)
@@ -164,21 +139,16 @@ def ladder_arithmetic_gen(number, initial=None):
 
 def linear_fractional_transformation_gen(number, initial=None):
     """
-    Linear frational transformation method for approximating
-    the square root of number.
+    Generate approximations of `sqrt(number)` using linear fractional
+    transformations.  For a decent initial guess `x = a / c`, the linear
+    fractional transformation `f(x) = (a * x + number * c) / (c * x + a)`
+    produces a good approximation.
 
-    For a decent initial guess `x = a / c`, the linear functional transformation
-    `f(x) = (a * x + number * c) / (c * x + a)` produces a better approximation.
-
-    params
-    + number : int, float, Rational
-    + initial : int, float, Rational
-        initial guess
-
-    return
-    generator -> Rational
+    + number: Union[int, float, Rational]
+    + initial: Union[int, float, Rational]
+    ~> Iterator[Rational]
     """
-    approx = first_approximation(number, initial)
+    approx = _first_approximation(number, initial)
     a = approx.numer
     c = approx.denom
     b = number * c
@@ -186,4 +156,12 @@ def linear_fractional_transformation_gen(number, initial=None):
     while True:
         yield approx
         approx = (a * approx + b) / (c * approx + a)
+
+#=============================
+
+def _first_approximation(number, initial=None):
+    """Returns integer square root or initial value as a Rational."""
+    if initial is None:
+        return frac(integer_sqrt(number))
+    return frac(initial)
 
