@@ -1,19 +1,29 @@
-#   numth/continued_fraction/quadratic.py
+#   lib/continued_fraction/quadratic.py
+#   - module for continued fraction algorithm for square root D
+
 #===========================================================
 from ..basic import gcd, integer_sqrt
 from ..types import ArithmeticType, frac, Quadratic
 #===========================================================
+__all__ = [
+    'continued_fraction_quotients',
+    'continued_fraction_convergents',
+    'continued_fraction_pell_numbers',
+    'continued_fraction_table',
+    'continued_fraction_all',
+    'QuadraticContinuedFraction',
+    'QuadraticRational',
+    'Convergents',
+]
+#===========================================================
 
 def continued_fraction_quotients(root, max_length=None):
     """
-    Compute the quotients of the continued fraction of sqrt(root).
+    Compute the quotients of the continued fraction of `sqrt(root)`.
 
-    params
-    + root : int
-        positive non-square
-
-    return
-    list(int)
+    + root: int --positive non-square
+    + max_length: int --max number of iterations
+    ~> List[int]
     """
     cf = QuadraticContinuedFraction(root, store_quotients=True)
 
@@ -28,14 +38,11 @@ def continued_fraction_quotients(root, max_length=None):
 
 def continued_fraction_convergents(root, max_length=None):
     """
-    Compute the convergents of the continued fraction of sqrt(root).
+    Compute the convergents of the continued fraction of `sqrt(root)`.
 
-    params
-    + root : int
-        positive non-square
-
-    return
-    list((int, int))
+    + root: int --positive non-square
+    + max_length: int --max number of iterations
+    ~> List[Tuple[int, int]]
     """
     cf = QuadraticContinuedFraction(root, store_convergents=True)
 
@@ -50,14 +57,11 @@ def continued_fraction_convergents(root, max_length=None):
 
 def continued_fraction_pell_numbers(root, max_length=None):
     """
-    Compute the Pell numbers associated to the continued fraction of sqrt(root).
+    Compute the Pell numbers associated to the continued fraction of `sqrt(root)`.
 
-    params
-    + root : int
-        positive non-square
-
-    return
-    list(int)
+    + root: int --positive non-square
+    + max_length: int --max number of iterations
+    ~> List[int]
     """
     cf = QuadraticContinuedFraction(root, store_pell_numbers=True)
 
@@ -72,14 +76,11 @@ def continued_fraction_pell_numbers(root, max_length=None):
 
 def continued_fraction_table(root, max_length=None):
     """
-    Compute the continued fraction table for sqrt(root).
+    Compute the continued fraction table for `sqrt(root)`.
 
-    params
-    + root : int
-        non-square
-
-    return
-    list((QuadraticRational, int, QuadraticRational))
+    + root: int --positive non-square
+    + max_length: int --max number of iterations
+    ~> List[Tuple[QuadraticRational, int, QuadraticRational]]
     """
     cf = QuadraticContinuedFraction(root, store_table=True)
 
@@ -94,16 +95,11 @@ def continued_fraction_table(root, max_length=None):
 
 def continued_fraction_all(root, max_length=None):
     """
-    Compute all relevant data of continued fraction table for sqrt(root).
+    Compute all relevant data of continued fraction for `sqrt(root)`.
 
-    params
-    + root : int
-        non-square
-    + max_length : int
-        max number of iterations
-
-    return
-    QuadraticContinuedFraction
+    + root: int -- positive non-square
+    + max_length: int --max number of iterations
+    ~> QuadraticContinuedFraction
     """
     cf = QuadraticContinuedFraction(root, store_all=True)
 
@@ -115,33 +111,27 @@ def continued_fraction_all(root, max_length=None):
     return cf
 
 
-#=============================
+#===========================================================
 
 
 class QuadraticContinuedFraction:
 
     """
-    Class for performing continued fraction algorithm.
+    Continued fraction algorithm for `sqrt(root)`.
 
-    params
-    + root : int
-        positive non-square
+    + root: int --positive non-square
     """
 
     def __init__(
-            self,
-            root,
-            store_all=False,
-            store_quotients=False,
-            store_convergents=False,
-            store_pell_numbers=False,
-            store_table=False
-        ):
-        """
-        Initializes the root, its approximate square root,
-        the first row `alpha, quotient, beta` of the table,
-        the initial two convergent pairs, and the period.
-        """
+        self,
+        root,
+        store_all=False,
+        store_quotients=False,
+        store_convergents=False,
+        store_pell_numbers=False,
+        store_table=False
+    ):
+        """Initialize the continued fraction algorithm and data."""
         self.root = root
         self.approx = integer_sqrt(root)
 
@@ -162,11 +152,8 @@ class QuadraticContinuedFraction:
         self.data = dict()
         self._initialize_data()
 
-    def __repr__(self):
-        return 'alpha: {}\nquotient: {}\nbeta : {}\nconvergent: {}'\
-            .format(self.alpha, self.quotient, self.beta, self.convergent.curr)
-
     def _initialize_data(self):
+        """Setup data storage."""
         if self._storage_flags['quotients']:
             self.data['quotients'] = [self.quotient]
         if self._storage_flags['convergents']:
@@ -176,37 +163,20 @@ class QuadraticContinuedFraction:
         if self._storage_flags['table']:
             self.data['table'] = [(self.alpha, self.quotient, self.beta)]
 
-    def advance(self):
-        """Advance to the next step in the algorithm."""
-        self.convergent.advance(self.quotient)
-        self.alpha = self.beta.inverse
-        self.quotient = self.alpha.floor
-        self.beta = self.alpha - self.quotient
+    #-------------------------
 
-        self.step += 1
-        if self.alpha.arguments == (self.approx, 1, 1, self.root):
-            self.period = self.step
+    def __repr__(self):
+        """Current state of the algorithm."""
+        return '\n'.join([
+            'step: {}'.format(self.step),
+            'alpha: {}'.format(self.alpha),
+            'quotient: {}'.format(self.quotient),
+            'beta: {}'.format(self.beta),
+            'convergent: {}'.format(self.convergent.curr),
+            'period: {}'.format(self.period)
+        ])
 
-        if self._storage_flags['quotients']:
-            self.data['quotients'].append(self.quotient)
-        if self._storage_flags['convergents']:
-            self.data['convergents'].append(self.convergent.curr)
-        if self._storage_flags['pell_numbers']:
-            self.data['pell_numbers'].append(self.to_pell_number())
-        if self._storage_flags['table']:
-            self.data['table'].append((self.alpha, self.quotient, self.beta))
-
-    def advance_until(self, max_length):
-        while self.period is None and self.step < max_length:
-            self.advance()
-
-    def advance_all(self):
-        while self.period is None:
-            self.advance()
-
-    def to_pell_number(self):
-        """Computes corresponding Pell number for current step."""
-        return self.convergent.to_pell_number(self.root)
+    #-------------------------
 
     @property
     def quotients(self):
@@ -228,21 +198,58 @@ class QuadraticContinuedFraction:
         if 'table' in self.data:
             return self.data['table']
 
-#=============================
+    #-------------------------
+
+    def advance(self):
+        """Advance to the next step in the algorithm."""
+        self.convergent.advance(self.quotient)
+        self.alpha = self.beta.inverse
+        self.quotient = self.alpha.floor
+        self.beta = self.alpha - self.quotient
+
+        self.step += 1
+        if self.alpha.arguments == (self.approx, 1, 1, self.root):
+            self.period = self.step
+
+        if self._storage_flags['quotients']:
+            self.data['quotients'].append(self.quotient)
+        if self._storage_flags['convergents']:
+            self.data['convergents'].append(self.convergent.curr)
+        if self._storage_flags['pell_numbers']:
+            self.data['pell_numbers'].append(
+                self.convergent.to_pell_number(self.root)
+            )
+        if self._storage_flags['table']:
+            self.data['table'].append((self.alpha, self.quotient, self.beta))
+
+    #-------------------------
+
+    def advance_until(self, max_length):
+        """Advance until period complete of `max_length` reached."""
+        while self.period is None and self.step < max_length:
+            self.advance()
+
+    def advance_all(self):
+        """Advance until period complete."""
+        while self.period is None:
+            self.advance()
+
+
+#===========================================================
+
 
 class QuadraticRational(ArithmeticType):
+
     """
     Class to represent `(real + imag * sqrt(root)) / denom` with
     necessary arithmetic for continued fraction algorithm.
 
-    params
-    + real : int
-    + imag : int
-    + denom : int
-        non-zero
-    + root : int
-        positive non-square
+    + real: int
+    + imag: int
+    + denom: int --non-zero
+    + root : int --positive non-square
     """
+
     def __init__(self, real, imag, denom, root, approx_root=None):
         self._real = int(real)
         self._imag = int(imag)
@@ -253,6 +260,16 @@ class QuadraticRational(ArithmeticType):
 
     def __repr__(self):
         return repr(self.to_quadratic)
+
+    #-------------------------
+
+    def _eq_QuadraticRational(self, other):
+        return self.arguments == other.arguments
+
+    def _eq_Quadratic(self, other):
+        return self.signature == other.signature
+
+    #-------------------------
 
     @property
     def real(self):
@@ -270,6 +287,13 @@ class QuadraticRational(ArithmeticType):
     def to_quadratic(self):
         return Quadratic(self.real, self.imag, self.root)
 
+    #-------------------------
+
+    @property
+    def floor(self):
+        """Floor of QuadraticRational."""
+        return (self._real + self._imag * self.approx_root) // self._denom
+
     @property
     def inverse(self):
         """Inverse or reciprocal of QuadraticRational."""
@@ -286,11 +310,6 @@ class QuadraticRational(ArithmeticType):
             self.approx_root
         )
 
-    @property
-    def floor(self):
-        """Floor of QuadraticRational."""
-        return (self._real + self._imag * self.approx_root) // self._denom
-
     def _add_int(self, other):
         return QuadraticRational(
             self._real + self._denom * other,
@@ -300,19 +319,21 @@ class QuadraticRational(ArithmeticType):
             self.approx_root
         )
 
-    def _eq_QuadraticRational(self, other):
-        return self.arguments == other.arguments
 
-    def _eq_Quadratic(self, other):
-        return self.signature == other.signature
+#===========================================================
 
-#=============================
 
 class Convergents:
-    """Class to represent pairs of convergents for continued fraction algorithm."""
+
+    """
+    Class to represent pairs of convergents for continued fraction algorithm.
+    """
+
     def __init__(self):
         self.prev = (0, 1)
         self.curr = (1, 0)
+
+    #-------------------------
 
     def next_conv(self, quotient):
         """Calculate next convergent from current and previous."""
