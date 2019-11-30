@@ -4,10 +4,7 @@
 from random import randint
 
 from ..basic import gcd, is_square, jacobi, padic
-from ..lucas_sequence import (
-    lucas_mod_by_index,
-    lucas_mod_double_index
-)
+from ..lucas_sequence import lucas_mod_by_index, lucas_mod_double_index
 #===========================================================
 __all__ = [
     'lucas_witness_pair',
