@@ -1,4 +1,6 @@
-#   numth/algebraic_structures/modular_ring.py
+#   lib/algebraic_structures/modular_ring.py
+#   - module for ring of integers relative to a modulus
+
 #===========================================================
 from collections import Counter
 from functools import reduce
@@ -7,11 +9,18 @@ from ..basic import gcd, mod_inverse, mod_power, prime_to
 from ..factorization import factor
 from ..modular import carmichael_lambda, euler_phi, mod_sqrt
 #===========================================================
+__all__ = [
+    'ModularRing',
+]
+#===========================================================
+
 
 class ModularRing:
+
     """
-    Class for arithmetic in the ring of integers relative to a modulus.
+    Class for computations in the ring of integers relative to a modulus.
     """
+
     def __init__(self, modulus):
         self.modulus = modulus
         if modulus == 2:
@@ -71,13 +80,13 @@ class ModularRing:
     #-------------------------
 
     def is_cyclic(self):
-        """Whether the multiplicative group is cyclic."""
+        """Determine if the multiplicative group is cyclic."""
         return self.euler() == self.carmichael()
 
     #-------------------------
 
     def is_field(self):
-        """Whether the modular ring is a field."""
+        """Determine if the modular ring is a field."""
         return self.euler() == self.modulus - 1
 
     #-------------------------

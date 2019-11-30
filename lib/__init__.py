@@ -3,10 +3,7 @@
 
 #===========================================================
 
-from .algebraic_structures import (
-    ModularRing
-)
-
+from .algebraic_structures import *
 from .basic import *
 from .continued_fraction import *
 from .factorization import *
