@@ -1,13 +1,35 @@
-#   numth/types/gaussian_rational.py
+#   lib/types/gaussian_rational.py
+#   - class for arithmetic of gaussian rational numbers
+
 #===========================================================
 import operator as op
 
 from .rational import frac
-from .quadratic import * 
+from .quadratic import *
 from .quadratic_integer import QuadraticInteger
 #===========================================================
+__all__ = [
+    'GaussianRational',
+]
+#===========================================================
+
 
 class GaussianRational(Quadratic):
+
+    """
+    Class that represents `real + imag * sqrt(-1)`,
+    where `real` and `imag` are rational numbers.
+
+    The class implements arithmetic operations with members of itself,
+    general quadratic numbers and quadratic integers (if `root == -1`),
+    integers, and rational numbers.
+
+    Much of the functionality is inherited from `lib.types.Quadratic`
+    and any operation with any compatible type returns a gaussian rational.
+
+    + real: Union[int, float, Rational]
+    + imag: Union[int, float, Rational]
+    """
 
     def __init__(self, real, imag, *args):
         self._real = frac(real)
@@ -28,6 +50,7 @@ class GaussianRational(Quadratic):
 
     @property
     def to_quadratic(self):
+        """Cast to Quadratic."""
         return Quadratic(*self.signature)
 
     #=========================
@@ -88,7 +111,7 @@ class GaussianRational(Quadratic):
         return NotImplemented
 
     #=========================
-    
+
     def _truediv_int(self, other):
         return GaussianRational(*truediv_constant(self, other))
 

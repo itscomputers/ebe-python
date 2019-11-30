@@ -1,12 +1,35 @@
-#   numth/types/quadratic_integer.py
+#   lib/types/quadratic_integer.py
+#   - class for arithmetic of quadratic integer numbers
+
 #===========================================================
 import operator as op
 
 from ..basic import mod_inverse
 from .quadratic import *
 #===========================================================
+__all__ = [
+    'QuadraticInteger',
+]
+#===========================================================
+
 
 class QuadraticInteger(Quadratic):
+
+    """
+    Class that represents `real + imag * sqrt(root)`,
+    where `real`, `imag`, and `root` are integers.
+
+    The class implements arithmetic operations with members of itself,
+    general quadratic numbers, integers, and rational numbers.
+
+    Much of the functionality is inherited from `lib.types.Quadratic` and
+    any operation with general quadratic numbers or rational numbers elevates
+    to that type.
+
+    + real: int
+    + imag: int
+    + real: int
+    """
 
     def __init__(self, real, imag, root):
         self._real = int(real)
@@ -25,6 +48,7 @@ class QuadraticInteger(Quadratic):
 
     @property
     def to_quadratic(self):
+        """Cast to Quadratic."""
         return Quadratic(self._real, self._imag, self._root)
 
     #=========================

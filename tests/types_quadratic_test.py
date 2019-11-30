@@ -6,7 +6,7 @@ from hypothesis import assume, given, strategies as st
 
 import env
 from lib.basic import gcd, is_square
-from lib.types.rational import Rational
+from lib.types.rational import frac, Rational
 from lib.types.quadratic import *
 #===========================================================
 

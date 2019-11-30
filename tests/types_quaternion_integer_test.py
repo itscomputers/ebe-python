@@ -5,8 +5,7 @@ from hypothesis import assume, given, strategies as st
 
 import env
 from lib.basic import gcd
-from lib.types import Rational
-from lib.types.quaternion import Quaternion
+from lib.types import Rational, Quaternion, GaussianRational, GaussianInteger
 from lib.types.quaternion_integer import *
 #===========================================================
 

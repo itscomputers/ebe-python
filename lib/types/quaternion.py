@@ -1,4 +1,6 @@
-#   numth/types/quaternion.py
+#   lib/types/quaternion.py
+#   - class for arithmetic of quaternions
+
 #===========================================================
 import operator as op
 
@@ -7,11 +9,24 @@ from .arithmetic_type import ArithmeticType
 from .gaussian_integer import GaussianInteger
 from .gaussian_rational import GaussianRational
 #===========================================================
+__all__ = [
+    'add_',
+    'add_constant',
+    'mul_',
+    'mul_constant',
+    'truediv_constant',
+    'floordiv_',
+    'floordiv_constant',
+    'Quaternion',
+]
+#===========================================================
 
 def add_(a, b):
+    """Shortcut to add other quaternions."""
     return map(op.__add__, a.components, b.components)
 
 def add_constant(a, b):
+    """Shortcut to add rational numbers and integers."""
     return (a.components[0] + b, *a.components[1:])
 
 def _mul_helper(index, a, b):
@@ -31,18 +46,23 @@ def _mul_helper(index, a, b):
     ))
 
 def mul_(a, b):
+    """Shortcut to multiply by other quaternions."""
     return (_mul_helper(index, a, b) for index in range(4))
 
 def mul_constant(a, b):
+    """Shortcut to multiply by rational numbers and integers."""
     return map(lambda x: x * b, a.components)
 
 def truediv_constant(a, b):
+    """Shortcut to divide by rational numbers and integers."""
     return map(lambda x: x / frac(b), a.components)
 
 def floordiv_(a, b):
+    """Shortcut to floor divide by other quaternions."""
     return (a / b).round.components
 
 def floordiv_constant(a, b):
+    """Shortcut to floor divide by rational numbers and integers."""
     return map(lambda x: x // b, a.components)
 
 #===========================================================
@@ -50,6 +70,15 @@ def floordiv_constant(a, b):
 
 class Quaternion(ArithmeticType):
 
+    """
+    Class that represents `a + bi + cj + dk`,
+    where coefficients are rational numbers.
+
+    The class implements arithmetic operations with members of itself,
+    integers, and rational numbers.
+
+    + components: Tuple[Union[int, float, Rational], ...]
+    """
 
     def __init__(self, *components):
         self.components = tuple(map(frac, components))
@@ -112,10 +141,12 @@ class Quaternion(ArithmeticType):
 
     @classmethod
     def from_gaussian_rational(self, gaussian_rational):
+        """Build from GaussianRational."""
         return Quaternion(*gaussian_rational.components, 0, 0)
 
     @classmethod
     def from_gaussian_integer(self, gaussian_integer):
+        """Build from GaussianInteger."""
         return Quaternion(*gaussian_integer.components, 0, 0)
 
     #=========================

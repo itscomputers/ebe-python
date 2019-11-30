@@ -1,4 +1,6 @@
-#   numth/types/quadratic.py
+#   lib/types/quadratic.py
+#   - class for arithmetic of quadratic numbers
+
 #===========================================================
 import math
 import operator as op
@@ -6,23 +8,41 @@ import operator as op
 from .arithmetic_type import ArithmeticType
 from .rational import frac, Rational
 #===========================================================
+__all__ = [
+    'add_',
+    'add_constant',
+    'mul_',
+    'mul_constant',
+    'truediv_',
+    'truediv_constant',
+    'floordiv_',
+    'floordiv_constant',
+    'mod_constant',
+    'Quadratic',
+]
+#===========================================================
 
 def add_(a, b):
+    """Shortcut to add other quadratic numbers."""
     return map(op.__add__, a.components, b.components)
 
 def add_constant(a, b):
+    """Shortcut to add rational numbers and integers."""
     return (a.real + b, a.imag)
 
 def mul_(a, b):
+    """Shortcut to multiply by other quadratic numbers."""
     return (
         a.real * b.real + a.imag * b.imag * a.root,
         a.real * b.imag + a.imag * b.real
     )
 
 def mul_constant(a, b):
+    """Shortcut to multiply by rational numbers and integers."""
     return map(lambda x: x * b, a.components)
 
 def truediv_(a, b):
+    """Shortcut to divide by other quadratic numbers."""
     norm = frac(b.norm)
     return (
         (a.real * b.real - a.imag * b.imag * a.root) / norm,
@@ -30,23 +50,36 @@ def truediv_(a, b):
     )
 
 def truediv_constant(a, b):
+    """Shortcut to divide by rational numbers and integers."""
     return map(lambda x: x / frac(b), a.components)
 
 def floordiv_(a, b):
+    """Shortcut to floor divide by other quadratic numbers."""
     return (a / b).round.components
 
 def floordiv_constant(a, b):
+    """Shortcut to floor divide by rational numbers and integers."""
     return map(lambda x: x // b, a.components)
 
 def mod_constant(a, b):
+    """Shortcut to mod by rational numbers and integers."""
     return map(lambda x: x % b, a.components)
 
 #===========================================================
 
 
 class Quadratic(ArithmeticType):
+
     """
-    Arithmetic class that represents `real + imag * sqrt(root)`.
+    Class that represents `real + imag * sqrt(root)`,
+    where `real`, `imag`, and `root` are rational numbers.
+
+    The class implements arithmetic operations with members of itself,
+    integers, and rational numbers.
+
+    + real: Union[int, float, Rational]
+    + imag: Union[int, float, Rational]
+    + root: Union[int, float, Rational]
     """
 
     def __init__(self, real, imag, root):
@@ -247,6 +280,7 @@ class Quadratic(ArithmeticType):
     #=========================
 
     def rational_approx(self, num_digits=None):
+        """Compute rational approximation if `root` is positive."""
         if self.imag == 0:
             return self.real
 

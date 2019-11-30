@@ -3,7 +3,8 @@
 
 #===========================================================
 from ..basic import gcd, integer_sqrt
-from ..types import ArithmeticType, frac, Quadratic
+from ..types.arithmetic_type import ArithmeticType
+from ..types import frac, Quadratic
 #===========================================================
 __all__ = [
     'continued_fraction_quotients',

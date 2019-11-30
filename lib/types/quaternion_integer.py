@@ -1,12 +1,28 @@
-#   numth/types/quaternion_integer.py
+#   lib/types/quaternion_integer.py
+#   - class for arithmetic of integer quaternions
 #===========================================================
 from ..basic import mod_inverse
 from .quaternion import *
+#===========================================================
+__all__ = [
+    'QuaternionInteger',
+]
 #===========================================================
 
 
 class QuaternionInteger(Quaternion):
 
+    """
+    Class that represents `a + bi + cj + dk`,
+    where coefficients are integers.
+
+    The class implements arithmetic operations with members of itself,
+    general quaternions, integers, and rational numbers.
+
+    Much of the functionality is inherited from `lib.types.Quaternion`
+    and operations with general quaternions or rational numbers will
+    elevate it to that type.
+    """
 
     def __init__(self, *components):
         self.components = tuple(map(int, components))
@@ -15,10 +31,12 @@ class QuaternionInteger(Quaternion):
 
     @property
     def to_quaternion(self):
+        """Cast to Quaternion."""
         return Quaternion(*self.components)
 
     @classmethod
     def from_gaussian_integer(self, gaussian_integer):
+        """Build from GaussianInteger."""
         return QuaternionInteger(*gaussian_integer.components, 0, 0)
 
     #=========================

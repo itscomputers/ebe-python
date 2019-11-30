@@ -1,4 +1,6 @@
-#   numth/types/gaussian_integer.py
+#   lib/types/gaussian_integer.py
+#   - class for arithmetic of gaussian integers
+
 #===========================================================
 import operator as op
 
@@ -6,8 +8,30 @@ from ..basic import mod_inverse
 from .quadratic import *
 from .gaussian_rational import GaussianRational
 #===========================================================
+__all__ = [
+    'GaussianInteger',
+]
+#===========================================================
+
 
 class GaussianInteger(GaussianRational):
+
+    """
+    Class that represents `real + imag * sqrt(-1)`,
+    where `real` and `imag` are integers.
+
+    The class implements arithmetic operations with members of itself,
+    gaussian rationals, general quadratic numbers and quadratic integers
+    (if `root == -1`), integers, and rational numbers.
+
+    Much of the functionality is inherited from `lib.types.GaussianRational`.
+    Operations with gaussian rationals, general quadratic numbers, or rational
+    numbers will return a gaussian rational.  Other operations will return
+    a gaussian integer.
+
+    + real: int
+    + imag: int
+    """
 
     def __init__(self, real, imag, *args):
         self._real = int(real)
@@ -28,6 +52,7 @@ class GaussianInteger(GaussianRational):
 
     @property
     def to_gaussian_rational(self):
+        """Cast to GaussianRational."""
         return GaussianRational(*self.components)
 
     #=========================

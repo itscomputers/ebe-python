@@ -5,7 +5,7 @@ from hypothesis import assume, given, strategies as st
 
 import env
 from lib.basic import div_with_small_remainder
-from lib.types import Rational
+from lib.types import Rational, GaussianInteger, GaussianRational
 from lib.types.quaternion import *
 #===========================================================
 
