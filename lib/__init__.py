@@ -14,15 +14,5 @@ from .lucas_sequence import *
 from .modular import *
 from .primality import *
 from .rational_approximation import *
-
-from .types import (
-    polyn,
-    Polynomial,
-    Quadratic,
-    QuadraticInteger,
-    GaussianInteger,
-    Quaternion,
-    frac,
-    Rational
-)
+from .types import *
 
