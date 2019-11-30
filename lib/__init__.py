@@ -8,18 +8,11 @@ from .algebraic_structures import (
 )
 
 from .basic import *
+from .continued_fraction import *
 from .factorization import *
 from .lucas_sequence import *
 from .modular import *
 from .primality import *
-
-from .continued_fraction import (
-    continued_fraction_quotients,
-    continued_fraction_convergents,
-    continued_fraction_pell_numbers,
-    continued_fraction_table,
-    continued_fraction_all
-)
 
 from .rational_approximation import (
     newton_gen,
