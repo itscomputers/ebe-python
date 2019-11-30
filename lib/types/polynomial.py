@@ -1,4 +1,6 @@
-#   numth/types/polynomial.py
+#   lib/types/polynomial.py
+#   - class for arithmetic of polynomials
+
 #===========================================================
 from collections import defaultdict
 from functools import reduce
@@ -6,6 +8,11 @@ import re
 
 from ..basic import gcd, lcm, mod_power
 from .rational import frac, Rational
+#===========================================================
+__all__ = [
+    'polyn',
+    'Polynomial',
+]
 #===========================================================
 
 def polyn(*inputs):
@@ -19,6 +26,7 @@ def polyn(*inputs):
 #-----------------------------
 
 def polyn_div(a, b, coeff_type=int):
+    """Polynomial division with remainder."""
     q = Polynomial({0: 0})
     r = a
     while b.degree <= r.degree:
@@ -33,7 +41,9 @@ def polyn_div(a, b, coeff_type=int):
 
 #=============================
 
+
 class Polynomial:
+
     """Polynomial class with polynomial arithmetic"""
 
     def __init__(self, coeffs):
@@ -258,11 +268,13 @@ class Polynomial:
 #===========================================================
 
 def _term_pattern():
+    """Pattern for polynomial string term."""
     return re.compile(r'([\+\-]?\d*)?(\*?[A-Za-z])?(\^\d+)?')
 
 #-----------------------------
 
 def _term_to_exp_coeff(coeff, var, exp):
+    """Extract exponent and coeff from string term."""
     try:
         _coeff = int(coeff)
     except ValueError:
@@ -280,6 +292,7 @@ def _term_to_exp_coeff(coeff, var, exp):
 #-----------------------------
 
 def _exp_coeff_to_term(exponent, coeff):
+    """Convert exponent and coeff to string term."""
     if exponent == 0:
         return '{}'.format(coeff)
 
@@ -296,6 +309,7 @@ def _exp_coeff_to_term(exponent, coeff):
 #=============================
 
 def _string_to_polyn(string):
+    """Convert string to polynomial."""
     coeffs = defaultdict(int)
     for term in _term_pattern().findall(''.join(string.split())):
         if term != ('', '', ''):
@@ -306,6 +320,7 @@ def _string_to_polyn(string):
 #-----------------------------
 
 def _tuples_to_polyn(*tuples):
+    """Convert list of tuples to polynomial."""
     coeffs = defaultdict(int)
     for (exp, coeff) in tuples:
         coeffs[exp] += coeff
@@ -314,6 +329,7 @@ def _tuples_to_polyn(*tuples):
 #-----------------------------
 
 def _args_to_polyn(*args):
+    """Convert general coeffs to polynomial."""
     coeffs = {exp: coeff for (exp, coeff) in enumerate(args)}
     return Polynomial(coeffs)
 
