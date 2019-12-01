@@ -2,14 +2,14 @@
 #   - module for new types
 
 #===========================================================
-from .gaussian_integer import *
-from .gaussian_rational import *
-from .polynomial import *
-from .quadratic import *
-from .quadratic_integer import *
-from .quaternion import *
-from .quaternion_integer import *
-from .rational import *
+from .gaussian_integer import GaussianInteger
+from .gaussian_rational import GaussianRational
+from .polynomial import Polynomial, polyn
+from .quadratic import Quadratic
+from .quadratic_integer import QuadraticInteger
+from .quaternion import Quaternion
+from .quaternion_integer import QuaternionInteger
+from .rational import Rational, frac
 #===========================================================
 __all__ = [
     'frac',

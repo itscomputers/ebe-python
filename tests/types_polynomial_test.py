@@ -1,400 +1,394 @@
 #   tests/types_polynomial_test.py
 #===========================================================
-import env
 from hypothesis import assume, given, strategies as st
+from collections import defaultdict
+from random import sample
 
-from lib.basic import is_square, lcm
-from lib.types import Rational, QuadraticInteger
+import env
+from lib.basic import is_square
+from lib.types import frac, Rational, Quadratic
 from lib.types.polynomial import *
-from lib.types.polynomial import (
-    _term_pattern,
-    _term_to_exp_coeff,
-    _exp_coeff_to_term,
-    _args_to_polyn
-)
+from lib.types.polynomial import _string_to_dict
 #===========================================================
 
-def coords(n, coeff_filter=lambda x: True, exp_min=0, exp_max=30, coeff_min=None, coeff_max=None):
-    return (x for y in \
-            n * [(
-                st.integers(min_value=exp_min, max_value=exp_max),
-                st.integers(min_value=coeff_min, max_value=coeff_max).filter(coeff_filter)
-            )] for x in y)
+@st.composite
+def polynomial(
+    draw,
+    num_terms,
+    min_coeff=None,
+    max_coeff=None,
+    min_exp=0,
+    max_exp=100,
+    coeff_filter=lambda x: True,
+):
+    exponents = sample(
+        range(min_exp, max_exp),
+        min(num_terms, max_exp - min_exp + 1)
+    )
 
-#-----------------------------
+    return Polynomial(dict((
+        exp,
+        draw(st.integers(min_value=min_coeff, max_value=max_coeff).filter(coeff_filter))
+    ) for exp in exponents))
 
-def nonzero(num):
-    return num != 0
+@st.composite
+def rational(draw, nonzero=False):
+    numer = draw(st.integers())
+    denom = draw(st.integers(min_value=1))
+    if nonzero:
+        assume( numer != 0 )
+    return Rational(numer, denom)
 
-#-----------------------------
+def nonzero(number):
+    return number != 0
 
-def are_distinct(*args):
-    if len(args) < 2:
-        return True
-    return args[0] not in args[1:] and are_distinct(*args[1:])
-
-#-----------------------------
-
-def make(*args):
-    return Polynomial({args[i]: args[i+1] for i in range(0, len(args), 2)})
-
-#=============================
-
-@given(*coords(1, nonzero))
-def test_term_pattern_and_term_to_exp_coeff(e, c):
-    pattern = _term_pattern()
-
-    string = '{}t^{}'.format(c, e)
-    term = pattern.match(string).group(1,2,3)
-    assert( term == (str(c), 't', '^{}'.format(e)) )
-    assert( _term_to_exp_coeff(*term) == (e, c) )
-
-    string = '{}*u^{}'.format(c, e)
-    term = pattern.match(string).group(1,2,3)
-    assert( term == (str(c), '*u', '^{}'.format(e)) )
-    assert( _term_to_exp_coeff(*term) == (e, c) )
-
-    string = '-v^{}'.format(e)
-    term = pattern.match(string).group(1,2,3)
-    assert( term == ('-', 'v', '^{}'.format(e)) )
-    assert( _term_to_exp_coeff(*term) == (e, -1) )
-
-    string = '+w^{}'.format(e)
-    term = pattern.match(string).group(1,2,3)
-    assert( term == ('+', 'w', '^{}'.format(e)) )
-    assert( _term_to_exp_coeff(*term) == (e, 1) )
-
-    string = 'x^{}'.format(e)
-    term = pattern.match(string).group(1,2,3)
-    assert( term == ('', 'x', '^{}'.format(e)) )
-    assert( _term_to_exp_coeff(*term) == (e, 1) )
-
-    string = '0y^{}'.format(e)
-    term = pattern.match(string).group(1,2,3)
-    assert( term == ('0', 'y', '^{}'.format(e)) )
-    assert( _term_to_exp_coeff(*term) == (e, 0) )
-
-    string = '0*z^{}'.format(e)
-    term = pattern.match(string).group(1,2,3)
-    assert( term == ('0', '*z', '^{}'.format(e)) )
-    assert( _term_to_exp_coeff(*term) == (e, 0) )
-
-    string = '{}'.format(c)
-    term = pattern.match(string).group(1,2,3)
-    assert( term == (str(c), None, None) )
-    assert( _term_to_exp_coeff(*term) == (0, c) )
-
-    string = '0'
-    term = pattern.match(string).group(1,2,3)
-    assert( term == ('0', None, None) )
-    assert( _term_to_exp_coeff(*term) == (0, 0) )
-
-#-----------------------------
-
-@given(*coords(1, coeff_filter=lambda x: x not in [-1, 0, 1], exp_min=2))
-def test_exp_coeff_to_term(e, c):
-    assert( _exp_coeff_to_term(e, c) == '{}x^{}'.format(c, e) )
-    assert( _exp_coeff_to_term(e, 1) == 'x^{}'.format(e) )
-    assert( _exp_coeff_to_term(e, -1) == '-x^{}'.format(e) )
-    assert( _exp_coeff_to_term(1, c) == '{}x'.format(c) )
-    assert( _exp_coeff_to_term(1, 1) == 'x' )
-    assert( _exp_coeff_to_term(1, -1) == '-x' )
-    assert( _exp_coeff_to_term(0, c) == str(c) )
-    assert( _exp_coeff_to_term(0, 1) == '1' )
-    assert( _exp_coeff_to_term(0, -1) == '-1' )
-    assert( _exp_coeff_to_term(0, 0) == '0' )
-
-#-----------------------------
-
-@given(*coords(1, nonzero))
-def test_args_to_polyn(e, c):
-    args = [0] * e + [c]
-    assert( _args_to_polyn(*args).coeffs == {e: c} )
-
-#-----------------------------
-
-@given(*coords(2))
-def test_polyn(e1, c1, e2, c2):
-    assume( are_distinct(e1, e2) )
-    p1 = make(e1, c1, e2, c2)
-    p2 = polyn((e1, c1), (e2, c2))
-    if c2 >= 0:
-        p3 = polyn('{}x^{} + {}x^{}'.format(c1, e1, c2, e2))
-    else:
-        p3 = polyn('{}x^{} {}x^{}'.format(c1, e1, c2, e2))
-    assert( p1 == p2 )
-    assert( p2 == p3 )
-
-#=============================
-
-@given(*coords(2), *coords(1, exp_min=1))
-def test_polyn_int_div(e1, c1, e2, c2, e3, c4):
-    assume( are_distinct(e1, e2) )
-    p1 = make(e1, c1, e2, c2)
-    p2 = make(e3, 1, 0, c4)
-    q, r = polyn_div(p1, p2)
-    assert( r.degree < p2.degree )
-    assert( p1 == q * p2 + r )
-
-#-----------------------------
-
-@given(*coords(2), *coords(2, nonzero))
-def test_polyn_rational_div(e1, c1, e2, c2, e3, c3, e4, c4):
-    assume( are_distinct(e1, e2) and are_distinct(e3, e4) )
-    p1 = make(e1, c1, e2, c2)
-    p2 = make(e3, c3, e4, c4)
-    q, r = polyn_div(p1, p2, Rational)
-    assert( r.degree < p2.degree )
-    assert( p1 == q * p2 + r )
-
-#=============================
-
-@given(*coords(3))
-def test_repr(e1, c1, e2, c2, e3, c3):
-    assume( are_distinct(e1, e2, e3) )
-    p1 = make(e1, c1, e2, c2, e3, c3)
-    assert( polyn(repr(p1)) == p1 )
-
-#=============================
-
-@given(*coords(3, nonzero))
-def test_degree_and_leading_coeff(e1, c1, e2, c2, e3, c3):
-    assume( are_distinct(e1, e2, e3) )
-    (e1, c1), (e2, c2), (e3, c3) = sorted([(e1, c1), (e2, c2), (e3, c3)])
-    p1 = make(e1, c1, e2, c2, e3, c3)
-    p2 = make(e1, c1, e2, c2, e3, 0)
-    p3 = make(e1, c1, e2, 0, e3, 0)
-    p4 = make(e1, 0, e2, 0, e3, 0)
-    assert( p1.degree == e3 )
-    assert( p1.leading_coeff == c3 )
-    assert( p2.degree == e2 )
-    assert( p2.leading_coeff == c2 )
-    assert( p3.degree == e1 )
-    assert( p3.leading_coeff == c1 )
-    assert( p4.degree == -1 )
-    assert( p4.leading_coeff == 0 )
-
-#-----------------------------
-
-@given(*coords(1, nonzero))
-def test_full_coeffs(e, c):
-    p = make(e, c)
-    full_coeffs = {_e: 0 for _e in range(e)}
-    full_coeffs[e] = c
-    assert( p._full_coeffs() == full_coeffs )
-
-#=============================
-
-@given(*coords(2))
-def test_neg(e1, c1, e2, c2):
-    p = make(e1, c1, e2, c2)
-    q = make(e1, -c1, e2, -c2)
-    assert( -p == q )
-    assert( p == -q )
-    assert( p + -p == polyn(0) )
-    assert( p * -q == -p * q == -(p * q) )
-    assert( -p == polyn(-1) * p )
-
-#-----------------------------
-
-@given(*coords(2))
-def test_canonical(e1, c1, e2, c2):
-    p = make(e1, c1, e2, c2)
-    assert( p.canonical().leading_coeff >= 0 )
-
-#-----------------------------
+#===========================================================
 
 @given(
-    st.integers(min_value=0),
-    st.integers(min_value=1),
-    st.integers(min_value=2),
-    st.integers(min_value=1),
-    st.integers(min_value=1),
-    st.integers(min_value=2),
-    st.integers(min_value=2),
-    st.integers(min_value=1),
-    st.integers(min_value=2),
+    st.integers(min_value=0, max_value=500),
+    st.integers(min_value=1, max_value=500),
+    st.integers(min_value=1, max_value=500)
 )
-def test_to_integer_polyn(e1, n1, d1, e2, n2, d2, e3, n3, d3):
-    assume( are_distinct(e1, e2, e3) )
-    p = make(e1, Rational(n1, d1), e2, Rational(n2, d2), e3, Rational(n3, d3))
-    q = p.to_integer_polyn()
-    m = lcm(*(c.denom for c in p.coeffs.values()))
-    for c in q.coeffs.values():
-        assert( type(c) is int )
-    assert( q / m == p )
+def test_string_to_dict(e, c, d):
+    for expected_dict, string in (
+        ({e: c}, '{}a^{}'.format(c, e)),
+        ({e: c}, '{}*b^{}'.format(c, e)),
+        ({e: c}, '+{}c^{}'.format(c, e)),
+        ({e: c}, '+{}*d^{}'.format(c, e)),
+        ({e: -c}, '-{}e^{}'.format(c, e)),
+        ({e: -c}, '-{}*f^{}'.format(c, e)),
+        ({e: frac(c,d)}, '{}/{}g^{}'.format(c, d, e)),
+        ({e: frac(c,d)}, '{}/{}*h^{}'.format(c, d, e)),
+        ({e: frac(c,d)}, '+{}/{}i^{}'.format(c, d, e)),
+        ({e: frac(c,d)}, '+{}/{}*j^{}'.format(c, d, e)),
+        ({e: -frac(c,d)}, '-{}/{}k^{}'.format(c, d, e)),
+        ({e: -frac(c,d)}, '-{}/{}*k^{}'.format(c, d, e)),
+        ({e: 1}, 'x^{}'.format(e)),
+        ({e: 1}, '+y^{}'.format(e)),
+        ({e: -1}, '-z^{}'.format(e)),
+        ({1: c}, '{}A'.format(c)),
+        ({1: c}, '{}*B'.format(c)),
+        ({1: c}, '+{}C'.format(c)),
+        ({1: c}, '+{}*D'.format(c)),
+        ({1: -c}, '-{}E'.format(c)),
+        ({1: -c}, '-{}*F'.format(c)),
+        ({1: frac(c,d)}, '{}/{}G'.format(c, d)),
+        ({1: frac(c,d)}, '{}/{}*H'.format(c, d)),
+        ({1: frac(c,d)}, '+{}/{}I'.format(c, d)),
+        ({1: frac(c,d)}, '+{}/{}*J'.format(c, d)),
+        ({1: -frac(c,d)}, '-{}/{}K'.format(c, d)),
+        ({1: -frac(c,d)}, '-{}/{}*K'.format(c, d)),
+        ({e: 0}, '0U^{}'.format(e)),
+        ({e: 0}, '0*V^{}'.format(e)),
+        ({e: 0}, '+0W^{}'.format(e)),
+        ({e: 0}, '+0*X^{}'.format(e)),
+        ({e: 0}, '-0Y^{}'.format(e)),
+        ({e: 0}, '-0*Z^{}'.format(e)),
+        ({0: c}, '{}'.format(c)),
+        ({0: 0}, '0')
+    ):
+        assert _string_to_dict(string) == expected_dict
+        assert polyn(string) == Polynomial(expected_dict)
+        assert polyn(string) == polyn(expected_dict)
+
+@given(polynomial(5))
+def test_from_string(a):
+    assert Polynomial.from_string(repr(a)) == a
+    assert polyn(repr(a)) == a
+
+@given(*(8 * [st.integers()]))
+def test_from_coeff_list(a, b, c, d, e, f, g, h):
+    coeff_list = (a, b, c, d, e, f, g, h)
+    p = Polynomial({0: a, 1: b, 2: c, 3: d, 4: e, 5: f, 6: g, 7: h})
+    assert Polynomial.from_coeff_list(*coeff_list) == p
+    assert polyn(*coeff_list) == p
 
 #=============================
 
-@given(*coords(2))
-def test_add(e1, c1, e2, c2):
-    p1 = make(e1, c1)
-    p2 = make(e2, c2)
-    if e1 == e2:
-        s1 = make(e1, c1 + c2)
+@given(polynomial(3))
+def test_degree_and_leading_coeff(a):
+    if a.coeffs != dict():
+        assert a.degree == max(a.coeffs.items())[0]
+        assert a.leading_coeff == max(a.coeffs.items())[1]
     else:
-        s1 = make(e1, c1, e2, c2)
-    if c2 >= 0:
-        s2 = polyn('+'.join((repr(p1), repr(p2))))
-    else:
-        s2 = polyn(''.join((repr(p1), repr(p2))))
-    assert( p1 + p2 == s1 )
-    assert( p2 + p1 == s1 )
-    assert( s2 == s1 )
-    assert( p1 + polyn(0) == p1 )
-
-#-----------------------------
-
-@given(*coords(1), st.integers())
-def test_add_polynomial_and_number(e, c, integer):
-    p = make(e, c)
-    assert( p + 0 == p )
-    if e == 0:
-        s = make(e, c + integer)
-    else:
-        s = make(e, c, 0, integer)
-    assert( p + integer == s )
-    assert( integer + p == s )
+        assert a.degree == -1
+        assert a.leading_coeff == 0
 
 #=============================
 
-@given(*coords(2))
-def test_sub(e1, c1, e2, c2):
-    p1 = make(e1, c1)
-    p2 = make(e2, c2)
-    if e1 == e2:
-        s1 = make(e1, c1 - c2)
+@given(polynomial(3), polynomial(3))
+def test_eq(a, b):
+    assert a == a
+    if sorted(a.coeffs.items()) == sorted(b.coeffs.items()):
+        assert a == b
     else:
-        s1 = make(e1, c1, e2, -c2)
-    if c2 >= 0:
-        s2 = polyn('-'.join((repr(p1), repr(p2))))
-    else:
-        s2 = polyn('+'.join((repr(p1), repr(p2).lstrip('-'))))
-    assert( p1 - p2 == s1 )
-    assert( p2 - p1 == -s1 )
-    assert( s2 == s1 )
-    assert( p1 - polyn(0) == p1 )
+        assert a != b
 
-#-----------------------------
-
-@given(*coords(1), st.integers())
-def test_sub_polynomial_and_number(e, c, integer):
-    p = make(e, c)
-    assert( p - 0 == p )
-    if e == 0:
-        s = make(e, c - integer)
+@given(polynomial(3), st.integers())
+def test_eq_int(a, b):
+    if a.degree == -1 and b == 0:
+        assert a == b
+    elif a.degree == 0 and a[0] == b:
+        assert a == b
     else:
-        s = make(e, c, 0, -integer)
-    assert( p - integer == s )
-    assert( integer - p == -s )
+        assert a != b
+
+@given(polynomial(3), rational())
+def test_eq_Rational(a, b):
+    if a.degree == -1 and b == 0:
+        assert a == b
+    elif a.degree == 0 and a[0] == b:
+        assert a == b
+    else:
+        assert a != b
 
 #=============================
 
-@given(*coords(2))
-def test_mul(e1, c1, e2, c2):
-    p1 = make(e1, c1)
-    p2 = make(e2, c2)
-    s = make(e1+e2, c1*c2)
-    assert( p1 * p2 == s )
-    assert( p2 * p1 == s )
-    assert( p1 * polyn(1) == p1 )
-    assert( p1 * polyn(0) == polyn(0) )
+@given(polynomial(3))
+def test_neg(a):
+    assert type(-a) is Polynomial
+    assert -a == Polynomial({e: -c for e, c in a.coeffs.items()})
+    assert a + -a == -a + a == 0
+    assert -a == -1 * a == a * -1
 
-#-----------------------------
+@given(polynomial(3))
+def test_canonical(a):
+    assert a.canonical().leading_coeff >= 0
 
-@given(*coords(1), st.integers())
-def test_mul_polynomial_and_number(e, c, integer):
-    p = make(e, c)
-    assert( p * 1 == p )
-    assert( p * -1 == -p )
-    assert( p * 0 == polyn(0) )
-    s = make(e, c * integer)
-    assert( p * integer == s )
-    assert( integer * p == s )
-
-#-----------------------------
-
-@given(*coords(4))
-def test_distributive_law(e1, c1, e2, c2, e3, c3, e4, c4):
-    p1 = make(e1, c1)
-    p2 = make(e2, c2)
-    p3 = make(e3, c3)
-    p4 = make(e4, c4)
-    assert( (p1 + p2) * (p3 + p4) == p1*p3 + p1*p4 + p2*p3 + p2*p4 )
+@given(polynomial(3, coeff_filter=nonzero), rational(nonzero=True))
+def test_clear_denominators(a, b):
+    assert set(map(
+        lambda x: x.denom,
+        (a * b).clear_denominators().coeffs.values()
+    )) == set([1])
 
 #=============================
 
-@given(*coords(4, nonzero))
-def test_div(e1, c1, e2, c2, e3, c3, e4, c4):
-    assume( are_distinct(e1, e2) and are_distinct(e3, e4) )
-    p1 = make(e1, c1, e2, c2)
-    p2 = make(e3, c3, e4, c4)
-    s = p1 * p2
-    assert( s // p1 == p2 )
-    assert( s // p2 == p1 )
-    assert( p1 // p1 == polyn(1) )
-    assert( p1 // polyn(1) == p1 / 1 == p1 )
-    assert( p1 // polyn(-1) == p1 / -1 == -p1 )
-
-#=============================
+@given(polynomial(2, coeff_filter=nonzero), st.integers())
+def test_eval(a, b):
+    (e1, c1), (e2, c2) = a.coeffs.items()
+    assert a.eval(b) == c1 * b**e1 + c2 * b**e2
 
 @given(
-    *coords(2, nonzero),
-    st.integers(min_value=0, max_value=20),
-    st.integers(min_value=0, max_value=10)
+    polynomial(2, coeff_filter=nonzero),
+    st.integers(),
+    st.integers(min_value=2)
 )
-def test_pow(e1, c1, e2, c2, m, n):
-    assume( are_distinct(e1, e2) )
-    p = make(e1, c1, e2, c2)
-    mth_power = p**m
-    nth_power = p**n
-    sum_power = p**(m+n)
-    assert( mth_power * nth_power == sum_power )
-    assert( sum_power // nth_power == mth_power )
+def test_mod_eval(a, b, m):
+    (e1, c1), (e2, c2) = a.coeffs.items()
+    assert a.mod_eval(b, m) == (c1 * pow(b, e1, m) + c2 * pow(b, e2, m)) % m
+    assert a.mod_eval(b, m) == a.eval(b) % m
 
 #=============================
 
-@given(*coords(3, coeff_min=1))
-def test_mod(e1, c1, e2, c2, e3, c3):
-    assume( are_distinct(e1, e2) )
-    p1 = make(e1, c1, e2, c2)
-    p2 = make(e3, c3)
-    assert( (p1 * p2) % p1 == polyn(0) )
-    assert( (p1 * p2) % p2 == polyn(0) )
+@given(polynomial(3), polynomial(3), st.integers())
+def test_derivative(a, b, c):
+    assert type(a.derivative()) is Polynomial
+    if a != 0:
+        assert a.derivative().degree == a.degree - 1
+    assert a.derivative(order=3) == a.derivative().derivative().derivative()
+    assert (c + a).derivative() == a.derivative()
+    assert (c * a).derivative() == c * a.derivative()
+    assert (a + b).derivative() == a.derivative() + b.derivative()
+    assert (a * b).derivative() == a.derivative() * b + a * b.derivative()
+
+@given(polynomial(3), st.integers(), st.integers().filter(nonzero))
+def test_integral(a, b, c):
+    assert type(a.integral()) is Polynomial
+    if a != 0 or b != 0:
+        assert a.integral(b).degree == a.degree + 1
+    assert a.integral(b).derivative() == a
+    assert a.derivative().integral(0 if 0 not in a.coeffs else a[0]) == a
+    assert a.integral(b).eval(0) == b
+    assert (c * a).integral() == c * a.integral()
 
 #=============================
 
-@given(*coords(2), st.integers(min_value=2))
-def test_div_mod_polynomial_by_int(e1, c1, e2, c2, integer):
-    assume( are_distinct(e1, e2) )
-    p = make(e1, c1, e2, c2)
-    assert( p == (p // integer) * integer + (p % integer) )
+@given(polynomial(3), polynomial(4))
+def test_add(a, b):
+    result = a + b
+    reverse = b + a
+    assert type(result) is Polynomial
+    assert result == reverse
+    assert result == polyn('+'.join([repr(a), repr(b)]))
+    assert result == Polynomial(dict((
+        exp,
+        defaultdict(int, a.coeffs)[exp] + defaultdict(int, b.coeffs)[exp]
+    ) for exp in set(a.coeffs.keys()) | set(b.coeffs.keys())))
+
+@given(polynomial(3), st.integers())
+def test_add_int(a, b):
+    result = a + b
+    reverse = b + a
+    assert type(result) is Polynomial
+    assert type(reverse) is Polynomial
+    assert result == reverse
+    assert result == polyn('+'.join([repr(a), repr(b)]))
+    assert result == Polynomial(dict((
+        exp,
+        defaultdict(int, a.coeffs)[exp] + (b if exp == 0 else 0)
+    ) for exp in set(a.coeffs.keys()) | set([0])))
+
+@given(polynomial(3), rational())
+def test_add_Rational(a, b):
+    result = a + b
+    reverse = b + a
+    assert type(result) is Polynomial
+    assert type(reverse) is Polynomial
+    assert result == reverse
+    assert result == polyn('+'.join([repr(a), repr(b)]))
+    assert result == Polynomial(dict((
+        exp,
+        defaultdict(int, a.coeffs)[exp] + (b if exp == 0 else 0)
+    ) for exp in set(a.coeffs.keys()) | set([0])))
 
 #=============================
 
-@given(*coords(2), st.integers())
-def test_eval(e1, c1, e2, c2, val):
-    assume( are_distinct(e1, e2) )
-    p = make(e1, c1, e2, c2)
-    output = c1 * val**e1 + c2 * val**e2
-    assert( p.eval(val) == output )
+@given(polynomial(3), polynomial(4))
+def test_sub(a, b):
+    result = a - b
+    reverse = b - a
+    assert type(result) is Polynomial
+    assert result == -reverse
+    assert result == a + (-b)
+
+@given(polynomial(3), st.integers())
+def test_sub_int(a, b):
+    result = a - b
+    reverse = b - a
+    assert type(result) is Polynomial
+    assert type(reverse) is Polynomial
+    assert result == -reverse
+    assert result == a + (-b)
+
+@given(polynomial(3), rational())
+def test_sub_Rational(a, b):
+    result = a - b
+    reverse = b - a
+    assert type(result) is Polynomial
+    assert type(reverse) is Polynomial
+    assert result == -reverse
+    assert result == a + (-b)
+
+#=============================
+
+@given(polynomial(3), polynomial(3))
+def test_mul(a, b):
+    result = a * b
+    reverse = b * a
+    assert type(result) is Polynomial
+    assert type(reverse) is Polynomial
+    assert result == reverse
+    assert result == sum(
+        Polynomial(
+            dict((
+                ea + eb,
+                ca * cb
+            ) for ea, ca in a.coeffs.items())
+        ) for eb, cb in b.coeffs.items()
+    )
+
+@given(polynomial(3), st.integers())
+def test_mul_int(a, b):
+    result = a * b
+    reverse = b * a
+    assert type(result) is Polynomial
+    assert type(reverse) is Polynomial
+    assert result == reverse
+    assert result == Polynomial(
+        dict((
+            exp,
+            coeff * b
+        ) for exp, coeff in a.coeffs.items())
+    )
+
+@given(polynomial(3), rational())
+def test_mul_Rational(a, b):
+    result = a * b
+    reverse = b * a
+    assert type(result) is Polynomial
+    assert type(reverse) is Polynomial
+    assert result == reverse
+    assert result == Polynomial(
+        dict((
+            exp,
+            coeff * b
+        ) for exp, coeff in a.coeffs.items())
+    )
 
 #-----------------------------
 
-@given(*coords(2), st.integers(), st.integers(min_value=2))
-def test_mod_eval(e1, c1, e2, c2, val, mod):
-    p = make(e1, c1, e2, c2)
-    assume( p.mod_eval(val, mod) == p.eval(val) % mod )
+@given(polynomial(3), polynomial(4), polynomial(2), polynomial(3))
+def test_distributive_law(p1, p2, p3, p4):
+    assert (p1 + p2) * (p3 + p4) == p1*p3 + p1*p4 + p2*p3 + p2*p4
+
+#=============================
+
+@given(polynomial(3), st.integers().filter(nonzero))
+def test_div_int(a, b):
+    result = a / b
+    assert type(result) is Polynomial
+    assert result * b == a
+
+@given(polynomial(3), rational(nonzero=True))
+def test_div_Rational(a, b):
+    result = a / b
+    assert type(result) is Polynomial
+    assert result * b == a
+
+#=============================
+
+@given(polynomial(3), polynomial(3, coeff_filter=nonzero))
+def test_div_with_remainder(a, b):
+    quotient, remainder = a.div_with_remainder(b)
+    assert type(quotient) is Polynomial
+    assert type(remainder) is Polynomial
+    assert a == b * quotient + remainder
+    assert remainder.degree < b.degree
+
+@given(polynomial(3), st.integers().filter(nonzero))
+def test_div_mod_int(a, b):
+    quotient, remainder = a // b, a % b
+    assert type(quotient) is Polynomial
+    assert type(remainder) is Polynomial
+    assert a == b * quotient + remainder
+
+@given(polynomial(3), rational(nonzero=True))
+def test_div_mod_int(a, b):
+    quotient, remainder = a // b, a % b
+    assert type(quotient) is Polynomial
+    assert type(remainder) is Polynomial
+    assert a == b * quotient + remainder
 
 #=============================
 
 @given(
-    *(4 * [st.integers()]),
+    polynomial(2, coeff_filter=nonzero),
+    st.integers(min_value=0, max_value=5),
+    st.integers(min_value=0, max_value=5)
+)
+def test_pow(a, m, n):
+    mth_power = a**m
+    nth_power = a**n
+    sum_power = a**(m + n)
+    assert type(a**0) is Polynomial
+    assert type(a**1) is Polynomial
+    assert type(mth_power) is Polynomial
+    assert a**0 == 1
+    assert a**1 == a
+    assert a**2 == a * a
+    assert mth_power * nth_power == sum_power
+    assert sum_power.div_with_remainder(mth_power) == (nth_power, 0)
+
+#=============================
+
+@given(
+    *(4 * [rational(nonzero)]),
     st.integers().filter(lambda x: x < 0 or not is_square(x))
 )
-def test_quadratic_integers(a1, b1, a2, b2, d):
-    g1 = QuadraticInteger(a1, b1, d)
-    g2 = QuadraticInteger(a2, b2, d)
+def test_quadratic(a1, b1, a2, b2, d):
+    g1 = Quadratic(a1, b1, d)
+    g2 = Quadratic(a2, b2, d)
     p1 = Polynomial({0: a1, 1: b1})
     p2 = Polynomial({0: a2, 1: b2})
     m = Polynomial({0: -d, 2: 1})
