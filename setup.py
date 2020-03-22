@@ -25,7 +25,7 @@ setup(
         'Natural Language :: English',
     ],
     packages = ['numth'],
-    install_requires = [],
+    install_requires = ['hypothesis'],
     python_requires = '>=3',
 )
 
