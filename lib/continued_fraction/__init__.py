@@ -1,4 +1,4 @@
-#   numth/continued_fraction/__init__.py
+#   lib/continued_fraction/__init__.py
 #   - module for continued fraction algorithms
 
 #===========================================================
