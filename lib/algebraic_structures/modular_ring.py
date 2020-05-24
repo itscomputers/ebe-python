@@ -1,5 +1,5 @@
 #   lib/algebraic_structures/modular_ring.py
-#   - module for ring of integers relative to a modulus
+#   - class for ring of integers relative to a modulus
 
 #===========================================================
 from collections import Counter
