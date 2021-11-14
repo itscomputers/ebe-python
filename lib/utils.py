@@ -1,26 +1,27 @@
-#   lib/utils.py
-#   - module for miscellaneous utilities
-
-# ===========================================================
-__all__ = [
-    "combine_counters",
-]
-# ===========================================================
+#  lib/utils.py
+#  - module for miscellaneous utilities
+from typing import Any, Dict
 
 
-def combine_counters(d1, d2, m1=1, m2=1):
+def combine_counters(
+    dictionary: Dict[Any, int],
+    other_dictionary: Dict[Any, int],
+    multiplicity: int = 1,
+    other_multiplicity: int = 1,
+) -> Dict[Any, int]:
     """
     Apply multiplicites and sum values of two dictionaries.
 
-    example: `combine_counters({2: 1, 5: 2}, {2: 3}, 3, 1) ~> {2: 6, 5: 6}`
-
-    + d1: Dict[Any, int]
-    + d2: Dict[Any, int]
-    + m1: int
-    + m2: int
-    ~> Dict[Any, int]
+    example: `combine_counters({2: 1, 5: 2}, {2: 4}, 3, 1) ~> {2: 7, 5: 6}`
     """
-    return dict(
-        (key, (m1 * d1[key] if key in d1 else 0) + (m2 * d2[key] if key in d2 else 0))
-        for key in set(d1.keys()) | set(d2.keys())
-    )
+    keys = set(dictionary.keys()) | set(other_dictionary.keys())
+
+    def value(key):
+        return sum(
+            [
+                multiplicity * dictionary.get(key, 0),
+                other_multiplicity * other_dictionary.get(key, 0),
+            ]
+        )
+
+    return {key: value(key) for key in keys}

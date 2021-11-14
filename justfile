@@ -15,7 +15,6 @@ type_check:
 
 lint:
   poetry run black . --check
-  poetry run flake8
 
 lint_fix:
   poetry run black .
