@@ -8,7 +8,7 @@ test path="":
   poetry run pytest {{path}}
 
 coverage:
-  poetry run coverage
+  poetry run pytest --cov lib --cov-report term-missing
 
 type_check:
   poetry run mypy .

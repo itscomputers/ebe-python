@@ -127,7 +127,7 @@ class Quaternion(ArithmeticType):
 
     def __repr__(self):
         displays = filter(
-            None.__ne__,
+            lambda n: n is not None,
             [
                 self._real_disp,
                 self._other_disp('i'),
