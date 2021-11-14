@@ -3,7 +3,7 @@
 import env
 from hypothesis import given, strategies as st
 
-from lib.basic import is_prime__naive, primes_up_to
+from lib.basic.primality import is_prime__naive, primes_up_to
 from lib.primality.miller_rabin import *
 from lib.primality.miller_rabin import _generate_witnesses
 from lib.primality.lucas import *

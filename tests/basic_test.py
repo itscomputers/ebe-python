@@ -7,6 +7,9 @@ import env
 from lib.factorization import factor
 from lib.modular import euler_phi
 from lib.basic import *
+from lib.basic.division import div_with_small_remainder
+from lib.basic.modular import euler_criterion
+from lib.basic.primality import is_prime__naive
 
 # ===========================================================
 #   division
