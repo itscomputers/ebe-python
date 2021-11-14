@@ -3,20 +3,12 @@
 
 # ===========================================================
 import math
+from typing import Iterable, Tuple
 
 # ===========================================================
-__all__ = [
-    "div",
-    "div_with_small_remainder",
-    "gcd",
-    "lcm",
-    "bezout",
-    "padic",
-]
-# ===========================================================
 
 
-def div(a, b):
+def div(a: int, b: int) -> Tuple[int, int]:
     """
     Compute quotient and remainder such that
         `0 <= remainder < abs(b)` and
@@ -24,10 +16,6 @@ def div(a, b):
 
     example: `div(55, 21) ~> (2, 13)`
         since `55 == 21 * 2 + 13`
-
-    + a: int
-    + b: int --nonzero
-    ~> (quotient, remainder): Tuple[int, int]
     """
     quotient = a // b
     remainder = a % b
@@ -41,7 +29,7 @@ def div(a, b):
 # -----------------------------
 
 
-def div_with_small_remainder(a, b):
+def div_with_small_remainder(a: int, b: int) -> Tuple[int, int]:
     """
     Compute quotient and remainder such that
         `-abs(b) / 2 < remainder <= abs(b) / 2` and
@@ -49,10 +37,6 @@ def div_with_small_remainder(a, b):
 
     example: `div_with_small_remainder(55, 21) ~> (3, -8)`
         since `55 == 21 * 3 - 8`
-
-    + a: int
-    + b: int --nonzero
-    ~> (quotient, remainder): Tuple[int, int]
     """
     quotient, remainder = div(a, b)
 
@@ -66,16 +50,13 @@ def div_with_small_remainder(a, b):
 # =============================
 
 
-def gcd(*numbers):
+def gcd(*numbers: Iterable[int]) -> int:
     """
     Compute largest positive integer (greatest common divisor)
     that divides each of `numbers`.
 
     examples: `gcd(12, 8) ~> 4`
               `gcd(12, 8, 10) ~> 2`
-
-    + numbers: Iterable[int] --not all zero
-    ~> int
     """
     if 0 in numbers:
         return gcd(*filter(lambda x: x != 0, numbers))
@@ -96,16 +77,13 @@ def gcd(*numbers):
 # -----------------------------
 
 
-def lcm(*numbers):
+def lcm(*numbers: Iterable[int]) -> int:
     """
     Compute smallest positive integer (least common multiple)
     that is divisible by each of `numbers`.
 
     examples: `lcm(12, 8) ~> 24`
               `lcm(12, 8, 10) ~> 120`
-
-    + numbers: Iterable[int] --not all zero
-    ~> int
     """
     if len(numbers) == 1:
         return abs(*numbers)
@@ -121,16 +99,12 @@ def lcm(*numbers):
 # =============================
 
 
-def bezout(a, b):
+def bezout(a: int, b: int) -> Tuple[int, int]:
     """
     Find a solution to Bezout's identity: `a*x + b*y == gcd(a, b)`.
 
     example: `bezout(5, 7) ~> (3, -2)`
         since `5*3 - 7*2 == 1 == gcd(5, 7)`
-
-    + a: int
-    + b: int --not both zero
-    ~> (x, y): Tuple[int, int]
     """
     if (a, b) == (0, 0):
         raise ValueError("bezout(0, 0) is undefined")
@@ -160,7 +134,7 @@ def bezout(a, b):
 # =============================
 
 
-def padic(number, base):
+def padic(number: int, base: int) -> Tuple[int, int]:
     """
     Compute exponent and unit part of `number` relative to base, satisfying
         `number == (base ** exponent) * unit` and
@@ -168,10 +142,6 @@ def padic(number, base):
 
     example: `padic(96, 2) == (5, 3)`
         since `96 == (2**5) * 3`.
-
-    + number: int --nonzero
-    + base: int --greater than 1
-    ~> (exp, unit): Tuple[int, int]
     """
     if number == 0:
         raise ValueError("number must be nonzero")
