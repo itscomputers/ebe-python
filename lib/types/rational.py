@@ -360,7 +360,7 @@ class Rational(Fraction):
         return NotImplemented
 
     def __mod__(self, other):
-        if isinstance(other, (int, Rational)):
+        if isinstance(other, (int, Fraction, Rational)):
             return self - (self // other) * other
         return NotImplemented
 
@@ -390,6 +390,13 @@ class Rational(Fraction):
 
     def __rtruediv__(self, other):
         return self.inverse * other
+
+    def __rmod__(self, other):
+        if isinstance(other, int):
+            return self.from_int(other) % self
+        elif isinstance(other, Fraction):
+            return self.from_Fraction(other) % self
+        return NotImplemented
 
     def __rpow__(self, other):
         if self.denom == 1:
