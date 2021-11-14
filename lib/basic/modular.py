@@ -2,30 +2,18 @@
 #   - module for basic functions related to modular arithmetic
 
 # ===========================================================
-from functools import reduce
 import itertools as it
+from functools import reduce
+from typing import Any, Dict, List, Iterable, Tuple
 
 from .division import bezout, gcd, padic
 
 # ===========================================================
-__all__ = [
-    "jacobi",
-    "euler_criterion",
-    "mod_inverse",
-    "mod_power",
-    "chinese_remainder_theorem",
-    "prime_to",
-]
-# ===========================================================
 
 
-def jacobi(a, b):
+def jacobi(a: int, b: int) -> int:
     """
     Jacobi symbol `(a | b)`, a generalization of Lagrange symbol.
-
-    + a: int
-    + b: int --odd
-    ~> int --in [0, 1, -1]
     """
     if b % 2 == 0:
         raise ValueError("jacobi(_, even) is undefined")
@@ -48,7 +36,7 @@ def jacobi(a, b):
 # -----------------------------
 
 
-def euler_criterion(a, p):
+def euler_criterion(a: int, p: int) -> int:
     """
     Euler's criterion to compute Lagrange symbol `(a | p)`, which is
         1 if `a` is a square modulo `p`,
@@ -57,10 +45,6 @@ def euler_criterion(a, p):
 
     (Its main purpose here is for testing `lib.basic.modular.jacobi`,
     since the jacobi symbol is both faster and more versatile.)
-
-    + a: int
-    + p: int --prime
-    ~> int --in [0, 1, -1]
     """
     result = mod_power(a, (p - 1) // 2, p)
     if result == p - 1:
@@ -72,16 +56,12 @@ def euler_criterion(a, p):
 # =============================
 
 
-def mod_inverse(number, modulus):
+def mod_inverse(number: int, modulus: int) -> int:
     """
     Compute multiplicative inverse of `number` relative to `modulus`.
 
     example: `mod_inverse(2, 13) ~> 7` and `mod_inverse(7, 13) ~> 2`
         since `(2 * 7) % 13 == 1`
-
-    + number: int --relatively prime to modulus
-    + modulus: int --at least 2
-    ~> int
     """
     if modulus < 2:
         raise ValueError("modulus must be at least 2")
@@ -100,17 +80,12 @@ def mod_inverse(number, modulus):
 # -----------------------------
 
 
-def mod_power(number, exponent, modulus):
+def mod_power(number: int, exponent: int, modulus: int) -> int:
     """
     Compute `(number ** exponent) % modulus`.
 
     example: `mod_power(7, -5, 13) ~> 6` and `mod_power(2, 5, 13) ~> 6`
         since `7**(-5) % 13 == 2**5 % 13 == 6`.
-
-    + number: int
-    + exponent: int --negative allowed if number is invertible
-    + modulus: int --at least 2
-    ~> int
     """
     if modulus < 2:
         raise ValueError("Modulus must be at least 2")
@@ -124,7 +99,7 @@ def mod_power(number, exponent, modulus):
 # =============================
 
 
-def chinese_remainder_theorem(residues, moduli):
+def chinese_remainder_theorem(residues: List[int], moduli: List[int]) -> int:
     """
     Compute the unique solution modulo the product of `moduli`
     to the system
@@ -133,10 +108,6 @@ def chinese_remainder_theorem(residues, moduli):
 
     example: `chinese_remainder_theorem([4, 2], [6, 7]) ~> 16`
         since `16 % 6 == 4` and `16 % 7 == 2`
-
-    + residues: List[int]
-    + moduli: List[int] --pairwise relatively prime
-    ~> int
     """
     moduli_product = reduce(lambda x, y: x * y, moduli, 1)
 
@@ -155,7 +126,7 @@ def chinese_remainder_theorem(residues, moduli):
 # -----------------------------
 
 
-def prime_to(factorization):
+def prime_to(factorization: Dict[int, int]) -> List[int]:
     """
     Compute the integers up to corresponding `number`
     which are relatively prime to `number`.
@@ -163,9 +134,6 @@ def prime_to(factorization):
     example: `prime_to({2: 3, 3: 1}) ~> [1, 5, 7, 11, 13, 17, 19, 23]`
         since these are the numbers strictly between 0 and `2**3 * 3**1 == 24`
         which are relatively prime to 24.
-
-    + factorization: Dict[int, int]
-    ~> List[int]
     """
     prime_powers = [p ** e for (p, e) in factorization.items()]
     number = reduce(lambda x, y: x * y, prime_powers, 1)
@@ -186,14 +154,14 @@ def prime_to(factorization):
 # =============================
 
 
-def _relatively_prime_to_prime_power(pair):
+def _relatively_prime_to_prime_power(pair: Tuple[int, int]) -> Iterable[int]:
     return (x for x in range(1, pair[0] ** pair[1]) if x % pair[0] != 0)
 
 
-def _residues(factorization):
+def _residues(factorization: Dict[int, int]):
     return it.product(*map(_relatively_prime_to_prime_power, factorization.items()))
 
 
-def _coeffs(modulus, moduli_product):
+def _coeffs(modulus: int, moduli_product: int) -> int:
     partial = moduli_product // modulus
     return (partial * mod_inverse(partial, modulus)) % moduli_product

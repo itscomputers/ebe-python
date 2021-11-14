@@ -3,7 +3,7 @@
 
 # ===========================================================
 import math
-from typing import Iterable, Tuple
+from typing import Tuple
 
 # ===========================================================
 
@@ -50,7 +50,7 @@ def div_with_small_remainder(a: int, b: int) -> Tuple[int, int]:
 # =============================
 
 
-def gcd(*numbers: Iterable[int]) -> int:
+def gcd(*numbers: int) -> int:
     """
     Compute largest positive integer (greatest common divisor)
     that divides each of `numbers`.
@@ -64,20 +64,21 @@ def gcd(*numbers: Iterable[int]) -> int:
     if len(numbers) == 0:
         raise ValueError("gcd(0, 0) is undefined")
 
-    if len(numbers) == 1:
-        return abs(*numbers)
+    if len(numbers) == 2:
+        return math.gcd(*numbers)
 
-    if len(numbers) > 2:
-        first, *rest = numbers
-        return gcd(first, gcd(*rest))
+    first, *rest = numbers
 
-    return math.gcd(*numbers)
+    if rest == []:
+        return abs(first)
+
+    return gcd(first, gcd(*rest))
 
 
 # -----------------------------
 
 
-def lcm(*numbers: Iterable[int]) -> int:
+def lcm(*numbers: int) -> int:
     """
     Compute smallest positive integer (least common multiple)
     that is divisible by each of `numbers`.
