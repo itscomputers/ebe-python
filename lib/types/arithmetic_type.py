@@ -1,11 +1,9 @@
 #   lib/types/arithmetic_type.py
 #   - class for common arithmetic functionality of inheriting types
 
-#===========================================================
-__all__ = [
-    'ArithmeticType'
-]
-#===========================================================
+# ===========================================================
+__all__ = ["ArithmeticType"]
+# ===========================================================
 
 
 class ArithmeticType:
@@ -36,24 +34,24 @@ class ArithmeticType:
 
     def execute(self, operation, other, *args):
         """Execute, if possible, an operation between self and other."""
-        method_name = '_{}_{}'.format(operation, other.__class__.__name__)
+        method_name = "_{}_{}".format(operation, other.__class__.__name__)
         if hasattr(self, method_name):
-            return eval('self.{}'.format(method_name))(other, *args)
+            return eval("self.{}".format(method_name))(other, *args)
         return NotImplemented
 
-    #=========================
+    # =========================
 
     def __eq__(self, other):
-        return self.execute('eq', other)
+        return self.execute("eq", other)
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
     def __lt__(self, other):
-        return self.execute('lt', other)
+        return self.execute("lt", other)
 
     def __gt__(self, other):
-        return self.execute('gt', other)
+        return self.execute("gt", other)
 
     def __le__(self, other):
         return not self.__gt__(other)
@@ -61,7 +59,7 @@ class ArithmeticType:
     def __ge__(self, other):
         return not self.__lt__(other)
 
-    #=========================
+    # =========================
 
     def __pos__(self):
         return self
@@ -69,10 +67,10 @@ class ArithmeticType:
     def __neg__(self):
         return NotImplemented
 
-    #=========================
+    # =========================
 
     def __add__(self, other):
-        return self.execute('add', other)
+        return self.execute("add", other)
 
     def __radd__(self, other):
         return self + other
@@ -84,30 +82,30 @@ class ArithmeticType:
         return -self + other
 
     def __mul__(self, other):
-        return self.execute('mul', other)
+        return self.execute("mul", other)
 
     def __rmul__(self, other):
-        return self.execute('rmul', other)
+        return self.execute("rmul", other)
 
     def __truediv__(self, other):
-        return self.execute('truediv', other)
+        return self.execute("truediv", other)
 
     def __rtruediv__(self, other):
-        return self.execute('rtruediv', other)
+        return self.execute("rtruediv", other)
 
     def __floordiv__(self, other):
-        return self.execute('floordiv', other)
+        return self.execute("floordiv", other)
 
     def __rfloordiv__(self, other):
-        return self.execute('rfloordiv', other)
+        return self.execute("rfloordiv", other)
 
     def __mod__(self, other):
-        return self.execute('mod', other)
+        return self.execute("mod", other)
 
     def __rmod__(self, other):
-        return self.execute('rmod', other)
+        return self.execute("rmod", other)
 
-    #=========================
+    # =========================
 
     def _pow(self, other):
         """
@@ -115,10 +113,10 @@ class ArithmeticType:
         For negative exponents, must implement `_inv_pow_int`.
         """
         if other < 0:
-            return self.execute('inv_pow', other)
+            return self.execute("inv_pow", other)
 
         if other == 0:
-            return self.execute('zero_pow', other)
+            return self.execute("zero_pow", other)
 
         if other == 1:
             return self
@@ -134,10 +132,10 @@ class ArithmeticType:
         For negative exponents, must implement `_inv_pow_mod_int`.
         """
         if other < 0:
-            return self.execute('inv_pow_mod', other, modulus)
+            return self.execute("inv_pow_mod", other, modulus)
 
         if other == 0:
-            return self.execute('zero_pow', other)
+            return self.execute("zero_pow", other)
 
         if other == 1:
             return self % modulus
@@ -155,4 +153,3 @@ class ArithmeticType:
             return self._pow(other)
 
         return self._pow_mod(other, modulus)
-

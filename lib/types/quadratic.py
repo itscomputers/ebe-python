@@ -1,71 +1,79 @@
 #   lib/types/quadratic.py
 #   - class for arithmetic of quadratic numbers
 
-#===========================================================
+# ===========================================================
 import math
 import operator as op
 
 from .arithmetic_type import ArithmeticType
 from .rational import frac, Rational
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'add_',
-    'add_constant',
-    'mul_',
-    'mul_constant',
-    'truediv_',
-    'truediv_constant',
-    'floordiv_',
-    'floordiv_constant',
-    'mod_constant',
-    'Quadratic',
+    "add_",
+    "add_constant",
+    "mul_",
+    "mul_constant",
+    "truediv_",
+    "truediv_constant",
+    "floordiv_",
+    "floordiv_constant",
+    "mod_constant",
+    "Quadratic",
 ]
-#===========================================================
+# ===========================================================
+
 
 def add_(a, b):
     """Shortcut to add other quadratic numbers."""
     return map(op.__add__, a.components, b.components)
 
+
 def add_constant(a, b):
     """Shortcut to add rational numbers and integers."""
     return (a.real + b, a.imag)
 
+
 def mul_(a, b):
     """Shortcut to multiply by other quadratic numbers."""
-    return (
-        a.real * b.real + a.imag * b.imag * a.root,
-        a.real * b.imag + a.imag * b.real
-    )
+    return (a.real * b.real + a.imag * b.imag * a.root, a.real * b.imag + a.imag * b.real)
+
 
 def mul_constant(a, b):
     """Shortcut to multiply by rational numbers and integers."""
     return map(lambda x: x * b, a.components)
+
 
 def truediv_(a, b):
     """Shortcut to divide by other quadratic numbers."""
     norm = frac(b.norm)
     return (
         (a.real * b.real - a.imag * b.imag * a.root) / norm,
-        (-a.real * b.imag + a.imag * b.real) / norm
+        (-a.real * b.imag + a.imag * b.real) / norm,
     )
+
 
 def truediv_constant(a, b):
     """Shortcut to divide by rational numbers and integers."""
     return map(lambda x: x / frac(b), a.components)
 
+
 def floordiv_(a, b):
     """Shortcut to floor divide by other quadratic numbers."""
     return (a / b).round.components
+
 
 def floordiv_constant(a, b):
     """Shortcut to floor divide by rational numbers and integers."""
     return map(lambda x: x // b, a.components)
 
+
 def mod_constant(a, b):
     """Shortcut to mod by rational numbers and integers."""
     return map(lambda x: x % b, a.components)
 
-#===========================================================
+
+# ===========================================================
 
 
 class Quadratic(ArithmeticType):
@@ -115,16 +123,16 @@ class Quadratic(ArithmeticType):
     def is_complex(self):
         return self.root == -1
 
-    #=========================
+    # =========================
 
     @property
     def _root_display(self):
         if self.is_complex:
-            return '\u2139'
+            return "\u2139"
         elif self.root.denom == 1:
-            return '\u221a{}'.format(self.root)
+            return "\u221a{}".format(self.root)
         else:
-            return '\u221a({})'.format(self.root)
+            return "\u221a({})".format(self.root)
 
     @property
     def _real_display(self):
@@ -139,8 +147,8 @@ class Quadratic(ArithmeticType):
         if self.imag == 1:
             return self._root_display
         elif self.imag == -1:
-            return '-{}'.format(self._root_display)
-        return '{} {}'.format(self.imag, self._root_display)
+            return "-{}".format(self._root_display)
+        return "{} {}".format(self.imag, self._root_display)
 
     def __repr__(self):
         real = self._real_display
@@ -152,9 +160,9 @@ class Quadratic(ArithmeticType):
         if imag is None:
             return real
 
-        return '{} + {}'.format(real, imag).replace(' + -', ' - ')
+        return "{} + {}".format(real, imag).replace(" + -", " - ")
 
-    #=========================
+    # =========================
 
     def _eq_int(self, other):
         return self.imag == 0 and self.real == other
@@ -165,7 +173,7 @@ class Quadratic(ArithmeticType):
     def _eq_Quadratic(self, other):
         return self.signature == other.signature
 
-    #=========================
+    # =========================
 
     def __neg__(self):
         return self.__class__(*map(op.__neg__, self.components), self.root)
@@ -179,7 +187,7 @@ class Quadratic(ArithmeticType):
 
     @property
     def norm(self):
-        return self.real**2 - self.root * self.imag**2
+        return self.real ** 2 - self.root * self.imag ** 2
 
     @property
     def inverse(self):
@@ -188,11 +196,10 @@ class Quadratic(ArithmeticType):
     @property
     def round(self):
         return self.__class__(
-            *map(lambda x: x.round_prefer_toward_zero, self.components),
-            self.root
+            *map(lambda x: x.round_prefer_toward_zero, self.components), self.root
         )
 
-    #=========================
+    # =========================
 
     def _add_int(self, other):
         return self.__class__(*add_constant(self, other), self.root)
@@ -205,7 +212,7 @@ class Quadratic(ArithmeticType):
             return Quadratic(*add_(self, other), self.root)
         return NotImplemented
 
-    #-------------------------
+    # -------------------------
 
     def _mul_int(self, other):
         return self.__class__(*mul_constant(self, other), self.root)
@@ -221,7 +228,7 @@ class Quadratic(ArithmeticType):
     def __rmul__(self, other):
         return self * other
 
-    #-------------------------
+    # -------------------------
 
     def _truediv_int(self, other):
         return Quadratic(*truediv_constant(self, other), self.root)
@@ -237,7 +244,7 @@ class Quadratic(ArithmeticType):
     def __rtruediv__(self, other):
         return self.inverse * other
 
-    #-------------------------
+    # -------------------------
 
     def _floordiv_int(self, other):
         return self.__class__(*floordiv_constant(self, other), self.root)
@@ -253,7 +260,7 @@ class Quadratic(ArithmeticType):
     def __rfloordiv__(self, other):
         return self.__class__(*floordiv_(other, self), self.root)
 
-    #-------------------------
+    # -------------------------
 
     def _mod_int(self, other):
         return self.__class__(*mod_constant(self, other), self.root)
@@ -269,7 +276,7 @@ class Quadratic(ArithmeticType):
     def __rmod__(self, other):
         return other - (other // self) * self
 
-    #-------------------------
+    # -------------------------
 
     def _inv_pow_int(self, other):
         return self.__pow__(-other).inverse
@@ -277,7 +284,7 @@ class Quadratic(ArithmeticType):
     def _zero_pow_int(self, _other):
         return self.__class__(1, 0, self.root)
 
-    #=========================
+    # =========================
 
     def rational_approx(self, num_digits=None):
         """Compute rational approximation if `root` is positive."""
@@ -285,7 +292,7 @@ class Quadratic(ArithmeticType):
             return self.real
 
         if not self.is_real:
-            raise ValueError('No rational approximation possible for non-real number')
+            raise ValueError("No rational approximation possible for non-real number")
 
         abs_imag = frac(self.imag)
 
@@ -312,4 +319,3 @@ class Quadratic(ArithmeticType):
 
     def __float__(self):
         return float(self.rational_approx(20))
-

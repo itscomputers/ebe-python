@@ -1,22 +1,24 @@
 #   lib/modular/sqrt.py
 #   - module for modular square roots
 
-#===========================================================
+# ===========================================================
 from functools import reduce
 
 from ..basic import jacobi, padic
 from ..primality import is_prime
 from ..types import QuadraticInteger
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'mod_sqrt',
-    'mod_sqrt_minus_one_wilson',
-    'mod_sqrt_minus_one_legendre',
-    'mod_sqrt_when_three_mod_four',
-    'mod_sqrt_tonelli_shanks',
-    'mod_sqrt_cipolla',
+    "mod_sqrt",
+    "mod_sqrt_minus_one_wilson",
+    "mod_sqrt_minus_one_legendre",
+    "mod_sqrt_when_three_mod_four",
+    "mod_sqrt_tonelli_shanks",
+    "mod_sqrt_cipolla",
 ]
-#===========================================================
+# ===========================================================
+
 
 def mod_sqrt(number, prime):
     """
@@ -31,7 +33,7 @@ def mod_sqrt(number, prime):
     ~> Tuple[int, int]
     """
     if not is_prime(prime):
-        raise ValueError('{} must be prime'.format(prime))
+        raise ValueError("{} must be prime".format(prime))
 
     if prime == 2 or number % prime == 0:
         return (number, number)
@@ -45,12 +47,14 @@ def mod_sqrt(number, prime):
     s, q = padic(prime - 1, 2)
     m = len(bin(prime)[2:])
 
-    if s * (s - 1) > 8*m + 20:
+    if s * (s - 1) > 8 * m + 20:
         return mod_sqrt_cipolla(number, prime)
 
     return mod_sqrt_tonelli_shanks(number, prime, s, q, m)
 
-#=============================
+
+# =============================
+
 
 def mod_sqrt_minus_one_wilson(prime):
     """
@@ -67,12 +71,14 @@ def mod_sqrt_minus_one_wilson(prime):
         return (1, 1)
 
     if prime % 4 == 3:
-        raise ValueError('-1 is not a square modulo {}'.format(prime))
+        raise ValueError("-1 is not a square modulo {}".format(prime))
 
-    val = reduce(lambda x, y: (x * y) % prime, range(2, (prime-1)//2 + 1), 1)
+    val = reduce(lambda x, y: (x * y) % prime, range(2, (prime - 1) // 2 + 1), 1)
     return tuple(sorted([val, prime - val]))
 
-#-----------------------------
+
+# -----------------------------
+
 
 def mod_sqrt_minus_one_legendre(prime):
     """
@@ -89,14 +95,16 @@ def mod_sqrt_minus_one_legendre(prime):
         return (1, 1)
 
     if prime % 4 == 3:
-        raise ValueError('-1 is not a square modulo {}'.format(prime))
+        raise ValueError("-1 is not a square modulo {}".format(prime))
 
-    for x in range(2, prime-1):
+    for x in range(2, prime - 1):
         if jacobi(x, prime) == -1:
-            val = pow(x, (prime-1)//4, prime)
+            val = pow(x, (prime - 1) // 4, prime)
     return tuple(sorted([val, prime - val]))
 
-#-----------------------------
+
+# -----------------------------
+
 
 def mod_sqrt_when_three_mod_four(number, prime):
     """
@@ -109,12 +117,14 @@ def mod_sqrt_when_three_mod_four(number, prime):
     ~> Tuple[int, int]
     """
     if prime % 4 != 3:
-        raise ValueError('Use a different mod_sqrt function')
+        raise ValueError("Use a different mod_sqrt function")
 
-    val = pow(number, (prime+1)//4, prime)
+    val = pow(number, (prime + 1) // 4, prime)
     return tuple(sorted([val, prime - val]))
 
-#-----------------------------
+
+# -----------------------------
+
 
 def mod_sqrt_cipolla(number, prime):
     """
@@ -128,14 +138,16 @@ def mod_sqrt_cipolla(number, prime):
     ~> Tuple[int, int]
     """
     for y in range(2, prime):
-        root = (y**2 - number) % prime
+        root = (y ** 2 - number) % prime
         if jacobi(root, prime) == -1:
             break
 
-    val = pow(QuadraticInteger(y, 1, root), (prime+1)//2, prime).real
+    val = pow(QuadraticInteger(y, 1, root), (prime + 1) // 2, prime).real
     return tuple(sorted([val, prime - val]))
 
-#-----------------------------
+
+# -----------------------------
+
 
 def mod_sqrt_tonelli_shanks(number, prime, *params):
     """
@@ -150,7 +162,7 @@ def mod_sqrt_tonelli_shanks(number, prime, *params):
     ~> Tuple[int, int]
     """
     if params == ():
-        s, q = padic(prime-1, 2)
+        s, q = padic(prime - 1, 2)
         m = len(bin(prime)[2:])
     else:
         s, q, m = params
@@ -162,14 +174,16 @@ def mod_sqrt_tonelli_shanks(number, prime, *params):
     m = s
     c = pow(z, q, prime)
     t = pow(number, q, prime)
-    val = pow(number, (q+1)//2, prime)
+    val = pow(number, (q + 1) // 2, prime)
 
     while t != 1:
         m, c, t, val = _tonelli_shanks_helper(m, c, t, val, prime)
 
     return tuple(sorted([val, prime - val]))
 
-#=============================
+
+# =============================
+
 
 def _tonelli_shanks_helper(m, c, t, val, prime):
     _t = t
@@ -178,10 +192,9 @@ def _tonelli_shanks_helper(m, c, t, val, prime):
         if _t == 1:
             break
 
-    b = pow(c, 2**(m - _m - 1), prime)
+    b = pow(c, 2 ** (m - _m - 1), prime)
     _c = pow(b, 2, prime)
     _t = (t * _c) % prime
     _val = (val * b) % prime
 
     return _m, _c, _t, _val
-

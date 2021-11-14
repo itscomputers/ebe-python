@@ -1,20 +1,22 @@
 #   lib/factorization/four_squares.py
 #   - module to express integer as sum of four squares
 
-#===========================================================
+# ===========================================================
 from functools import reduce
 
 from ..basic import jacobi
 from ..types import QuaternionInteger
 from .main import factor, square_and_square_free
 from .two_squares import gaussian_divisor
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'quaternion_descent',
-    'quaternion_divisor',
-    'four_squares',
+    "quaternion_descent",
+    "quaternion_divisor",
+    "four_squares",
 ]
-#===========================================================
+# ===========================================================
+
 
 def quaternion_descent(quaternion_integer, prime):
     """
@@ -34,11 +36,12 @@ def quaternion_descent(quaternion_integer, prime):
     m_q = QuaternionInteger(m, 0, 0, 0)
 
     return quaternion_descent(
-        (quaternion_integer.conjugate * (quaternion_integer % m_q)) // m_q,
-        prime
+        (quaternion_integer.conjugate * (quaternion_integer % m_q)) // m_q, prime
     )
 
-#-----------------------------
+
+# -----------------------------
+
 
 def quaternion_divisor(prime):
     """
@@ -69,7 +72,9 @@ def quaternion_divisor(prime):
 
     return quaternion_descent(QuaternionInteger(s, t, 1, 0), prime)
 
-#-----------------------------
+
+# -----------------------------
+
 
 def four_squares_from_factorization(factorization):
     """
@@ -82,24 +87,24 @@ def four_squares_from_factorization(factorization):
     """
     square, square_free = square_and_square_free(factorization)
     quaternion_square_free = reduce(
-        lambda x, y: x * y,
-        map(quaternion_divisor, square_free.keys()),
-        1
+        lambda x, y: x * y, map(quaternion_divisor, square_free.keys()), 1
     )
 
     square_root = reduce(
-        lambda x, y: x * y,
-        map(lambda z: z[0] ** (z[1] // 2), square.items()),
-        1
+        lambda x, y: x * y, map(lambda z: z[0] ** (z[1] // 2), square.items()), 1
     )
     quaternion_square = QuaternionInteger(square_root, 0, 0, 0)
 
-    return tuple(sorted(
-        map(abs, (quaternion_square * quaternion_square_free).components),
-        reverse=True
-    ))
+    return tuple(
+        sorted(
+            map(abs, (quaternion_square * quaternion_square_free).components),
+            reverse=True,
+        )
+    )
 
-#-----------------------------
+
+# -----------------------------
+
 
 def four_squares(number_or_factorization):
     """
@@ -117,4 +122,3 @@ def four_squares(number_or_factorization):
         factorization = number_or_factorization
 
     return four_squares_from_factorization(factorization)
-

@@ -1,27 +1,29 @@
 #   lib/primality/main.py
 #   - module for primality testing and applications
 
-#===========================================================
+# ===========================================================
 from functools import reduce
 
 from ..config import default
 from ..basic import prime_to
 from .lucas import lucas_test
 from .miller_rabin import miller_rabin_test, miller_rabin_max_cutoff
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'is_prime',
-    'next_prime_gen',
-    'next_prime',
-    'next_primes',
-    'primes_in_range',
-    'prev_prime_gen',
-    'prev_prime',
-    'next_twin_primes_gen',
-    'next_twin_primes',
-    'goldbach_partition',
+    "is_prime",
+    "next_prime_gen",
+    "next_prime",
+    "next_primes",
+    "primes_in_range",
+    "prev_prime_gen",
+    "prev_prime",
+    "next_twin_primes_gen",
+    "next_twin_primes",
+    "goldbach_partition",
 ]
-#===========================================================
+# ===========================================================
+
 
 def is_prime(number, mr_wit=None, l_wit=None):
     """
@@ -41,19 +43,21 @@ def is_prime(number, mr_wit=None, l_wit=None):
         return False
 
     if number < miller_rabin_max_cutoff():
-        return miller_rabin_test(number, 1) == 'prime'
+        return miller_rabin_test(number, 1) == "prime"
 
-    mr_wit = mr_wit or default('miller_rabin_witness_count')
-    if miller_rabin_test(number, mr_wit) == 'composite':
+    mr_wit = mr_wit or default("miller_rabin_witness_count")
+    if miller_rabin_test(number, mr_wit) == "composite":
         return False
 
-    l_wit = l_wit or default('lucas_witness_pair_count')
-    if lucas_test(number, l_wit) == 'composite':
+    l_wit = l_wit or default("lucas_witness_pair_count")
+    if lucas_test(number, l_wit) == "composite":
         return False
 
     return True
 
-#=============================
+
+# =============================
+
 
 def next_prime_gen(number, sieve_primes=None):
     """
@@ -63,14 +67,11 @@ def next_prime_gen(number, sieve_primes=None):
     + sieve_primes: List[int] --primes used in sieving block
     ~> Iterator[int]
     """
-    sieve_primes = sieve_primes or default('sieve_primes')
+    sieve_primes = sieve_primes or default("sieve_primes")
 
     start = max(number, 1)
     diameter = reduce(lambda x, y: x * y, sieve_primes, 1)
-    block = [
-        start - start % diameter + x \
-            for x in prime_to({p : 1 for p in sieve_primes})
-    ]
+    block = [start - start % diameter + x for x in prime_to({p: 1 for p in sieve_primes})]
 
     for p in sieve_primes:
         if number < p:
@@ -84,7 +85,9 @@ def next_prime_gen(number, sieve_primes=None):
                 yield y
         shift += 1
 
-#-----------------------------
+
+# -----------------------------
+
 
 def next_prime(number, sieve_primes=None):
     """
@@ -96,7 +99,9 @@ def next_prime(number, sieve_primes=None):
     """
     return next(next_prime_gen(number, sieve_primes))
 
-#-----------------------------
+
+# -----------------------------
+
 
 def next_primes(number, k, sieve_primes=None):
     """
@@ -110,7 +115,9 @@ def next_primes(number, k, sieve_primes=None):
     gen = next_prime_gen(number, sieve_primes)
     return [next(gen) for _ in range(k)]
 
-#-----------------------------
+
+# -----------------------------
+
 
 def primes_in_range(lower_bound, upper_bound, sieve_primes=None):
     """
@@ -133,7 +140,9 @@ def primes_in_range(lower_bound, upper_bound, sieve_primes=None):
 
     return primes
 
-#=============================
+
+# =============================
+
 
 def prev_prime_gen(number, sieve_primes=None):
     """
@@ -143,12 +152,12 @@ def prev_prime_gen(number, sieve_primes=None):
     + sieve_primes: List[int] --primes used in sieving block
     ~> Iterator[int]
     """
-    sieve_primes = sieve_primes or default('sieve_primes')
+    sieve_primes = sieve_primes or default("sieve_primes")
 
     diameter = reduce(lambda x, y: x * y, sieve_primes, 1)
     block = [
-        number - number % diameter + x \
-            for x in reversed(prime_to({p : 1 for p in sieve_primes}))
+        number - number % diameter + x
+        for x in reversed(prime_to({p: 1 for p in sieve_primes}))
     ]
 
     shift = 0
@@ -164,7 +173,9 @@ def prev_prime_gen(number, sieve_primes=None):
         if number > p:
             yield p
 
-#-----------------------------
+
+# -----------------------------
+
 
 def prev_prime(number, sieve_primes=None):
     """
@@ -179,7 +190,9 @@ def prev_prime(number, sieve_primes=None):
     except StopIteration:
         return None
 
-#=============================
+
+# =============================
+
 
 def next_twin_primes_gen(number, sieve_primes=None):
     """
@@ -196,9 +209,11 @@ def next_twin_primes_gen(number, sieve_primes=None):
         while q != p + 2:
             p, q = q, next(gen)
         yield p, q
-        p, q =q, next(gen)
+        p, q = q, next(gen)
 
-#-----------------------------
+
+# -----------------------------
+
 
 def next_twin_primes(number, sieve_primes=None):
     """
@@ -210,7 +225,9 @@ def next_twin_primes(number, sieve_primes=None):
     """
     return next(next_twin_primes_gen(number, sieve_primes))
 
-#=============================
+
+# =============================
+
 
 def goldbach_partition(number, sieve_primes=None):
     """
@@ -223,13 +240,13 @@ def goldbach_partition(number, sieve_primes=None):
     ~> Union[Tuple[int, int], Tuple[int, int, int]]
     """
     if number < 4:
-        raise ValueError('Must be at least 4')
+        raise ValueError("Must be at least 4")
 
     if number % 2 == 1 and number > 6:
         p = prev_prime(number - 4)
-        return tuple(sorted(
-            [p, *goldbach_partition(number - p, sieve_primes)],
-            reverse=True))
+        return tuple(
+            sorted([p, *goldbach_partition(number - p, sieve_primes)], reverse=True)
+        )
 
     start = number // 2 - 1
     prime_gen = next_prime_gen(start, sieve_primes)
@@ -239,4 +256,3 @@ def goldbach_partition(number, sieve_primes=None):
         p = next(prime_gen)
 
     return tuple(sorted([p, number - p], reverse=True))
-

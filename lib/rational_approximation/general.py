@@ -1,14 +1,16 @@
 #   lib/rational_approximation/general.py
 #   - module for general rational approximation functions
 
-#===========================================================
+# ===========================================================
 from ..types import frac
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'newton_gen',
-    'halley_gen',
+    "newton_gen",
+    "halley_gen",
 ]
-#===========================================================
+# ===========================================================
+
 
 def newton_gen(polynomial, initial):
     """
@@ -25,7 +27,9 @@ def newton_gen(polynomial, initial):
         yield approx
         approx = approx - polynomial.eval(approx) / derivative.eval(approx)
 
-#=============================
+
+# =============================
+
 
 def halley_gen(polynomial, initial):
     """
@@ -46,4 +50,3 @@ def halley_gen(polynomial, initial):
         d2p = second_derivative.eval(approx)
         p_div_dp = p / dp
         approx = approx - p_div_dp / (1 - p_div_dp * d2p / dp / 2)
-

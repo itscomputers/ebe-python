@@ -1,7 +1,7 @@
 #   lib/types/polynomial.py
 #   - class for arithmetic of polynomials
 
-#===========================================================
+# ===========================================================
 from collections import defaultdict
 from functools import reduce
 import re
@@ -10,19 +10,21 @@ from ..basic import gcd, lcm, mod_power
 from ..utils import combine_counters
 from .arithmetic_type import ArithmeticType
 from .rational import frac, Rational
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'add_',
-    'add_constant',
-    'mul_',
-    'mul_constant',
-    'truediv_constant',
-    'floordiv_constant',
-    'mod_constant',
-    'polyn',
-    'Polynomial',
+    "add_",
+    "add_constant",
+    "mul_",
+    "mul_constant",
+    "truediv_constant",
+    "floordiv_constant",
+    "mod_constant",
+    "polyn",
+    "Polynomial",
 ]
-#===========================================================
+# ===========================================================
+
 
 def polyn(*args):
     """Shortcut to create Polynomial from string or tuple of coeffs"""
@@ -33,38 +35,45 @@ def polyn(*args):
             return Polynomial(*args)
     return Polynomial.from_coeff_list(*args)
 
-#=============================
+
+# =============================
+
 
 def add_(a, b):
     """Shortcut to add other polynomials."""
     return combine_counters(a, b)
 
+
 def add_constant(a, b):
     """Shortcut to add rational numbers and integers."""
     return combine_counters(a, {0: b})
 
+
 def mul_(a, b):
     """Shortcut to multiply by other polynomials."""
     return reduce(
-        add_,
-        ({e1 + e2: c1 * c2 for e2, c2 in b.items()} for e1, c1 in a.items()),
-        dict()
+        add_, ({e1 + e2: c1 * c2 for e2, c2 in b.items()} for e1, c1 in a.items()), dict()
     )
+
 
 def mul_constant(a, b):
     """Shortcut to multiply by rational numbers and integers."""
     return dict((k, v * b) for k, v in a.items())
 
+
 def truediv_constant(a, b):
     return dict((k, v * frac(b).inverse) for k, v in a.items())
+
 
 def floordiv_constant(a, b):
     return dict((k, v // b) for k, v in a.items())
 
+
 def mod_constant(a, b):
     return dict((k, v % b) for k, v in a.items())
 
-#=============================
+
+# =============================
 
 
 class Polynomial(ArithmeticType):
@@ -72,23 +81,25 @@ class Polynomial(ArithmeticType):
     """Polynomial class with polynomial arithmetic"""
 
     def __init__(self, coeffs=dict()):
-        self.coeffs = {e : frac(c) for (e, c) in coeffs.items() \
-            if type(e) is int and e >= 0 and c != 0}
+        self.coeffs = {
+            e: frac(c)
+            for (e, c) in coeffs.items()
+            if type(e) is int and e >= 0 and c != 0
+        }
         self.degree = self._degree()
         self.leading_coeff = self._leading_coeff()
         self.monic = self.leading_coeff == 1
 
     def __repr__(self):
         if self.coeffs == dict():
-            return '0'
-        representation = ' + '.join(
-            _exp_coeff_to_term(e, c) \
-            for (e, c) in sorted(self.coeffs.items())
+            return "0"
+        representation = " + ".join(
+            _exp_coeff_to_term(e, c) for (e, c) in sorted(self.coeffs.items())
         )
 
-        return representation.replace(' + -', ' - ')
+        return representation.replace(" + -", " - ")
 
-    #=========================
+    # =========================
 
     @classmethod
     def from_string(self, string):
@@ -98,7 +109,7 @@ class Polynomial(ArithmeticType):
     def from_coeff_list(self, *coeff_list):
         return Polynomial({e: c for e, c in enumerate(coeff_list)})
 
-    #=========================
+    # =========================
 
     def _degree(self):
         if self.coeffs == dict():
@@ -110,7 +121,7 @@ class Polynomial(ArithmeticType):
             return 0
         return self.coeffs[self.degree]
 
-    #=========================
+    # =========================
 
     def _eq_Polynomial(self, other):
         return self.coeffs == other.coeffs
@@ -131,10 +142,10 @@ class Polynomial(ArithmeticType):
     def _gt_Polynomial(self, other):
         return self.degree > other.degree
 
-    #=========================
+    # =========================
 
     def __neg__(self):
-        return Polynomial({e : -c for (e, c) in self.coeffs.items()})
+        return Polynomial({e: -c for (e, c) in self.coeffs.items()})
 
     def canonical(self):
         if self.leading_coeff < 0:
@@ -147,18 +158,23 @@ class Polynomial(ArithmeticType):
 
         return Polynomial(coeffs).canonical()
 
-    #=========================
+    # =========================
 
     def eval(self, value):
-        return sum(map(lambda x: x[1] * value**x[0], self.coeffs.items()))
+        return sum(map(lambda x: x[1] * value ** x[0], self.coeffs.items()))
 
     def mod_eval(self, value, modulus):
-        return sum(map(
-            lambda x: (x[1] * mod_power(value, x[0], modulus)),
-            self.coeffs.items()
-        )) % modulus
+        return (
+            sum(
+                map(
+                    lambda x: (x[1] * mod_power(value, x[0], modulus)),
+                    self.coeffs.items(),
+                )
+            )
+            % modulus
+        )
 
-    #=========================
+    # =========================
 
     def derivative(self, order=None):
         if order == 0:
@@ -174,14 +190,12 @@ class Polynomial(ArithmeticType):
         return deriv.derivative(order - 1)
 
     def integral(self, constant=0):
-        return Polynomial(
-            dict((
-                e + 1,
-                c / frac(e + 1)
-            ) for (e, c) in self.coeffs.items())
-        ) + constant
+        return (
+            Polynomial(dict((e + 1, c / frac(e + 1)) for (e, c) in self.coeffs.items()))
+            + constant
+        )
 
-    #=========================
+    # =========================
 
     def _add_int(self, other):
         return self.__class__(add_constant(self.coeffs, other))
@@ -192,7 +206,7 @@ class Polynomial(ArithmeticType):
     def _add_Polynomial(self, other):
         return Polynomial(add_(self.coeffs, other.coeffs))
 
-    #=========================
+    # =========================
 
     def _mul_int(self, other):
         return self.__class__(mul_constant(self.coeffs, other))
@@ -206,7 +220,7 @@ class Polynomial(ArithmeticType):
     def __rmul__(self, other):
         return self * other
 
-    #=========================
+    # =========================
 
     def div_with_remainder(self, other):
         quotient_dict = dict()
@@ -218,7 +232,7 @@ class Polynomial(ArithmeticType):
             remainder = remainder - other * Polynomial({exp: coeff})
         return Polynomial(quotient_dict), remainder
 
-    #=========================
+    # =========================
 
     def _truediv_int(self, other):
         return Polynomial(truediv_constant(self.coeffs, other))
@@ -226,7 +240,7 @@ class Polynomial(ArithmeticType):
     def _truediv_Rational(self, other):
         return Polynomial(truediv_constant(self.coeffs, other))
 
-    #=========================
+    # =========================
 
     def _floordiv_int(self, other):
         return self.__class__(floordiv_constant(self.coeffs, other))
@@ -243,7 +257,7 @@ class Polynomial(ArithmeticType):
     def _rfloordiv_Rational(self, other):
         return Polynomial({0: other}) // self
 
-    #=========================
+    # =========================
 
     def _mod_int(self, other):
         return self.__class__(mod_constant(self.coeffs, other))
@@ -254,7 +268,7 @@ class Polynomial(ArithmeticType):
     def _mod_Polynomial(self, other):
         return self.div_with_remainder(other)[1]
 
-    #=========================
+    # =========================
 
     def _inv_pow_int(self, other):
         if self.degree == 0:
@@ -264,23 +278,28 @@ class Polynomial(ArithmeticType):
     def _zero_pow_int(self, other):
         return self.__class__({0: 1})
 
-#===========================================================
+
+# ===========================================================
+
 
 def _split_string_into_terms(string):
-    return string.replace('-', '+-').replace(' ', '').split('+')
+    return string.replace("-", "+-").replace(" ", "").split("+")
+
 
 def _term_pattern():
     """Pattern for polynomial string term."""
-    return re.compile(r'^([\-])?(\d+\/\d+|\d+)?\*?([A-Za-z]*)?\^?(\d+)?')
+    return re.compile(r"^([\-])?(\d+\/\d+|\d+)?\*?([A-Za-z]*)?\^?(\d+)?")
+
 
 def _term_to_dict(term, pattern=_term_pattern()):
     sign, coeff, var, exp = pattern.findall(term)[0]
-    coeff = frac('{}{}'.format(sign, 1 if coeff == '' else coeff))
-    if var == '':
+    coeff = frac("{}{}".format(sign, 1 if coeff == "" else coeff))
+    if var == "":
         return {0: coeff}
-    if exp == '':
+    if exp == "":
         return {1: coeff}
     return {int(exp): coeff}
+
 
 def _string_to_dict(string):
     pattern = _term_pattern()
@@ -288,26 +307,27 @@ def _string_to_dict(string):
         add_,
         map(
             lambda term: _term_to_dict(term, pattern),
-            filter(lambda term: term != '', _split_string_into_terms(string))
+            filter(lambda term: term != "", _split_string_into_terms(string)),
         ),
-        dict()
+        dict(),
     )
     return Polynomial(coeffs)
 
-#-----------------------------
+
+# -----------------------------
+
 
 def _exp_coeff_to_term(exponent, coeff):
     """Convert exponent and coeff to string term."""
     if exponent == 0:
-        return '{}'.format(coeff)
+        return "{}".format(coeff)
 
     if abs(coeff) == 1:
-        _coeff = format(coeff).replace('1', '')
+        _coeff = format(coeff).replace("1", "")
     else:
-        _coeff = '{}'.format(coeff)
+        _coeff = "{}".format(coeff)
 
     if exponent == 1:
-        return '{} x'.format(_coeff)
+        return "{} x".format(_coeff)
 
-    return '{} x^{}'.format(_coeff, exponent)
-
+    return "{} x^{}".format(_coeff, exponent)

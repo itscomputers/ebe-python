@@ -1,15 +1,17 @@
 #   lib/rational_approximation/pi.py
 #   - module for rational approximation of pi
 
-#===========================================================
+# ===========================================================
 from ..config import default
 from ..types import Rational
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'ramanujan_hardy',
-    'pi',
+    "ramanujan_hardy",
+    "pi",
 ]
-#===========================================================
+# ===========================================================
+
 
 def ramanujan_hardy(sqrt_digits):
     """
@@ -28,11 +30,13 @@ def ramanujan_hardy(sqrt_digits):
         yield multiplier * value
         k = k + 1
         for j in range(4):
-            multiplicative_term = multiplicative_term * (4*k - j) / 396 / k
+            multiplicative_term = multiplicative_term * (4 * k - j) / 396 / k
         linear_term = linear_term + 26390
         value = value + multiplicative_term * linear_term
 
-#=============================
+
+# =============================
+
 
 def pi(num_digits=None):
     """
@@ -42,7 +46,7 @@ def pi(num_digits=None):
     ~> Rational
     """
     if num_digits is None:
-        num_digits = default('pi_digits')
+        num_digits = default("pi_digits")
 
     rh = ramanujan_hardy(num_digits)
 
@@ -50,4 +54,3 @@ def pi(num_digits=None):
         next(rh)
 
     return next(rh).inverse
-

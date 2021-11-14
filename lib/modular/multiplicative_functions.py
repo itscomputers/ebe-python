@@ -1,17 +1,19 @@
 #   lib/modular/multiplicative_functions.py
 #   - module for multiplicative functions relative to a modulus
 
-#===========================================================
+# ===========================================================
 from functools import reduce
 
 from ..basic import lcm
 from ..factorization import factor
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'carmichael_lambda',
-    'euler_phi',
+    "carmichael_lambda",
+    "euler_phi",
 ]
-#===========================================================
+# ===========================================================
+
 
 def _phi(prime_power_pair):
     """
@@ -21,7 +23,8 @@ def _phi(prime_power_pair):
     ~> int
     """
     prime, exp = prime_power_pair
-    return prime**(exp - 1) * (prime - 1)
+    return prime ** (exp - 1) * (prime - 1)
+
 
 def _lambda(prime_power_pair):
     """
@@ -34,7 +37,9 @@ def _lambda(prime_power_pair):
         return _phi(prime_power_pair) // 2
     return _phi(prime_power_pair)
 
-#=============================
+
+# =============================
+
 
 def euler_phi_from_factorization(factorization):
     """
@@ -45,7 +50,9 @@ def euler_phi_from_factorization(factorization):
     """
     return reduce(lambda x, y: x * y, map(_phi, factorization.items()), 1)
 
-#-----------------------------
+
+# -----------------------------
+
 
 def euler_phi(number_or_factorization):
     """
@@ -65,7 +72,9 @@ def euler_phi(number_or_factorization):
 
     return euler_phi_from_factorization(factorization)
 
-#=============================
+
+# =============================
+
 
 def carmichael_lambda_from_factorization(factorization):
     """
@@ -76,7 +85,9 @@ def carmichael_lambda_from_factorization(factorization):
     """
     return lcm(*map(_lambda, factorization.items()))
 
-#-----------------------------
+
+# -----------------------------
+
 
 def carmichael_lambda(number_or_factorization):
     """
@@ -95,4 +106,3 @@ def carmichael_lambda(number_or_factorization):
         factorization = number_or_factorization
 
     return carmichael_lambda_from_factorization(factorization)
-

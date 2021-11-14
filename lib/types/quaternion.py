@@ -1,71 +1,77 @@
 #   lib/types/quaternion.py
 #   - class for arithmetic of quaternions
 
-#===========================================================
+# ===========================================================
 import operator as op
 
 from .rational import frac
 from .arithmetic_type import ArithmeticType
 from .gaussian_integer import GaussianInteger
 from .gaussian_rational import GaussianRational
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'add_',
-    'add_constant',
-    'mul_',
-    'mul_constant',
-    'truediv_constant',
-    'floordiv_',
-    'floordiv_constant',
-    'Quaternion',
+    "add_",
+    "add_constant",
+    "mul_",
+    "mul_constant",
+    "truediv_constant",
+    "floordiv_",
+    "floordiv_constant",
+    "Quaternion",
 ]
-#===========================================================
+# ===========================================================
+
 
 def add_(a, b):
     """Shortcut to add other quaternions."""
     return map(op.__add__, a.components, b.components)
 
+
 def add_constant(a, b):
     """Shortcut to add rational numbers and integers."""
     return (a.components[0] + b, *a.components[1:])
 
+
 def _mul_helper(index, a, b):
-    sign = [(1, -1, -1, -1),
-            (1, 1, 1, -1),
-            (1, -1, 1, 1),
-            (1, 1, -1, 1)][index]
-    b_ind = [(0, 1, 2, 3),
-            (1, 0, 3, 2),
-            (2, 3, 0, 1),
-            (3, 2, 1, 0)][index]
-    return sum(map(
-        lambda x, y, z: x * y * z,
-        sign,
-        a.components,
-        (b.components[i] for i in b_ind)
-    ))
+    sign = [(1, -1, -1, -1), (1, 1, 1, -1), (1, -1, 1, 1), (1, 1, -1, 1)][index]
+    b_ind = [(0, 1, 2, 3), (1, 0, 3, 2), (2, 3, 0, 1), (3, 2, 1, 0)][index]
+    return sum(
+        map(
+            lambda x, y, z: x * y * z,
+            sign,
+            a.components,
+            (b.components[i] for i in b_ind),
+        )
+    )
+
 
 def mul_(a, b):
     """Shortcut to multiply by other quaternions."""
     return (_mul_helper(index, a, b) for index in range(4))
 
+
 def mul_constant(a, b):
     """Shortcut to multiply by rational numbers and integers."""
     return map(lambda x: x * b, a.components)
+
 
 def truediv_constant(a, b):
     """Shortcut to divide by rational numbers and integers."""
     return map(lambda x: x / frac(b), a.components)
 
+
 def floordiv_(a, b):
     """Shortcut to floor divide by other quaternions."""
     return (a / b).round.components
+
 
 def floordiv_constant(a, b):
     """Shortcut to floor divide by rational numbers and integers."""
     return map(lambda x: x // b, a.components)
 
-#===========================================================
+
+# ===========================================================
 
 
 class Quaternion(ArithmeticType):
@@ -107,7 +113,7 @@ class Quaternion(ArithmeticType):
     def is_complex(self):
         return set(self.components[2:]) == set([0])
 
-    #=========================
+    # =========================
 
     @property
     def _real_disp(self):
@@ -116,28 +122,28 @@ class Quaternion(ArithmeticType):
         return format(self.r)
 
     def _other_disp(self, ch):
-        val = eval('self.{}'.format(ch))
+        val = eval("self.{}".format(ch))
         if val == 0:
             return None
         if val == 1:
             return ch
         if val == -1:
-            return '-{}'.format(ch)
-        return '{} {}'.format(val, ch)
+            return "-{}".format(ch)
+        return "{} {}".format(val, ch)
 
     def __repr__(self):
         displays = filter(
             lambda n: n is not None,
             [
                 self._real_disp,
-                self._other_disp('i'),
-                self._other_disp('j'),
-                self._other_disp('k')
-            ]
+                self._other_disp("i"),
+                self._other_disp("j"),
+                self._other_disp("k"),
+            ],
         )
-        return ' + '.join(displays).replace(' + -', ' - ')
+        return " + ".join(displays).replace(" + -", " - ")
 
-    #=========================
+    # =========================
 
     @classmethod
     def from_gaussian_rational(self, gaussian_rational):
@@ -149,7 +155,7 @@ class Quaternion(ArithmeticType):
         """Build from GaussianInteger."""
         return Quaternion(*gaussian_integer.components, 0, 0)
 
-    #=========================
+    # =========================
 
     def _eq_int(self, other):
         return self.components == (other, 0, 0, 0)
@@ -160,7 +166,7 @@ class Quaternion(ArithmeticType):
     def _eq_Quaternion(self, other):
         return self.components == other.components
 
-    #=========================
+    # =========================
 
     def __neg__(self):
         return self.__class__(*map(op.__neg__, self.components))
@@ -171,7 +177,7 @@ class Quaternion(ArithmeticType):
 
     @property
     def norm(self):
-        return sum(map(lambda x: x**2, self.components))
+        return sum(map(lambda x: x ** 2, self.components))
 
     @property
     def inverse(self):
@@ -179,11 +185,9 @@ class Quaternion(ArithmeticType):
 
     @property
     def round(self):
-        return self.__class__(
-            *map(lambda x: x.round_prefer_toward_zero, self.components)
-        )
+        return self.__class__(*map(lambda x: x.round_prefer_toward_zero, self.components))
 
-    #=========================
+    # =========================
 
     def _add_int(self, other):
         return self.__class__(*add_constant(self, other))
@@ -194,7 +198,7 @@ class Quaternion(ArithmeticType):
     def _add_Quaternion(self, other):
         return Quaternion(*add_(self, other))
 
-    #=========================
+    # =========================
 
     def _mul_int(self, other):
         return self.__class__(*mul_constant(self, other))
@@ -211,7 +215,7 @@ class Quaternion(ArithmeticType):
     def _rmul_Rational(self, other):
         return Quaternion(*mul_constant(self, other))
 
-    #=========================
+    # =========================
 
     def _truediv_int(self, other):
         return Quaternion(*truediv_constant(self, other))
@@ -228,7 +232,7 @@ class Quaternion(ArithmeticType):
     def _rtruediv_Rational(self, other):
         return Quaternion(other, 0, 0, 0) / self
 
-    #=========================
+    # =========================
 
     def _floordiv_int(self, other):
         return self.__class__(*floordiv_constant(self, other))
@@ -245,7 +249,7 @@ class Quaternion(ArithmeticType):
     def _rfloordiv_Rational(self, other):
         return Quaternion(other, 0, 0, 0) // self
 
-    #=========================
+    # =========================
 
     def __mod__(self, other):
         return self - (self // other) * other
@@ -253,11 +257,10 @@ class Quaternion(ArithmeticType):
     def __rmod__(self, other):
         return other - (other // self) * self
 
-    #=========================
+    # =========================
 
     def _inv_pow_int(self, other):
         return self.__pow__(-other).inverse
 
     def _zero_pow_int(self, other):
         return self.__class__(1, 0, 0, 0)
-

@@ -1,18 +1,20 @@
 #   lib/basic/division
 #   - module for division algorithm and its applications
 
-#===========================================================
+# ===========================================================
 import math
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'div',
-    'div_with_small_remainder',
-    'gcd',
-    'lcm',
-    'bezout',
-    'padic',
+    "div",
+    "div_with_small_remainder",
+    "gcd",
+    "lcm",
+    "bezout",
+    "padic",
 ]
-#===========================================================
+# ===========================================================
+
 
 def div(a, b):
     """
@@ -35,7 +37,9 @@ def div(a, b):
 
     return quotient, remainder
 
-#-----------------------------
+
+# -----------------------------
+
 
 def div_with_small_remainder(a, b):
     """
@@ -58,7 +62,9 @@ def div_with_small_remainder(a, b):
 
     return quotient, remainder
 
-#=============================
+
+# =============================
+
 
 def gcd(*numbers):
     """
@@ -75,7 +81,7 @@ def gcd(*numbers):
         return gcd(*filter(lambda x: x != 0, numbers))
 
     if len(numbers) == 0:
-        raise ValueError('gcd(0, 0) is undefined')
+        raise ValueError("gcd(0, 0) is undefined")
 
     if len(numbers) == 1:
         return abs(*numbers)
@@ -86,7 +92,9 @@ def gcd(*numbers):
 
     return math.gcd(*numbers)
 
-#-----------------------------
+
+# -----------------------------
+
 
 def lcm(*numbers):
     """
@@ -109,7 +117,9 @@ def lcm(*numbers):
     a, b = numbers
     return abs(a // gcd(a, b) * b)
 
-#=============================
+
+# =============================
+
 
 def bezout(a, b):
     """
@@ -123,7 +133,7 @@ def bezout(a, b):
     ~> (x, y): Tuple[int, int]
     """
     if (a, b) == (0, 0):
-        raise ValueError('bezout(0, 0) is undefined')
+        raise ValueError("bezout(0, 0) is undefined")
     if b == 0:
         return (1, 0) if a > 0 else (-1, 0)
     if b < 0:
@@ -137,13 +147,18 @@ def bezout(a, b):
     X = (0, 1)
     Y = (1, -q)
     while r != 0:
-        a, b, = b, r
+        a, b, = (
+            b,
+            r,
+        )
         q, r = div(a, b)
         X, Y = advance(*X, q), advance(*Y, q)
 
     return X[0], Y[0]
 
-#=============================
+
+# =============================
+
 
 def padic(number, base):
     """
@@ -159,10 +174,10 @@ def padic(number, base):
     ~> (exp, unit): Tuple[int, int]
     """
     if number == 0:
-        raise ValueError('number must be nonzero')
+        raise ValueError("number must be nonzero")
 
     if base < 2:
-        raise ValueError('base must be at least 2')
+        raise ValueError("base must be at least 2")
 
     exp = 0
     unit = number
@@ -171,4 +186,3 @@ def padic(number, base):
         exp += 1
 
     return exp, unit
-

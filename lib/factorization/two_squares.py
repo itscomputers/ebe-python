@@ -1,19 +1,21 @@
 #   lib/factorization/two_squares.py
 #   - module to express integer as sum of two squares
 
-#===========================================================
+# ===========================================================
 from functools import reduce
 
 from ..modular import mod_sqrt
 from ..types import GaussianInteger
 from .main import factor, square_and_square_free
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'gaussian_divisor',
-    'is_sum_of_two_squares',
-    'two_squares',
+    "gaussian_divisor",
+    "is_sum_of_two_squares",
+    "two_squares",
 ]
-#===========================================================
+# ===========================================================
+
 
 def gaussian_divisor(prime):
     """
@@ -26,12 +28,14 @@ def gaussian_divisor(prime):
     ~> GaussianInteger
     """
     if prime % 4 == 3:
-        raise ValueError('{} does not split over Z[i]'.format(prime))
+        raise ValueError("{} does not split over Z[i]".format(prime))
 
     s = min(mod_sqrt(-1, prime))
     return GaussianInteger(prime, 0).gcd(GaussianInteger(s, 1))
 
-#-----------------------------
+
+# -----------------------------
+
 
 def is_sum_of_two_squares(factorization):
     """
@@ -47,7 +51,9 @@ def is_sum_of_two_squares(factorization):
     square, square_free = square_and_square_free(factorization)
     return 3 not in map(lambda x: x % 4, square_free.keys())
 
-#-----------------------------
+
+# -----------------------------
+
 
 def two_squares_from_factorization(factorization):
     """
@@ -64,24 +70,23 @@ def two_squares_from_factorization(factorization):
         return None
 
     gaussian_square_free = reduce(
-        lambda x, y: x * y,
-        map(gaussian_divisor, square_free.keys()),
-        1
+        lambda x, y: x * y, map(gaussian_divisor, square_free.keys()), 1
     )
 
     square_root = reduce(
-        lambda x, y: x * y,
-        map(lambda z: z[0] ** (z[1] // 2), square.items()),
-        1
+        lambda x, y: x * y, map(lambda z: z[0] ** (z[1] // 2), square.items()), 1
     )
     gaussian_square = GaussianInteger(square_root, 0)
 
-    return tuple(sorted(
-        map(abs, (gaussian_square * gaussian_square_free).components),
-        reverse=True
-    ))
+    return tuple(
+        sorted(
+            map(abs, (gaussian_square * gaussian_square_free).components), reverse=True
+        )
+    )
 
-#-----------------------------
+
+# -----------------------------
+
 
 def two_squares(number_or_factorization):
     """
@@ -99,4 +104,3 @@ def two_squares(number_or_factorization):
         factorization = number_or_factorization
 
     return two_squares_from_factorization(factorization)
-

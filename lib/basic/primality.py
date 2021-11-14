@@ -1,18 +1,20 @@
 #   lib/basic/primality.py
 #   - module for basic functions related to prime numbers
 
-#===========================================================
+# ===========================================================
 import itertools as it
 
 from .sqrt import integer_sqrt
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'prime_gen',
-    'iter_primes_up_to',
-    'primes_up_to',
-    'is_prime__naive',
+    "prime_gen",
+    "iter_primes_up_to",
+    "primes_up_to",
+    "is_prime__naive",
 ]
-#===========================================================
+# ===========================================================
+
 
 def prime_gen():
     """
@@ -26,7 +28,9 @@ def prime_gen():
         primes = filter(prime.__rmod__, primes)
         yield prime
 
-#-----------------------------
+
+# -----------------------------
+
 
 def iter_primes_up_to(number):
     """
@@ -39,7 +43,9 @@ def iter_primes_up_to(number):
     """
     return it.takewhile(lambda x: x <= number, prime_gen())
 
-#-----------------------------
+
+# -----------------------------
+
 
 def primes_up_to(max_value, primes=None, numbers_left=None):
     """
@@ -61,16 +67,16 @@ def primes_up_to(max_value, primes=None, numbers_left=None):
     except StopIteration:
         return primes
 
-    if min_value**2 >= max_value:
+    if min_value ** 2 >= max_value:
         return primes + [min_value] + list(numbers_left)
 
     return primes_up_to(
-        max_value,
-        primes + [min_value],
-        filter(min_value.__rmod__, numbers_left)
+        max_value, primes + [min_value], filter(min_value.__rmod__, numbers_left)
     )
 
-#=============================
+
+# =============================
+
 
 def is_prime__naive(number, numbers_left=None):
     """
@@ -97,8 +103,4 @@ def is_prime__naive(number, numbers_left=None):
     if number % min_value == 0:
         return False
 
-    return is_prime__naive(
-        number,
-        filter(min_value.__rmod__, numbers_left)
-    )
-
+    return is_prime__naive(number, filter(min_value.__rmod__, numbers_left))

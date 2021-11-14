@@ -1,7 +1,7 @@
 #   lib/factorization/main.py
 #   - module for main factorization functionality
 
-#===========================================================
+# ===========================================================
 from collections import Counter
 from functools import reduce
 
@@ -10,17 +10,19 @@ from ..basic import integer_sqrt, iter_primes_up_to, padic
 from ..primality import is_prime
 from ..utils import combine_counters
 from .algorithms import pollard_rho_gen, pollard_p_minus_one_gen
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'find_divisor',
-    'factor_trivial',
-    'factor_nontrivial',
-    'factor',
-    'divisors',
-    'square_and_square_free',
-    'number_from_factorization',
+    "find_divisor",
+    "factor_trivial",
+    "factor_nontrivial",
+    "factor",
+    "divisors",
+    "square_and_square_free",
+    "number_from_factorization",
 ]
-#===========================================================
+# ===========================================================
+
 
 def find_divisor(number, rho_seeds=None, minus_seeds=None):
     """
@@ -39,20 +41,21 @@ def find_divisor(number, rho_seeds=None, minus_seeds=None):
     divisor_found = False
     while not divisor_found:
         for value in divisor_search.values():
-            divisor = next(value['generator'])
+            divisor = next(value["generator"])
             if divisor == number:
-                value['generator'] = _trivial_generator()
+                value["generator"] = _trivial_generator()
             else:
                 if divisor > 1:
                     divisor_found = True
-                value['divisor'] = divisor
+                value["divisor"] = divisor
 
-    return set(filter(
-        lambda x: x != 1,
-        map(lambda x: x['divisor'], divisor_search.values())
-    ))
+    return set(
+        filter(lambda x: x != 1, map(lambda x: x["divisor"], divisor_search.values()))
+    )
 
-#=============================
+
+# =============================
+
 
 def factor_trivial(number, prime_base=None):
     """
@@ -65,7 +68,7 @@ def factor_trivial(number, prime_base=None):
     + prime_base: List[int]
     ~> (remaining, factorization): Tuple[int, Dict[int, int]]
     """
-    prime_base = prime_base or iter_primes_up_to(default('prime_base_max'))
+    prime_base = prime_base or iter_primes_up_to(default("prime_base_max"))
     remaining = number
     factorization = dict()
 
@@ -76,7 +79,9 @@ def factor_trivial(number, prime_base=None):
 
     return remaining, factorization
 
-#-----------------------------
+
+# -----------------------------
+
 
 def factor_nontrivial(number, rho_seeds=None, minus_seeds=None):
     """
@@ -94,10 +99,10 @@ def factor_nontrivial(number, rho_seeds=None, minus_seeds=None):
         return dict()
 
     if is_prime(number):
-        return {number : 1}
+        return {number: 1}
 
     sqrt_number = integer_sqrt(number)
-    if sqrt_number**2 == number:
+    if sqrt_number ** 2 == number:
         return combine_counters(dict(), factor_nontrivial(sqrt_number), 1, 2)
 
     remaining = number
@@ -107,15 +112,14 @@ def factor_nontrivial(number, rho_seeds=None, minus_seeds=None):
     for divisor in divisors:
         exp, remaining = padic(remaining, divisor)
         factorization = combine_counters(
-            factorization,
-            factor_nontrivial(divisor),
-            1,
-            exp
+            factorization, factor_nontrivial(divisor), 1, exp
         )
 
     return combine_counters(factorization, factor_nontrivial(remaining))
 
-#-----------------------------
+
+# -----------------------------
+
 
 def factor(number, prime_base=None, rho_seeds=None, minus_seeds=None):
     """
@@ -135,7 +139,9 @@ def factor(number, prime_base=None, rho_seeds=None, minus_seeds=None):
 
     return {**trivial_divisors, **nontrivial_divisors}
 
-#=============================
+
+# =============================
+
 
 def divisors_from_factorization(factorization):
     """
@@ -151,7 +157,9 @@ def divisors_from_factorization(factorization):
         divs = divs | set(p * d for d in divs)
     return sorted(divs)
 
-#-----------------------------
+
+# -----------------------------
+
 
 def divisors(number_or_factorization):
     """
@@ -170,7 +178,9 @@ def divisors(number_or_factorization):
 
     return divisors_from_factorization(factorization)
 
-#=============================
+
+# =============================
+
 
 def square_part(factorization):
     """
@@ -181,9 +191,11 @@ def square_part(factorization):
     + factorization: Dict[int, int]
     ~> Dict[int, int]
     """
-    return {k : v - v % 2 for k, v in factorization.items() if v > 1}
+    return {k: v - v % 2 for k, v in factorization.items() if v > 1}
 
-#-----------------------------
+
+# -----------------------------
+
 
 def square_free_part(factorization):
     """
@@ -194,9 +206,11 @@ def square_free_part(factorization):
     + factorization: Dict[int, int]
     ~> Dict[int, int]
     """
-    return {k : 1 for k, v in factorization.items() if v % 2 == 1}
+    return {k: 1 for k, v in factorization.items() if v % 2 == 1}
 
-#-----------------------------
+
+# -----------------------------
+
 
 def square_and_square_free(factorization):
     """
@@ -207,7 +221,9 @@ def square_and_square_free(factorization):
     """
     return square_part(factorization), square_free_part(factorization)
 
-#=============================
+
+# =============================
+
 
 def number_from_factorization(factorization):
     """
@@ -220,7 +236,9 @@ def number_from_factorization(factorization):
     """
     return reduce(lambda x, y: x * y, Counter(factorization).elements(), 1)
 
-#===========================================================
+
+# ===========================================================
+
 
 def _divisor_search_generators(number, rho_seeds, minus_seeds):
     """
@@ -232,17 +250,17 @@ def _divisor_search_generators(number, rho_seeds, minus_seeds):
     ~> Dict[Tuple[int, str], Dict[str, Iterator[int]]]
     """
     divisor_search = dict()
-    for seed in (rho_seeds or default('rho_seeds')):
-        divisor_search[(seed, 'rho')] = {
-            'generator' : pollard_rho_gen(number, seed, lambda x: x**2 + 1)
+    for seed in rho_seeds or default("rho_seeds"):
+        divisor_search[(seed, "rho")] = {
+            "generator": pollard_rho_gen(number, seed, lambda x: x ** 2 + 1)
         }
-    for seed in (minus_seeds or default('minus_seeds')):
-        divisor_search[(seed, 'p-1')] = {
-            'generator' : pollard_p_minus_one_gen(number, seed)
+    for seed in minus_seeds or default("minus_seeds"):
+        divisor_search[(seed, "p-1")] = {
+            "generator": pollard_p_minus_one_gen(number, seed)
         }
     return divisor_search
+
 
 def _trivial_generator():
     while True:
         yield 1
-

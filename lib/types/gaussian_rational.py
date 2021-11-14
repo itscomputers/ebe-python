@@ -1,17 +1,18 @@
 #   lib/types/gaussian_rational.py
 #   - class for arithmetic of gaussian rational numbers
 
-#===========================================================
+# ===========================================================
 import operator as op
 
 from .rational import frac
 from .quadratic import *
 from .quadratic_integer import QuadraticInteger
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'GaussianRational',
+    "GaussianRational",
 ]
-#===========================================================
+# ===========================================================
 
 
 class GaussianRational(Quadratic):
@@ -40,20 +41,20 @@ class GaussianRational(Quadratic):
     def is_complex(self):
         return True
 
-    #=========================
+    # =========================
 
     @property
     def _root_display(self):
-        return '\u2139'
+        return "\u2139"
 
-    #=========================
+    # =========================
 
     @property
     def to_quadratic(self):
         """Cast to Quadratic."""
         return Quadratic(*self.signature)
 
-    #=========================
+    # =========================
 
     def _eq_GaussianRational(self, other):
         return self.components == other.components
@@ -61,7 +62,7 @@ class GaussianRational(Quadratic):
     def _eq_QuadraticInteger(self, other):
         return self.components == other.components
 
-    #=========================
+    # =========================
 
     @property
     def canonical(self):
@@ -74,7 +75,7 @@ class GaussianRational(Quadratic):
 
         return -canonical if canonical.real < 0 else canonical
 
-    #=========================
+    # =========================
 
     def _add_Rational(self, other):
         return GaussianRational(*add_constant(self, other))
@@ -92,7 +93,7 @@ class GaussianRational(Quadratic):
             return self.__class__(*add_(self, other))
         return NotImplemented
 
-    #=========================
+    # =========================
 
     def _mul_Rational(self, other):
         return GaussianRational(*mul_constant(self, other))
@@ -110,7 +111,7 @@ class GaussianRational(Quadratic):
             return self.__class__(*mul_(self, other))
         return NotImplemented
 
-    #=========================
+    # =========================
 
     def _truediv_int(self, other):
         return GaussianRational(*truediv_constant(self, other))
@@ -131,7 +132,7 @@ class GaussianRational(Quadratic):
             return GaussianRational(*truediv_(self, other))
         return NotImplemented
 
-    #=========================
+    # =========================
 
     def _floordiv_GaussianRational(self, other):
         return self.__class__(*floordiv_(self, other))
@@ -146,7 +147,7 @@ class GaussianRational(Quadratic):
             return self.__class__(*floordiv_(self, other))
         return NotImplemented
 
-    #=========================
+    # =========================
 
     def _mod_Rational(self, other):
         return GaussianRational(*mod_constant(self, other))
@@ -159,4 +160,3 @@ class GaussianRational(Quadratic):
 
     def _mod_QuadraticInteger(self, other):
         return self - (self // other) * other
-

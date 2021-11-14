@@ -1,19 +1,21 @@
 #   lib/primality/miller_rabin.py
 #   - module for miller-rabin primality testing
 
-#===========================================================
+# ===========================================================
 from random import randint
 
 from ..basic import padic
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'miller_rabin_witness',
-    'miller_rabin_witnesses',
-    'miller_rabin_test',
-    'miller_rabin_max_cutoff',
-    'miller_rabin_cutoffs',
+    "miller_rabin_witness",
+    "miller_rabin_witnesses",
+    "miller_rabin_test",
+    "miller_rabin_max_cutoff",
+    "miller_rabin_cutoffs",
 ]
-#===========================================================
+# ===========================================================
+
 
 def miller_rabin_witness(number, witness):
     """
@@ -28,24 +30,26 @@ def miller_rabin_witness(number, witness):
     + witness: int
     ~> str
     """
-    exp, rest  = padic(number - 1, 2)
+    exp, rest = padic(number - 1, 2)
     x = pow(witness, rest, number)
 
     if x in [1, number - 1]:
-        return 'probable prime'
+        return "probable prime"
 
     for j in range(exp):
         x = pow(x, 2, number)
 
         if x == number - 1:
-            return 'probable prime'
+            return "probable prime"
 
         if x == 1:
-            return 'composite'
+            return "composite"
 
-    return 'composite'
+    return "composite"
 
-#-----------------------------
+
+# -----------------------------
+
 
 def miller_rabin_witnesses(number, witnesses):
     """
@@ -60,12 +64,14 @@ def miller_rabin_witnesses(number, witnesses):
     ~> str
     """
     for witness in witnesses:
-        if miller_rabin_witness(number, witness) == 'composite':
-            return 'composite'
+        if miller_rabin_witness(number, witness) == "composite":
+            return "composite"
 
-    return 'probable prime'
+    return "probable prime"
 
-#-----------------------------
+
+# -----------------------------
+
 
 def miller_rabin_test(number, num_witnesses):
     """
@@ -82,35 +88,41 @@ def miller_rabin_test(number, num_witnesses):
     ~> str
     """
     if number < 2:
-        raise ValueError('number should be at least 2')
+        raise ValueError("number should be at least 2")
     if number == 2:
-        return 'prime'
+        return "prime"
 
     primality = miller_rabin_witnesses(number, _generate_witnesses(number, num_witnesses))
-    if primality == 'probable prime' and number < miller_rabin_max_cutoff():
-        return 'prime'
+    if primality == "probable prime" and number < miller_rabin_max_cutoff():
+        return "prime"
 
     return primality
 
-#=============================
+
+# =============================
+
 
 def miller_rabin_max_cutoff():
     return 341550071728321
 
+
 def miller_rabin_cutoffs():
-    return ((1, 2),
-            (2047, 3),
-            (1373653, 5),
-            (25326001, 7),
-            (3215031751, 11),
-            (2152302898747, 13),
-            (3474749660383, 17))
+    return (
+        (1, 2),
+        (2047, 3),
+        (1373653, 5),
+        (25326001, 7),
+        (3215031751, 11),
+        (2152302898747, 13),
+        (3474749660383, 17),
+    )
+
 
 def _generate_witnesses(number, num_witnesses):
     """Generate random witnesses for Miller-Rabin test."""
     if number > miller_rabin_max_cutoff():
         if num_witnesses > number:
-            witnesses = set(x for x in range(2, number-1))
+            witnesses = set(x for x in range(2, number - 1))
         else:
             witnesses = set()
             while len(witnesses) < num_witnesses:
@@ -120,4 +132,3 @@ def _generate_witnesses(number, num_witnesses):
         witnesses = set(p for val, p in miller_rabin_cutoffs() if number >= val)
 
     return witnesses
-

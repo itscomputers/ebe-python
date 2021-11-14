@@ -1,13 +1,14 @@
 #   lib/types/quaternion_integer.py
 #   - class for arithmetic of integer quaternions
-#===========================================================
+# ===========================================================
 from ..basic import mod_inverse
 from .quaternion import *
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'QuaternionInteger',
+    "QuaternionInteger",
 ]
-#===========================================================
+# ===========================================================
 
 
 class QuaternionInteger(Quaternion):
@@ -27,7 +28,7 @@ class QuaternionInteger(Quaternion):
     def __init__(self, *components):
         self.components = tuple(map(int, components))
 
-    #=========================
+    # =========================
 
     @property
     def to_quaternion(self):
@@ -39,12 +40,12 @@ class QuaternionInteger(Quaternion):
         """Build from GaussianInteger."""
         return QuaternionInteger(*gaussian_integer.components, 0, 0)
 
-    #=========================
+    # =========================
 
     def _eq_QuaternionInteger(self, other):
         return self.components == other.components
 
-    #=========================
+    # =========================
 
     @property
     def round(self):
@@ -53,12 +54,12 @@ class QuaternionInteger(Quaternion):
     def mod_inverse(self, modulus):
         return (self.conjugate * mod_inverse(self.norm, modulus)) % modulus
 
-    #=========================
+    # =========================
 
     def _add_QuaternionInteger(self, other):
         return QuaternionInteger(*add_(self, other))
 
-    #=========================
+    # =========================
 
     def _mul_QuaternionInteger(self, other):
         return QuaternionInteger(*mul_(self, other))
@@ -66,7 +67,7 @@ class QuaternionInteger(Quaternion):
     def _rmul_Quaternion(self, other):
         return Quaternion(*mul_(other, self))
 
-    #=========================
+    # =========================
 
     def _truediv_QuaternionInteger(self, other):
         return self * other.inverse
@@ -74,7 +75,7 @@ class QuaternionInteger(Quaternion):
     def _rtruediv_Quaternion(self, other):
         return other * self.inverse
 
-    #=========================
+    # =========================
 
     def _floordiv_QuaternionInteger(self, other):
         return QuaternionInteger(*floordiv_(self, other))
@@ -82,8 +83,7 @@ class QuaternionInteger(Quaternion):
     def _rfloordiv_Quaternion(self, other):
         return Quaternion(*floordiv_(other, self))
 
-    #=========================
+    # =========================
 
     def _inv_pow_mod_int(self, other, modulus):
         return self.__pow__(-other, modulus).mod_inverse(modulus)
-

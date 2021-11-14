@@ -1,21 +1,23 @@
 #   lib/basic/modular.py
 #   - module for basic functions related to modular arithmetic
 
-#===========================================================
+# ===========================================================
 from functools import reduce
 import itertools as it
 
 from .division import bezout, gcd, padic
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'jacobi',
-    'euler_criterion',
-    'mod_inverse',
-    'mod_power',
-    'chinese_remainder_theorem',
-    'prime_to',
+    "jacobi",
+    "euler_criterion",
+    "mod_inverse",
+    "mod_power",
+    "chinese_remainder_theorem",
+    "prime_to",
 ]
-#===========================================================
+# ===========================================================
+
 
 def jacobi(a, b):
     """
@@ -26,18 +28,14 @@ def jacobi(a, b):
     ~> int --in [0, 1, -1]
     """
     if b % 2 == 0:
-        raise ValueError('jacobi(_, even) is undefined')
+        raise ValueError("jacobi(_, even) is undefined")
     if b == 1:
         return 1
     if gcd(a, b) != 1:
         return 0
 
     sign = 1
-    sign_change = [
-        (0, 3, 3), (0, 3, 7),
-        (1, 1, 3), (1, 1, 5),
-        (1, 3, 5), (1, 3, 7)
-    ]
+    sign_change = [(0, 3, 3), (0, 3, 7), (1, 1, 3), (1, 1, 5), (1, 3, 5), (1, 3, 7)]
     while b != 1:
         e, r = padic(a % b, 2)
         if (e % 2, r % 4, b % 8) in sign_change:
@@ -46,7 +44,9 @@ def jacobi(a, b):
 
     return sign
 
-#-----------------------------
+
+# -----------------------------
+
 
 def euler_criterion(a, p):
     """
@@ -68,7 +68,9 @@ def euler_criterion(a, p):
 
     return 1
 
-#=============================
+
+# =============================
+
 
 def mod_inverse(number, modulus):
     """
@@ -82,19 +84,21 @@ def mod_inverse(number, modulus):
     ~> int
     """
     if modulus < 2:
-        raise ValueError('modulus must be at least 2')
+        raise ValueError("modulus must be at least 2")
 
     inverse = bezout(number, modulus)[0]
 
     if (number * inverse) % modulus not in [1, -1]:
-        raise ValueError('{} not invertible modulo {}'.format(number, modulus))
+        raise ValueError("{} not invertible modulo {}".format(number, modulus))
 
     if inverse < 0:
         inverse += modulus
 
     return inverse
 
-#-----------------------------
+
+# -----------------------------
+
 
 def mod_power(number, exponent, modulus):
     """
@@ -109,14 +113,16 @@ def mod_power(number, exponent, modulus):
     ~> int
     """
     if modulus < 2:
-        raise ValueError('Modulus must be at least 2')
+        raise ValueError("Modulus must be at least 2")
 
     if exponent < 0:
         return pow(mod_inverse(number, modulus), -exponent, modulus)
 
     return pow(number, exponent, modulus)
 
-#=============================
+
+# =============================
+
 
 def chinese_remainder_theorem(residues, moduli):
     """
@@ -134,13 +140,20 @@ def chinese_remainder_theorem(residues, moduli):
     """
     moduli_product = reduce(lambda x, y: x * y, moduli, 1)
 
-    return sum(map(
-        lambda x, y: (x * y) % moduli_product,
-        map(lambda modulus: _coeffs(modulus, moduli_product), moduli),
-        residues)
-    ) % moduli_product
+    return (
+        sum(
+            map(
+                lambda x, y: (x * y) % moduli_product,
+                map(lambda modulus: _coeffs(modulus, moduli_product), moduli),
+                residues,
+            )
+        )
+        % moduli_product
+    )
 
-#-----------------------------
+
+# -----------------------------
+
 
 def prime_to(factorization):
     """
@@ -154,28 +167,33 @@ def prime_to(factorization):
     + factorization: Dict[int, int]
     ~> List[int]
     """
-    prime_powers = [p**e for (p, e) in factorization.items()]
+    prime_powers = [p ** e for (p, e) in factorization.items()]
     number = reduce(lambda x, y: x * y, prime_powers, 1)
 
     return sorted(
-        sum(map(
-            lambda x, y: (x * y) % number,
-            map(lambda modulus: _coeffs(modulus, number), prime_powers),
-            residues
-        )) % number for residues in _residues(factorization)
+        sum(
+            map(
+                lambda x, y: (x * y) % number,
+                map(lambda modulus: _coeffs(modulus, number), prime_powers),
+                residues,
+            )
+        )
+        % number
+        for residues in _residues(factorization)
     )
 
-#=============================
+
+# =============================
+
 
 def _relatively_prime_to_prime_power(pair):
-    return (x for x in range(1, pair[0]**pair[1]) if x % pair[0] != 0)
+    return (x for x in range(1, pair[0] ** pair[1]) if x % pair[0] != 0)
+
 
 def _residues(factorization):
-    return it.product(
-        *map(_relatively_prime_to_prime_power, factorization.items())
-    )
+    return it.product(*map(_relatively_prime_to_prime_power, factorization.items()))
+
 
 def _coeffs(modulus, moduli_product):
     partial = moduli_product // modulus
     return (partial * mod_inverse(partial, modulus)) % moduli_product
-

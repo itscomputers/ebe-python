@@ -1,18 +1,20 @@
 #   tests/algebraic_structures_test.py
-#===========================================================
+# ===========================================================
 import env
 from hypothesis import given, strategies as st
 
 from lib.basic import gcd, jacobi, mod_power
 from lib.primality import is_prime
 from lib.algebraic_structures import *
-#===========================================================
+
+# ===========================================================
+
 
 @given(
-    st.integers(min_value=2, max_value=10**3),
+    st.integers(min_value=2, max_value=10 ** 3),
     st.integers(),
     st.integers(),
-    st.integers()
+    st.integers(),
 )
 def test_modular_ring(modulus, a, b, c):
     Zm = ModularRing(modulus)
@@ -82,7 +84,9 @@ def test_modular_ring(modulus, a, b, c):
 
     if Zm.is_cyclic():
         gens = set(x for x in Zm.multiplicative_group() if Zm.orders[x] == Zm.euler())
-        gens2 = set(x for i, x in Zm.cyclic_group_dict().items() if gcd(i, Zm.euler()) == 1)
+        gens2 = set(
+            x for i, x in Zm.cyclic_group_dict().items() if gcd(i, Zm.euler()) == 1
+        )
         assert gens == gens2
 
     if Zm.is_field() and Zm.modulus > 2:
@@ -92,4 +96,3 @@ def test_modular_ring(modulus, a, b, c):
                 for y in Zm.sqrt_of(x):
                     assert Zm.power_of(y, 2) == x
                     assert Zm.log_of(x) == (Zm.log_of(y) * 2) % (Zm.euler())
-

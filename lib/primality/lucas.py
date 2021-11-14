@@ -1,17 +1,19 @@
 #   lib/primality/lucas.py
 #   - module for lucas primalit testing
-#===========================================================
+# ===========================================================
 from random import randint
 
 from ..basic import gcd, is_square, jacobi, padic
 from ..lucas_sequence import lucas_mod_by_index, lucas_mod_double_index
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'lucas_witness_pair',
-    'lucas_witness_pairs',
-    'lucas_test',
+    "lucas_witness_pair",
+    "lucas_witness_pairs",
+    "lucas_test",
 ]
-#===========================================================
+# ===========================================================
+
 
 def lucas_witness_pair(number, P, Q):
     """
@@ -27,13 +29,13 @@ def lucas_witness_pair(number, P, Q):
     + Q: int
     ~> (primality, strong): Tuple[str, bool]
     """
-    D = P**2 - 4*Q
+    D = P ** 2 - 4 * Q
 
     valid = _good_parameters(number, P, Q, D)
     if valid is False:
-        raise ValueError('Bad parameters')
+        raise ValueError("Bad parameters")
     if type(valid) is int:
-        return 'composite', False
+        return "composite", False
 
     delta = number - jacobi(D, number)
     s, d = padic(delta, 2)
@@ -51,12 +53,14 @@ def lucas_witness_pair(number, P, Q):
     U, V, Q_ = lucas_mod_double_index(U, V, Q_k, number)
     if U == 0:
         if _trivially_composite(V, Q, Q_k, number, delta):
-            return 'composite', False
-        return 'probable prime', strong
+            return "composite", False
+        return "probable prime", strong
 
-    return 'composite', False
+    return "composite", False
 
-#-----------------------------
+
+# -----------------------------
+
 
 def lucas_witness_pairs(number, witness_pairs):
     """
@@ -75,14 +79,16 @@ def lucas_witness_pairs(number, witness_pairs):
     strong = False
     for pair in witness_pairs:
         primality, witness_strong = lucas_witness_pair(number, *pair)
-        if primality == 'composite':
-            return 'composite', False
+        if primality == "composite":
+            return "composite", False
         if witness_strong:
             strong = True
 
-    return 'probable prime', strong
+    return "probable prime", strong
 
-#-----------------------------
+
+# -----------------------------
+
 
 def lucas_test(number, num_witnesses):
     """
@@ -98,19 +104,21 @@ def lucas_test(number, num_witnesses):
     ~> str
     """
     if number < 3:
-        raise ValueError('Number should be at least 3')
+        raise ValueError("Number should be at least 3")
     if number % 2 == 0:
-        return 'composite'
+        return "composite"
 
     witness_pairs = _generate_witness_pairs(number, num_witnesses)
     primality, strong = lucas_witness_pairs(number, witness_pairs)
 
-    if primality == 'composite' or strong is False:
+    if primality == "composite" or strong is False:
         return primality
 
-    return 'strong probable prime'
+    return "strong probable prime"
 
-#=============================
+
+# =============================
+
 
 def _generate_witness_pairs(number, num_witnesses):
     """Generate witness pairs for Lucas test."""
@@ -126,14 +134,16 @@ def _generate_witness_pairs(number, num_witnesses):
             sgn *= -1
 
     while len(witnesses) < num_witnesses:
-        P = randint(1, 100*num_witnesses)
-        Q = randint(1, 100*num_witnesses)
-        if P % number != 0 and Q % number != 0 and (P**2 - 4*Q) % number != 0:
+        P = randint(1, 100 * num_witnesses)
+        Q = randint(1, 100 * num_witnesses)
+        if P % number != 0 and Q % number != 0 and (P ** 2 - 4 * Q) % number != 0:
             witnesses = witnesses | set([(P, Q)])
 
     return witnesses
 
-#=============================
+
+# =============================
+
 
 def _good_parameters(number, P, Q, D):
     """Validate parameters are good."""
@@ -144,12 +154,14 @@ def _good_parameters(number, P, Q, D):
             return d
     return True
 
-#-----------------------------
+
+# -----------------------------
+
 
 def _trivially_composite(V, Q, Q_power, number, delta):
     """Determine if `number` is trivially composite."""
     if delta == number + 1:
-        if V != (2*Q) % number:
+        if V != (2 * Q) % number:
             return True
         if Q_power != (Q * jacobi(Q, number)) % number:
             return True
@@ -158,4 +170,3 @@ def _trivially_composite(V, Q, Q_power, number, delta):
             return True
 
     return False
-

@@ -1,15 +1,17 @@
 #   lib/basic/shape_number.py
 #   - module for functions related to shape numbers
 
-#===========================================================
+# ===========================================================
 from .division import div
 from .sqrt import integer_sqrt, is_square
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'shape_number_by_index',
-    'which_shape_number',
+    "shape_number_by_index",
+    "which_shape_number",
 ]
-#===========================================================
+# ===========================================================
+
 
 def shape_number_by_index(k, sides):
     """
@@ -24,7 +26,9 @@ def shape_number_by_index(k, sides):
     """
     return k * (k * (sides - 2) - sides + 4) // 2
 
-#=============================
+
+# =============================
+
 
 def which_shape_number(number, sides):
     """
@@ -40,7 +44,7 @@ def which_shape_number(number, sides):
     ~> int
     """
     denom = 2 * (sides - 2)
-    root = 8 * (sides - 2) * number + (sides - 4)**2
+    root = 8 * (sides - 2) * number + (sides - 4) ** 2
 
     if not is_square(root):
         return None
@@ -48,4 +52,3 @@ def which_shape_number(number, sides):
     q, r = div(sides - 4 + integer_sqrt(root), denom)
     if r == 0:
         return q
-

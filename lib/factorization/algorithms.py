@@ -1,18 +1,20 @@
 #   lib/factorization/algorithms.py
 #   - module for factor-finding algorithms for composite numbers
 
-#===========================================================
+# ===========================================================
 from ..basic import gcd
-#===========================================================
+
+# ===========================================================
 __all__ = [
-    'pollard_rho_gen',
-    'pollard_rho',
-    'pollard_p_minus_one_gen',
-    'pollard_p_minus_one',
-    'williams_p_plus_one_gen',
-    'williams_p_plus_one',
+    "pollard_rho_gen",
+    "pollard_rho",
+    "pollard_p_minus_one_gen",
+    "pollard_p_minus_one",
+    "williams_p_plus_one_gen",
+    "williams_p_plus_one",
 ]
-#===========================================================
+# ===========================================================
+
 
 def pollard_rho_gen(number, seed, func):
     """
@@ -31,7 +33,9 @@ def pollard_rho_gen(number, seed, func):
         x_i = func(x_i) % number
         x_2i = func(func(x_2i) % number) % number
 
-#-----------------------------
+
+# -----------------------------
+
 
 def pollard_rho(number, seed, func):
     """
@@ -52,7 +56,9 @@ def pollard_rho(number, seed, func):
 
     return divisor
 
-#=============================
+
+# =============================
+
 
 def pollard_p_minus_one_gen(number, seed):
     """
@@ -70,7 +76,9 @@ def pollard_p_minus_one_gen(number, seed):
         index = index + 1
         x_i = pow(x_i, index, number)
 
-#-----------------------------
+
+# -----------------------------
+
 
 def pollard_p_minus_one(number, seed):
     """
@@ -94,7 +102,9 @@ def pollard_p_minus_one(number, seed):
 
     return divisor
 
-#=============================
+
+# =============================
+
 
 def williams_p_plus_one_gen(number, quadratic_seed):
     """
@@ -113,7 +123,9 @@ def williams_p_plus_one_gen(number, quadratic_seed):
         z = pow(z, power, number)
         yield gcd(z.imag, number)
 
-#-----------------------------
+
+# -----------------------------
+
 
 def williams_p_plus_one(number, quadratic_seed):
     """
@@ -132,4 +144,3 @@ def williams_p_plus_one(number, quadratic_seed):
         divisor = next(gen)
 
     return divisor
-

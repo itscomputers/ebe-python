@@ -9,6 +9,7 @@ build/
 # Unit test / coverage reports
 .hypothesis/
 .pytest_cache/
+.coverage
 
 # Environments
 .env
