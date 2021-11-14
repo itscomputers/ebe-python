@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "ebe"
+version = "0.1.0"
+description = "A number theory package for Python"
+authors = ["itscomputers <its_computers@protonmail.com>"]
+license = "GNU General Public License v3.0"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+hypothesis = "^6.24.3"
+black = "^21.10b0"
+flake8 = "^4.0.1"
+mypy = "^0.910"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -354,7 +354,7 @@ def test_div_mod_int(a, b):
     assert a == b * quotient + remainder
 
 @given(polynomial(3), rational(nonzero=True))
-def test_div_mod_int(a, b):
+def test_div_mod_rational(a, b):
     quotient, remainder = a // b, a % b
     assert type(quotient) is Polynomial
     assert type(remainder) is Polynomial
