@@ -39,7 +39,9 @@ def iter_primes_up_to(number: int) -> Iterator[int]:
 
 
 def primes_up_to(
-    max_value: int, primes: List[int] = [], numbers_left: Iterator[int] = None
+    max_value: int,
+    primes: List[int] = [],
+    numbers_left: Iterator[int] | None = None,
 ) -> List[int]:
     """
     Compute primes up to `max_value`.
@@ -65,7 +67,10 @@ def primes_up_to(
 # =============================
 
 
-def is_prime__naive(number: int, numbers_left: Iterator[int] = None) -> bool:
+def is_prime__naive(
+    number: int,
+    numbers_left: Iterator[int] | None = None,
+) -> bool:
     """
     Determine if `number` is prime using sieve of Eratosthenes.
 

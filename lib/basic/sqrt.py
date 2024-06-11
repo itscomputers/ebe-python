@@ -7,7 +7,7 @@ import math
 # ===========================================================
 
 
-def integer_sqrt(number: int, guess: int = None) -> int:
+def integer_sqrt(number: int, guess: int | None = None) -> int:
     """
     Compute the integer part of the square root of `number`.
 
