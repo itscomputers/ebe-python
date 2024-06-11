@@ -141,7 +141,6 @@ def ladder_arithmetic_gen(number, initial=None):
     """
     m = _first_approximation(number, initial)
     m2 = m**2
-    s0, s1 = 0, 1
     s = frac(0)
 
     while True:

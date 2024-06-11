@@ -2,9 +2,27 @@
 #   - module for primality testing and its applications
 
 # ===========================================================
-from .main import *
-from .lucas import *
-from .miller_rabin import *
+from .main import (
+    is_prime,
+    next_prime_gen,
+    next_prime,
+    next_primes,
+    primes_in_range,
+    prev_prime_gen,
+    prev_prime,
+    next_twin_primes_gen,
+    next_twin_primes,
+    goldbach_partition,
+)
+from .lucas import (
+    lucas_witness_pair,
+    lucas_test,
+)
+from .miller_rabin import (
+    miller_rabin_witness,
+    miller_rabin_test,
+)
+
 
 # ===========================================================
 __all__ = [

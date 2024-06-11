@@ -1,11 +1,11 @@
 #   tests/types_rational_test.py
 # ===========================================================
-import env
+import env  # noqa
 import math
 from fractions import Fraction
 from hypothesis import given, strategies as st
 
-from lib.types.rational import *
+from lib.types.rational import Rational, frac
 
 # ===========================================================
 
@@ -58,13 +58,13 @@ def test_constructors(i, fl, a):
     f = Fraction(a.numer, a.denom)
     s1 = "{}/{}".format(a.numer, a.denom)
     s2 = "{} / {}".format(a.numer, a.denom)
-    l = [a.numer, a.denom]
+    lst = [a.numer, a.denom]
     t = (a.numer, a.denom)
     assert Rational.from_Rational(a) == frac(a) == a
     assert Rational.from_Fraction(f) == frac(f) == a
     assert Rational.from_str(s1) == frac(s1) == a
     assert Rational.from_str(s2) == frac(s2) == a
-    assert Rational.from_list(l) == frac(l) == a
+    assert Rational.from_list(lst) == frac(lst) == a
     assert Rational.from_tuple(t) == frac(t) == a
 
 

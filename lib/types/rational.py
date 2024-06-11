@@ -7,7 +7,7 @@ import math
 import numbers
 
 from ..config import default
-from ..basic import gcd, integer_sqrt, is_square
+from ..basic import integer_sqrt, is_square
 
 # ===========================================================
 __all__ = [

@@ -1,11 +1,10 @@
 #   tests/utils_test.py
 
 # ===========================================================
-from functools import reduce
 from hypothesis import given, strategies as st
 
-import env
-from lib.utils import *
+import env  # noqa
+from lib.utils import combine_counters
 
 # ===========================================================
 

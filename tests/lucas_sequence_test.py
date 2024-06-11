@@ -1,10 +1,13 @@
 #   tests/lucas_sequence_test.py
 # ===========================================================
-import env
+import env  # noqa
 from hypothesis import given, strategies as st
 
 from lib.types import QuadraticInteger
-from lib.lucas_sequence.modular import *
+from lib.lucas_sequence.modular import (
+    lucas_mod_by_index,
+    lucas_mod_gen,
+)
 
 # ===========================================================
 #   modular

@@ -2,10 +2,12 @@
 #   - class for arithmetic of gaussian integers
 
 # ===========================================================
-import operator as op
-
 from ..basic import mod_inverse
-from .quadratic import *
+from .quadratic import (
+    add_,
+    floordiv_,
+    mul_,
+)
 from .gaussian_rational import GaussianRational
 
 # ===========================================================

@@ -2,10 +2,25 @@
 #   - module for prime factorization and its applications
 
 # ===========================================================
-from .algorithms import *
-from .main import *
-from .two_squares import *
-from .four_squares import *
+from .algorithms import (
+    pollard_rho,
+    pollard_p_minus_one,
+    williams_p_plus_one,
+)
+from .main import (
+    divisors,
+    factor,
+    find_divisor,
+    number_from_factorization,
+)
+from .two_squares import (
+    gaussian_divisor,
+    two_squares,
+)
+from .four_squares import (
+    quaternion_divisor,
+    four_squares,
+)
 
 # ===========================================================
 __all__ = [

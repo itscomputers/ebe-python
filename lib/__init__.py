@@ -1,6 +1,8 @@
 #   lib/__init__.py
 #   - a number theory library in python 3
 
+# flake8: noqa
+
 # ===========================================================
 
 from .algebraic_structures import *

@@ -3,10 +3,10 @@
 import pytest
 from hypothesis import assume, given, strategies as st
 
-import env
+import env  # noqa
 from lib.basic import gcd, is_square
 from lib.types import Rational, Quadratic
-from lib.types.quadratic_integer import *
+from lib.types.quadratic_integer import QuadraticInteger
 
 # ===========================================================
 

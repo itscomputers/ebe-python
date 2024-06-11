@@ -2,7 +2,14 @@
 #   - module for continued fraction algorithms
 
 # ===========================================================
-from .quadratic import *
+from .quadratic import (
+    continued_fraction_quotients,
+    continued_fraction_convergents,
+    continued_fraction_pell_numbers,
+    continued_fraction_table,
+    continued_fraction_all,
+    QuadraticContinuedFraction,
+)
 
 # ===========================================================
 __all__ = [

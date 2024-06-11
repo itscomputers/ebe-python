@@ -6,8 +6,6 @@ import operator as op
 
 from .rational import frac
 from .arithmetic_type import ArithmeticType
-from .gaussian_integer import GaussianInteger
-from .gaussian_rational import GaussianRational
 
 # ===========================================================
 __all__ = [

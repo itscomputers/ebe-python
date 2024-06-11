@@ -1,11 +1,14 @@
 #   tests/continued_fraction_test.py
 # ===========================================================
-import env
+import env  # noqa
 from hypothesis import assume, given, strategies as st
 
 from lib.basic import is_square
 from lib.types import Quadratic, frac
-from lib.continued_fraction.quadratic import *
+from lib.continued_fraction.quadratic import (
+    QuadraticContinuedFraction,
+    QuadraticRational,
+)
 
 # ===========================================================
 

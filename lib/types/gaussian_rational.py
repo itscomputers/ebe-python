@@ -2,11 +2,18 @@
 #   - class for arithmetic of gaussian rational numbers
 
 # ===========================================================
-import operator as op
-
 from .rational import frac
-from .quadratic import *
-from .quadratic_integer import QuadraticInteger
+from .quadratic import (
+    add_,
+    add_constant,
+    floordiv_,
+    mod_constant,
+    mul_,
+    mul_constant,
+    truediv_,
+    truediv_constant,
+    Quadratic,
+)
 
 # ===========================================================
 __all__ = [

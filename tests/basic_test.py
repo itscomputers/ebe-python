@@ -3,10 +3,27 @@
 from hypothesis import assume, given, strategies as st
 from random import sample
 
-import env
+import env  # noqa
 from lib.factorization import factor
 from lib.modular import euler_phi
-from lib.basic import *
+from lib.basic import (
+    bezout,
+    div,
+    gcd,
+    lcm,
+    padic,
+    chinese_remainder_theorem,
+    jacobi,
+    mod_inverse,
+    mod_power,
+    prime_to,
+    iter_primes_up_to,
+    primes_up_to,
+    shape_number_by_index,
+    which_shape_number,
+    integer_sqrt,
+    is_square,
+)
 from lib.basic.division import div_with_small_remainder
 from lib.basic.modular import euler_criterion
 from lib.basic.primality import is_prime__naive

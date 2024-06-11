@@ -6,7 +6,7 @@ import math
 import operator as op
 
 from .arithmetic_type import ArithmeticType
-from .rational import frac, Rational
+from .rational import frac
 
 # ===========================================================
 __all__ = [

@@ -1,11 +1,10 @@
 #   tests/types_quaternion_test.py
 # ===========================================================
-import pytest
 from hypothesis import assume, given, strategies as st
 
-import env
+import env  # noqa
 from lib.types import Rational, GaussianInteger, GaussianRational
-from lib.types.quaternion import *
+from lib.types.quaternion import Quaternion
 
 # ===========================================================
 

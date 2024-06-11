@@ -1,12 +1,21 @@
 #   tests/modular_test.py
 # ===========================================================
-import env
+import env  # noqa
 from hypothesis import given, strategies as st
 
 from lib.basic import gcd, primes_up_to, jacobi
 from lib.factorization import factor, divisors
-from lib.modular.multiplicative_functions import *
-from lib.modular.sqrt import *
+from lib.modular.multiplicative_functions import (
+    carmichael_lambda,
+    euler_phi,
+)
+from lib.modular.sqrt import (
+    mod_sqrt,
+    mod_sqrt_minus_one_wilson,
+    mod_sqrt_minus_one_legendre,
+    mod_sqrt_tonelli_shanks,
+    mod_sqrt_cipolla,
+)
 
 # ===========================================================
 

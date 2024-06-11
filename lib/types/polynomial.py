@@ -2,14 +2,13 @@
 #   - class for arithmetic of polynomials
 
 # ===========================================================
-from collections import defaultdict
 from functools import reduce
 import re
 
-from ..basic import gcd, lcm, mod_power
+from ..basic import lcm, mod_power
 from ..utils import combine_counters
 from .arithmetic_type import ArithmeticType
-from .rational import frac, Rational
+from .rational import frac
 
 # ===========================================================
 __all__ = [
@@ -310,7 +309,6 @@ def _string_to_dict(string):
         ),
         dict(),
     )
-    return Polynomial(coeffs)
 
 
 # -----------------------------

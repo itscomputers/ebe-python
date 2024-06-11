@@ -2,7 +2,10 @@
 #   - module for lucas sequences
 
 # ===========================================================
-from .modular import *
+from .modular import (
+    lucas_mod_gen,
+    lucas_mod_by_index,
+)
 
 # ===========================================================
 __all__ = [

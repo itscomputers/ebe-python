@@ -1,11 +1,11 @@
 #   tests/algebraic_structures_test.py
 # ===========================================================
-import env
+import env  # noqa
 from hypothesis import given, strategies as st
 
 from lib.basic import gcd, jacobi, mod_power
 from lib.primality import is_prime
-from lib.algebraic_structures import *
+from lib.algebraic_structures import ModularRing
 
 # ===========================================================
 

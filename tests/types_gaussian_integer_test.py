@@ -3,10 +3,10 @@
 import pytest
 from hypothesis import assume, given, strategies as st
 
-import env
+import env  # noqa
 from lib.basic import gcd
-from lib.types import frac, Rational, GaussianRational, Quadratic, QuadraticInteger
-from lib.types.gaussian_integer import *
+from lib.types import Rational, GaussianRational, Quadratic, QuadraticInteger
+from lib.types.gaussian_integer import GaussianInteger
 
 # ===========================================================
 

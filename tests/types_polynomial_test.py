@@ -2,13 +2,15 @@
 # ===========================================================
 from hypothesis import assume, given, strategies as st
 from collections import defaultdict
-from random import sample
 
-import env
+import env  # noqa
 from lib.basic import is_square
 from lib.types import frac, Rational, Quadratic
-from lib.types.polynomial import *
-from lib.types.polynomial import _string_to_dict
+from lib.types.polynomial import (
+    Polynomial,
+    polyn,
+    _string_to_dict,
+)
 
 # ===========================================================
 

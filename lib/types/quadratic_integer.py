@@ -2,10 +2,13 @@
 #   - class for arithmetic of quadratic integer numbers
 
 # ===========================================================
-import operator as op
-
 from ..basic import mod_inverse
-from .quadratic import *
+from .quadratic import (
+    add_,
+    mul_,
+    truediv_,
+    Quadratic,
+)
 
 # ===========================================================
 __all__ = [

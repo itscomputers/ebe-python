@@ -1,6 +1,8 @@
 #   lib/basic/__init__.py
 #   - module with basic number theoretic functionality
 
+# flake8: noqa
+
 # ===========================================================
 from .division import (
     bezout,

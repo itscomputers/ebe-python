@@ -2,7 +2,12 @@
 #   - class for arithmetic of integer quaternions
 # ===========================================================
 from ..basic import mod_inverse
-from .quaternion import *
+from .quaternion import (
+    add_,
+    floordiv_,
+    mul_,
+    Quaternion,
+)
 
 # ===========================================================
 __all__ = [

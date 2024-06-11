@@ -2,8 +2,11 @@
 #   - module for advanced modular arithmetic functions
 
 # ===========================================================
-from .multiplicative_functions import *
-from .sqrt import *
+from .multiplicative_functions import (
+    carmichael_lambda,
+    euler_phi,
+)
+from .sqrt import mod_sqrt
 
 # ===========================================================
 __all__ = [

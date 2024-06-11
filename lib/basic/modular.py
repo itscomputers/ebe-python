@@ -4,7 +4,7 @@
 # ===========================================================
 import itertools as it
 from functools import reduce
-from typing import Any, Dict, List, Iterable, Tuple
+from typing import Dict, List, Iterable, Tuple
 
 from .division import bezout, gcd, padic
 

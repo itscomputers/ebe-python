@@ -1,17 +1,36 @@
 #   tests/primality_test.py
 # ===========================================================
-import env
+import env  # noqa
 from hypothesis import given, strategies as st
 
 from lib.basic.primality import is_prime__naive, primes_up_to
-from lib.primality.miller_rabin import *
+from lib.primality.miller_rabin import (
+    miller_rabin_cutoffs,
+    miller_rabin_max_cutoff,
+    miller_rabin_test,
+    miller_rabin_witness,
+    miller_rabin_witnesses,
+)
 from lib.primality.miller_rabin import _generate_witnesses
-from lib.primality.lucas import *
+from lib.primality.lucas import (
+    lucas_test,
+    lucas_witness_pair,
+    lucas_witness_pairs,
+)
 from lib.primality.lucas import (
     _generate_witness_pairs,
     _good_parameters,
 )
-from lib.primality.main import *
+from lib.primality.main import (
+    is_prime,
+    next_prime,
+    next_primes,
+    primes_in_range,
+    prev_prime_gen,
+    prev_prime,
+    next_twin_primes,
+    goldbach_partition,
+)
 
 # ===========================================================
 #   lucas
@@ -58,7 +77,7 @@ def test_generate_witness_pairs(number, num_witnesses):
     assert num_witnesses == len(witness_pairs)
     for witness_pair in witness_pairs:
         P, Q = witness_pair
-        assert _good_parameters(number, P, Q, P**2 - 4 * Q) != False
+        assert _good_parameters(number, P, Q, P**2 - 4 * Q) is not False
 
 
 # ===========================================================
@@ -210,7 +229,7 @@ def test_prev_primes_gen(number):
 def test_prev_prime_small():
     assert prev_prime(5) == prev_prime(4) == 3
     assert prev_prime(3) == 2
-    assert prev_prime(2) == prev_prime(1) == prev_prime(0) == None
+    assert prev_prime(2) == prev_prime(1) == prev_prime(0) is None
 
 
 # -----------------------------
