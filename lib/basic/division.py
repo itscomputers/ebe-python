@@ -122,10 +122,7 @@ def bezout(a: int, b: int) -> Tuple[int, int]:
     X = (0, 1)
     Y = (1, -q)
     while r != 0:
-        a, b, = (
-            b,
-            r,
-        )
+        a, b = b, r
         q, r = div(a, b)
         X, Y = advance(*X, q), advance(*Y, q)
 
@@ -138,7 +135,7 @@ def bezout(a: int, b: int) -> Tuple[int, int]:
 def padic(number: int, base: int) -> Tuple[int, int]:
     """
     Compute exponent and unit part of `number` relative to base, satisfying
-        `number == (base ** exponent) * unit` and
+        `number == (base**exponent) * unit` and
         `gcd(number, unit) == 1`.
 
     example: `padic(96, 2) == (5, 3)`

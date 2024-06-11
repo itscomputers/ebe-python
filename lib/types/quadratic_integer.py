@@ -15,7 +15,6 @@ __all__ = [
 
 
 class QuadraticInteger(Quadratic):
-
     """
     Class that represents `real + imag * sqrt(root)`,
     where `real`, `imag`, and `root` are integers.

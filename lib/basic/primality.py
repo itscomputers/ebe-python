@@ -54,7 +54,7 @@ def primes_up_to(
     except StopIteration:
         return primes
 
-    if min_value ** 2 >= max_value:
+    if min_value**2 >= max_value:
         return primes + [min_value] + list(numbers_left)
 
     return primes_up_to(

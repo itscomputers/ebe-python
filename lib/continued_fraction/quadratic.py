@@ -126,7 +126,6 @@ def continued_fraction_all(root, max_length=None):
 
 
 class QuadraticContinuedFraction:
-
     """
     Continued fraction algorithm for `sqrt(root)`.
 
@@ -250,7 +249,6 @@ class QuadraticContinuedFraction:
 
 
 class QuadraticRational(ArithmeticType):
-
     """
     Class to represent `(real + imag * sqrt(root)) / denom` with
     necessary arithmetic for continued fraction algorithm.
@@ -308,7 +306,7 @@ class QuadraticRational(ArithmeticType):
     @property
     def inverse(self):
         """Inverse or reciprocal of QuadraticRational."""
-        D = self._real ** 2 - self._imag ** 2 * self.root
+        D = self._real**2 - self._imag**2 * self.root
         d = gcd(self._denom, D)
         m = self._denom // d
 
@@ -335,7 +333,6 @@ class QuadraticRational(ArithmeticType):
 
 
 class Convergents:
-
     """
     Class to represent pairs of convergents for continued fraction algorithm.
     """

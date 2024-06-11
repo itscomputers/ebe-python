@@ -77,7 +77,6 @@ def mod_constant(a, b):
 
 
 class Quadratic(ArithmeticType):
-
     """
     Class that represents `real + imag * sqrt(root)`,
     where `real`, `imag`, and `root` are rational numbers.
@@ -187,7 +186,7 @@ class Quadratic(ArithmeticType):
 
     @property
     def norm(self):
-        return self.real ** 2 - self.root * self.imag ** 2
+        return self.real**2 - self.root * self.imag**2
 
     @property
     def inverse(self):

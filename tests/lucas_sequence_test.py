@@ -20,7 +20,7 @@ from lib.lucas_sequence.modular import *
 def test_by_index(k, P, Q, mod):
     mod += 1 - mod % 2
 
-    D = P ** 2 - 4 * Q
+    D = P**2 - 4 * Q
     imag = ((mod + 1) // 2) % mod
     real = (P * imag) % mod
     q = QuadraticInteger(real, imag, D)

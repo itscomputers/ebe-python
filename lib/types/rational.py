@@ -36,7 +36,6 @@ def frac(*inputs):
 
 
 class Rational(Fraction):
-
     """
     Class that represents `numer / denom` as a rational number.
 
@@ -157,7 +156,7 @@ class Rational(Fraction):
         quotient, remainder = divmod(abs(self._numerator), self._denominator)
         if num_digits == 0:
             return str(quotient)
-        shifted_rem = Rational(remainder * 10 ** num_digits, self._denominator)
+        shifted_rem = Rational(remainder * 10**num_digits, self._denominator)
         digits = str(shifted_rem.round_to_nearest_int)
         num_zeros = num_digits - len(digits)
 
@@ -233,7 +232,7 @@ class Rational(Fraction):
         bc = self._denominator * other_._numerator
         bd = self._denominator * other_._denominator
 
-        return 10 ** num_digits * abs(ad - bc) < abs(bd)
+        return 10**num_digits * abs(ad - bc) < abs(bd)
 
     # =========================
 
@@ -252,8 +251,8 @@ class Rational(Fraction):
         guess = Rational(numer_integer_sqrt, denom_integer_sqrt)
 
         if (
-            numer_integer_sqrt ** 2 == self._numerator
-            and denom_integer_sqrt ** 2 == self._denominator
+            numer_integer_sqrt**2 == self._numerator
+            and denom_integer_sqrt**2 == self._denominator
         ):
             return guess
 
@@ -284,11 +283,11 @@ class Rational(Fraction):
             raise ValueError("Inverse square root only if greater than 1")
 
         guess = self.sqrt(2).inverse
-        other_guess = guess * (2 - self * guess ** 2)
+        other_guess = guess * (2 - self * guess**2)
 
         while not guess.approx_equal(other_guess, num_digits):
             guess = (guess + other_guess) / 2
-            other_guess = guess * (2 - self * guess ** 2)
+            other_guess = guess * (2 - self * guess**2)
 
         return guess
 
@@ -356,7 +355,7 @@ class Rational(Fraction):
             elif other < 0:
                 return (self ** (-other)).inverse
             return Rational(
-                self._numerator ** other, self._denominator ** other, _normalize=False
+                self._numerator**other, self._denominator**other, _normalize=False
             )
         return NotImplemented
 
@@ -383,5 +382,5 @@ class Rational(Fraction):
 
     def __rpow__(self, other):
         if self.denom == 1:
-            return other ** self.numer
+            return other**self.numer
         return NotImplemented

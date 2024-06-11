@@ -116,7 +116,7 @@ def test_babylonian(number):
     for i in range(5):
         curr, diff = assert_convergence_and_advance(curr, diff, gen)
 
-    assert (curr ** 2).approx_equal(number, 30)
+    assert (curr**2).approx_equal(number, 30)
 
 
 # -----------------------------
@@ -132,7 +132,7 @@ def test_halley_sqrt(number):
     for i in range(3):
         curr, diff = assert_convergence_and_advance(curr, diff, gen)
 
-    assert (curr ** 2).approx_equal(number, 30)
+    assert (curr**2).approx_equal(number, 30)
 
 
 # -----------------------------
@@ -150,7 +150,7 @@ def test_bakshali(number):
 # -----------------------------
 
 
-@given(st.integers(min_value=2, max_value=10 ** 5).filter(lambda x: not is_square(x)))
+@given(st.integers(min_value=2, max_value=10**5).filter(lambda x: not is_square(x)))
 def test_continued_fraction_convergent(number):
     gen = continued_fraction_convergent_gen(number)
     pell_numbers = continued_fraction_pell_numbers(number)
@@ -163,7 +163,7 @@ def test_continued_fraction_convergent(number):
     counter = 1
 
     for i in range(50):
-        pell = curr.numer ** 2 - number * curr.denom ** 2
+        pell = curr.numer**2 - number * curr.denom**2
         expected = last ** (counter // period) * pell_numbers[counter % period]
         assert pell == expected
         prev, curr = curr, next(gen)
@@ -201,7 +201,7 @@ def test_ladder_arithmetic(number):
     for i in range(5):
         curr, diff = assert_convergence_and_advance(curr, diff, gen)
 
-    assert (curr ** 2).approx_equal(number, 10)
+    assert (curr**2).approx_equal(number, 10)
 
 
 # -----------------------------
@@ -217,4 +217,4 @@ def test_linear_fractional_transformation(number):
     for i in range(5):
         curr, diff = assert_convergence_and_advance(curr, diff, gen)
 
-    assert (curr ** 2).approx_equal(number, 10)
+    assert (curr**2).approx_equal(number, 10)

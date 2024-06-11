@@ -75,7 +75,6 @@ def floordiv_constant(a, b):
 
 
 class Quaternion(ArithmeticType):
-
     """
     Class that represents `a + bi + cj + dk`,
     where coefficients are rational numbers.
@@ -177,7 +176,7 @@ class Quaternion(ArithmeticType):
 
     @property
     def norm(self):
-        return sum(map(lambda x: x ** 2, self.components))
+        return sum(map(lambda x: x**2, self.components))
 
     @property
     def inverse(self):

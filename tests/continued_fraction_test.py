@@ -34,7 +34,7 @@ def test_quadratic_rational_class(real, imag, denom, root, integer):
 # -----------------------------
 
 
-@given(root(max_value=10 ** 6))
+@given(root(max_value=10**6))
 def test_continued_fractions(root):
     cf = QuadraticContinuedFraction(root, store_all=True)
     cf.advance_all()
@@ -65,7 +65,7 @@ def test_continued_fractions(root):
 # -----------------------------
 
 
-@given(root(max_value=10 ** 6), st.integers(min_value=1, max_value=30))
+@given(root(max_value=10**6), st.integers(min_value=1, max_value=30))
 def test_continued_fractions_with_max(root, max_length):
     cf = QuadraticContinuedFraction(root, store_all=True)
     cf.advance_until(max_length)

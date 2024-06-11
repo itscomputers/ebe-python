@@ -82,7 +82,7 @@ def mod_inverse(number: int, modulus: int) -> int:
 
 def mod_power(number: int, exponent: int, modulus: int) -> int:
     """
-    Compute `(number ** exponent) % modulus`.
+    Compute `(number**exponent) % modulus`.
 
     example: `mod_power(7, -5, 13) ~> 6` and `mod_power(2, 5, 13) ~> 6`
         since `7**(-5) % 13 == 2**5 % 13 == 6`.
@@ -135,7 +135,7 @@ def prime_to(factorization: Dict[int, int]) -> List[int]:
         since these are the numbers strictly between 0 and `2**3 * 3**1 == 24`
         which are relatively prime to 24.
     """
-    prime_powers = [p ** e for (p, e) in factorization.items()]
+    prime_powers = [p**e for (p, e) in factorization.items()]
     number = reduce(lambda x, y: x * y, prime_powers, 1)
 
     return sorted(

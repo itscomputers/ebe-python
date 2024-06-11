@@ -94,7 +94,7 @@ def lucas_mod_index_plus_one(U_k, V_k, Q_k, P, Q, modulus):
     ~> (U_k1, V_k1, Q_k1): Tuple[int, int, int]
     """
     U = ((P * U_k + V_k) * (modulus + 1) // 2) % modulus
-    V = (((P ** 2 - 4 * Q) * U_k + P * V_k) * (modulus + 1) // 2) % modulus
+    V = (((P**2 - 4 * Q) * U_k + P * V_k) * (modulus + 1) // 2) % modulus
 
     return U, V, (Q_k * Q) % modulus
 

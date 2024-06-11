@@ -89,7 +89,7 @@ def test_bezout(a, b):
 @given(number=st.integers().filter(lambda x: x != 0), base=st.integers(min_value=2))
 def test_padic(number, base):
     exp, rest = padic(number, base)
-    assert number == base ** exp * rest
+    assert number == base**exp * rest
     assert rest % base != 0
 
 
@@ -100,7 +100,7 @@ def test_padic(number, base):
 
 @given(st.integers())
 def test_jacobi(a):
-    for p in iter_primes_up_to(10 ** 3):
+    for p in iter_primes_up_to(10**3):
         if p == 2:
             continue
         if a % p == 0:
@@ -141,10 +141,10 @@ def test_mod_power(number, exponent, modulus):
 
 @given(*(3 * [st.integers()]))
 def test_chinese_remainder_theorem(a, b, c):
-    primes = sample(primes_up_to(10 ** 3), 4)
+    primes = sample(primes_up_to(10**3), 4)
     moduli = [primes[0] ** 1, primes[1] ** 2, primes[2] * primes[3]]
     solution = chinese_remainder_theorem([a, b, c], moduli)
-    for (r, m) in zip([a, b, c], moduli):
+    for r, m in zip([a, b, c], moduli):
         assert solution % m == r % m
 
 
@@ -167,19 +167,19 @@ def test_prime_to(number):
 
 
 def test_primes_up_to():
-    prime_lists = (primes_up_to(10 ** i) for i in range(6))
+    prime_lists = (primes_up_to(10**i) for i in range(6))
     prime_counts = [0, 4, 25, 168, 1229, 9592]
     for i, prime_list in enumerate(prime_lists):
         assert len(prime_list) == prime_counts[i]
         if i < 5:
-            assert prime_list == list(iter_primes_up_to(10 ** i))
+            assert prime_list == list(iter_primes_up_to(10**i))
 
 
 # -----------------------------
 
 
 def test_is_prime__naive():
-    for p in iter_primes_up_to(10 ** 3):
+    for p in iter_primes_up_to(10**3):
         assert is_prime__naive(p)
 
 
@@ -202,7 +202,7 @@ def test_shape_number(s):
 @given(st.integers(min_value=0))
 def test_integer_sqrt(number):
     s = integer_sqrt(number)
-    assert s ** 2 <= number < (s + 1) ** 2
+    assert s**2 <= number < (s + 1) ** 2
 
 
 # -----------------------------
@@ -210,4 +210,4 @@ def test_integer_sqrt(number):
 
 @given(st.integers())
 def test_is_square(number):
-    assert is_square(number ** 2)
+    assert is_square(number**2)

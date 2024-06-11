@@ -16,7 +16,6 @@ __all__ = [
 
 
 class GaussianInteger(GaussianRational):
-
     """
     Class that represents `real + imag * sqrt(-1)`,
     where `real` and `imag` are integers.

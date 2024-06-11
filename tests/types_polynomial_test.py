@@ -202,7 +202,7 @@ def test_clear_denominators(a, b):
 @given(polynomial(2, coeff_filter=nonzero), st.integers())
 def test_eval(a, b):
     (e1, c1), (e2, c2) = a.coeffs.items()
-    assert a.eval(b) == c1 * b ** e1 + c2 * b ** e2
+    assert a.eval(b) == c1 * b**e1 + c2 * b**e2
 
 
 @given(polynomial(2, coeff_filter=nonzero), st.integers(), st.integers(min_value=2))
@@ -418,15 +418,15 @@ def test_div_mod_rational(a, b):
     st.integers(min_value=0, max_value=5),
 )
 def test_pow(a, m, n):
-    mth_power = a ** m
-    nth_power = a ** n
+    mth_power = a**m
+    nth_power = a**n
     sum_power = a ** (m + n)
-    assert type(a ** 0) is Polynomial
-    assert type(a ** 1) is Polynomial
+    assert type(a**0) is Polynomial
+    assert type(a**1) is Polynomial
     assert type(mth_power) is Polynomial
-    assert a ** 0 == 1
-    assert a ** 1 == a
-    assert a ** 2 == a * a
+    assert a**0 == 1
+    assert a**1 == a
+    assert a**2 == a * a
     assert mth_power * nth_power == sum_power
     assert sum_power.div_with_remainder(mth_power) == (nth_power, 0)
 

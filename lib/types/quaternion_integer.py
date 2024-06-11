@@ -12,7 +12,6 @@ __all__ = [
 
 
 class QuaternionInteger(Quaternion):
-
     """
     Class that represents `a + bi + cj + dk`,
     where coefficients are integers.

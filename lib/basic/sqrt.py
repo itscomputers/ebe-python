@@ -17,7 +17,7 @@ def integer_sqrt(number: int, guess: int = None) -> int:
     if guess is None:
         guess = int(math.sqrt(number))
 
-    while guess ** 2 > number or (guess + 1) ** 2 <= number:
+    while guess**2 > number or (guess + 1) ** 2 <= number:
         guess = (guess + number // guess) // 2
 
     return guess

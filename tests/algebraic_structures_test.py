@@ -11,7 +11,7 @@ from lib.algebraic_structures import *
 
 
 @given(
-    st.integers(min_value=2, max_value=10 ** 3),
+    st.integers(min_value=2, max_value=10**3),
     st.integers(),
     st.integers(),
     st.integers(),
@@ -75,7 +75,7 @@ def test_modular_ring(modulus, a, b, c):
 
     Zm.all_inverses()
     inverse_pairs = set(tuple(sorted(x)) for x in Zm.inverses.items())
-    for (x, y) in inverse_pairs:
+    for x, y in inverse_pairs:
         assert Zm.mult(x, y) == 1
 
     Zm.all_orders()

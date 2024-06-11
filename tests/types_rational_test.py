@@ -192,7 +192,7 @@ def test_round_prefer_toward_zero(a):
 
 @given(rational())
 def test_is_square(a):
-    assert (a ** 2).is_square
+    assert (a**2).is_square
 
 
 # =============================
@@ -200,7 +200,7 @@ def test_is_square(a):
 
 @given(rational(), rational(), st.integers(min_value=0, max_value=30))
 def test_approx_equal(a, b, num_digits):
-    in_range = abs(a - b) < Rational(1, 10 ** num_digits)
+    in_range = abs(a - b) < Rational(1, 10**num_digits)
     assert a.approx_equal(b, num_digits) == in_range
 
 
@@ -218,7 +218,7 @@ def test_approx_equal_2(a, integer, num_digits):
 def test_sqrt(a, num_digits):
     s = a.sqrt(num_digits)
     assert type(s) is Rational
-    lhs = 10 ** num_digits * abs(a - s ** 2)
+    lhs = 10**num_digits * abs(a - s**2)
     rhs = s + int(s) + 1
 
     assert lhs < rhs
@@ -428,10 +428,10 @@ def test_mod_Fraction(a, b):
 
 @given(rational("nonzero"), st.integers(min_value=0, max_value=15))
 def test_pow(a, m):
-    mth_power = a ** m
+    mth_power = a**m
     assert type(mth_power) is Rational
-    assert mth_power == a.to_fraction ** m
-    assert mth_power == Rational(a.numer ** m, a.denom ** m)
+    assert mth_power == a.to_fraction**m
+    assert mth_power == Rational(a.numer**m, a.denom**m)
     assert a ** (-m) == mth_power.inverse
     assert a ** Rational(m, 1) == mth_power
-    assert a.numer ** Rational(m, 1) == a.numer ** m
+    assert a.numer ** Rational(m, 1) == a.numer**m

@@ -368,17 +368,17 @@ def test_mod_Rational(a, b):
 
 @given(quaternion_integer(nonzero=True), st.integers(min_value=2, max_value=20))
 def test_pow(a, m):
-    mth_power = a ** m
-    mth_inverse = a ** -m
-    assert type(a ** 0) is QuaternionInteger
-    assert type(a ** 1) is QuaternionInteger
-    assert type(a ** -1) is Quaternion
+    mth_power = a**m
+    mth_inverse = a**-m
+    assert type(a**0) is QuaternionInteger
+    assert type(a**1) is QuaternionInteger
+    assert type(a**-1) is Quaternion
     assert type(mth_power) is QuaternionInteger
     assert type(mth_inverse) is Quaternion
-    assert a ** 0 == 1
-    assert a ** 1 == a
-    assert a ** -1 == a.inverse
-    assert mth_power == a.to_quaternion ** m
+    assert a**0 == 1
+    assert a**1 == a
+    assert a**-1 == a.inverse
+    assert mth_power == a.to_quaternion**m
     assert mth_inverse == mth_power.inverse
 
 
@@ -388,7 +388,7 @@ def test_pow(a, m):
     st.integers(min_value=2),
 )
 def test_pow_mod(a, exp, mod):
-    power = a ** exp
+    power = a**exp
     mod_power = pow(a, exp, mod)
     assert type(power) is QuaternionInteger
     assert type(mod_power) is QuaternionInteger

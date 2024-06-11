@@ -77,7 +77,6 @@ def mod_constant(a, b):
 
 
 class Polynomial(ArithmeticType):
-
     """Polynomial class with polynomial arithmetic"""
 
     def __init__(self, coeffs=dict()):

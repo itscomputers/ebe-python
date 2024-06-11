@@ -31,17 +31,17 @@ def composite(draw, num_factors, min_value, max_value):
 # ===========================================================
 
 
-@given(st.integers(min_value=2, max_value=10 ** 12))
+@given(st.integers(min_value=2, max_value=10**12))
 def test_pollard_rho(number):
     if not is_prime(number):
-        d = pollard_rho(number, 2, lambda x: x ** 2 + 1)
+        d = pollard_rho(number, 2, lambda x: x**2 + 1)
         assert d > 1 and number % d == 0
 
 
 # -----------------------------
 
 
-@given(st.integers(min_value=2, max_value=10 ** 10))
+@given(st.integers(min_value=2, max_value=10**10))
 def test_pollard_p_minus_one(number):
     if not is_prime(number):
         d = pollard_p_minus_one(number, 2)
@@ -51,7 +51,7 @@ def test_pollard_p_minus_one(number):
 # -----------------------------
 
 
-@given(st.integers(min_value=2, max_value=10 ** 8))
+@given(st.integers(min_value=2, max_value=10**8))
 def test_williams_p_plus_one(number):
     if not is_prime(number):
         d = williams_p_plus_one(number, GaussianInteger(1, 2))
@@ -63,7 +63,7 @@ def test_williams_p_plus_one(number):
 # ===========================================================
 
 
-@given(composite(4, 10 ** 2, 10 ** 5))
+@given(composite(4, 10**2, 10**5))
 def test_find_divisor(number):
     divisors = find_divisor(number)
     for d in divisors:
@@ -74,7 +74,7 @@ def test_find_divisor(number):
 # -----------------------------
 
 
-@given(composite(4, 1, 10 ** 5))
+@given(composite(4, 1, 10**5))
 def test_factor_trivial(number):
     remaining, factorization = factor_trivial(number)
     for d in factorization.keys():
@@ -85,7 +85,7 @@ def test_factor_trivial(number):
 # -----------------------------
 
 
-@given(composite(4, 10 ** 2, 10 ** 5))
+@given(composite(4, 10**2, 10**5))
 def test_factor_nontrivial(number):
     factorization = factor_nontrivial(number)
     for d in factorization.keys():
@@ -96,7 +96,7 @@ def test_factor_nontrivial(number):
 # -----------------------------
 
 
-@given(st.integers(min_value=2, max_value=10 ** 15))
+@given(st.integers(min_value=2, max_value=10**15))
 def test_factor(number):
     factorization = factor(number)
     for d in factorization.keys():
@@ -107,7 +107,7 @@ def test_factor(number):
 # -----------------------------
 
 
-@given(st.integers(min_value=2, max_value=10 ** 12))
+@given(st.integers(min_value=2, max_value=10**12))
 def test_square_and_square_free(number):
     factorization = factor(number)
     square, square_free = square_and_square_free(factorization)
@@ -125,7 +125,7 @@ def test_square_and_square_free(number):
 # -----------------------------
 
 
-@given(st.integers(min_value=2, max_value=10 ** 12))
+@given(st.integers(min_value=2, max_value=10**12))
 def test_divisors(number):
     all_divisors = divisors(number)
     assert all_divisors == divisors(factor(number))
@@ -150,14 +150,14 @@ def test_gaussian_divisor(number):
 # -----------------------------
 
 
-@given(st.integers(min_value=2, max_value=10 ** 4))
+@given(st.integers(min_value=2, max_value=10**4))
 def test_two_squares(number):
     factorization = factor(number)
     squares = two_squares(factorization)
     assert squares == two_squares(number)
     if is_sum_of_two_squares(factorization):
         assert sorted(squares, reverse=True) == list(squares)
-        assert sum(map(lambda x: x ** 2, squares)) == number
+        assert sum(map(lambda x: x**2, squares)) == number
     else:
         assert squares is None
 
@@ -178,10 +178,10 @@ def test_quaternion_divisor(number):
 # -----------------------------
 
 
-@given(st.integers(min_value=2, max_value=10 ** 4))
+@given(st.integers(min_value=2, max_value=10**4))
 def test_four_squares(number):
     factorization = factor(number)
     squares = four_squares(factorization)
     assert squares == four_squares(number)
     assert sorted(squares, reverse=True) == list(squares)
-    assert sum(map(lambda x: x ** 2, squares)) == number
+    assert sum(map(lambda x: x**2, squares)) == number

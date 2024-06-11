@@ -207,7 +207,7 @@ def test_norm_conjugate(a):
     assert type(conj) is Quaternion
     assert type(norm) is Rational
     assert conj == Quaternion(a.r, -a.i, -a.j, -a.k)
-    assert norm == a.r ** 2 + a.i ** 2 + a.j ** 2 + a.k ** 2
+    assert norm == a.r**2 + a.i**2 + a.j**2 + a.k**2
     assert a * conj == norm
     assert a + conj == 2 * a.r
     assert a - conj == Quaternion(0, 2 * a.i, 2 * a.j, 2 * a.k)
@@ -447,18 +447,18 @@ def test_mod_Rational(a, b):
     st.integers(min_value=-10, max_value=10),
 )
 def test_pow(a, m, n):
-    mth_power = a ** m
-    nth_power = a ** n
+    mth_power = a**m
+    nth_power = a**n
     sum_power = a ** (m + n)
-    assert type(a ** 0) is Quaternion
-    assert type(a ** 1) is Quaternion
-    assert type(a ** -1) is Quaternion
+    assert type(a**0) is Quaternion
+    assert type(a**1) is Quaternion
+    assert type(a**-1) is Quaternion
     assert type(mth_power) is Quaternion
-    assert a ** 0 == 1
-    assert a ** 1 == a
-    assert a ** -1 == a.inverse
-    assert a ** 2 == a * a
-    assert a ** -2 == (a * a).inverse
+    assert a**0 == 1
+    assert a**1 == a
+    assert a**-1 == a.inverse
+    assert a**2 == a * a
+    assert a**-2 == (a * a).inverse
     assert mth_power * nth_power == sum_power
     assert sum_power / mth_power == nth_power
-    assert a ** -m == mth_power.inverse
+    assert a**-m == mth_power.inverse

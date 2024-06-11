@@ -138,7 +138,7 @@ def mod_sqrt_cipolla(number, prime):
     ~> Tuple[int, int]
     """
     for y in range(2, prime):
-        root = (y ** 2 - number) % prime
+        root = (y**2 - number) % prime
         if jacobi(root, prime) == -1:
             break
 

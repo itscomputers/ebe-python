@@ -143,7 +143,7 @@ def test_norm_conjugate(a):
     assert type(conj) is Quadratic
     assert type(norm) is Rational
     assert conj == Quadratic(a.real, -a.imag, a.root)
-    assert norm == a.real ** 2 - a.root * a.imag ** 2
+    assert norm == a.real**2 - a.root * a.imag**2
     assert a * conj == norm
     assert a + conj == 2 * a.real
     assert a - conj == Quadratic(0, 2 * a.imag, a.root)
@@ -163,7 +163,7 @@ def test_round(a):
     assert type(r) is Quadratic
     assert set(map(lambda x: x.denom, r.components)) == set([1])
 
-    for (ac, rc, dc) in zip(a.components, r.components, (a - r).components):
+    for ac, rc, dc in zip(a.components, r.components, (a - r).components):
         if 2 * abs(dc) == 1:
             assert abs(rc) < abs(ac)
         else:
@@ -395,21 +395,21 @@ def test_mod_Rational(a, b):
     st.integers(min_value=-10, max_value=10),
 )
 def test_pow(a, m, n):
-    mth_power = a ** m
-    nth_power = a ** n
+    mth_power = a**m
+    nth_power = a**n
     sum_power = a ** (m + n)
-    assert type(a ** 0) is Quadratic
-    assert type(a ** 1) is Quadratic
-    assert type(a ** -1) is Quadratic
+    assert type(a**0) is Quadratic
+    assert type(a**1) is Quadratic
+    assert type(a**-1) is Quadratic
     assert type(mth_power) is Quadratic
-    assert a ** 0 == 1
-    assert a ** 1 == a
-    assert a ** -1 == a.inverse
-    assert a ** 2 == a * a
+    assert a**0 == 1
+    assert a**1 == a
+    assert a**-1 == a.inverse
+    assert a**2 == a * a
     assert a ** (-2) == (a * a).inverse
     assert mth_power * nth_power == sum_power
     assert sum_power / mth_power == nth_power
-    assert a ** -m == mth_power.inverse
+    assert a**-m == mth_power.inverse
 
 
 @given(
@@ -418,7 +418,7 @@ def test_pow(a, m, n):
     st.integers(min_value=2),
 )
 def test_pow_mod(a, exp, mod):
-    power = a ** exp
+    power = a**exp
     mod_power = pow(a, exp, mod)
     assert type(power) is Quadratic
     assert type(mod_power) is Quadratic
@@ -443,10 +443,10 @@ def test_rational_approx(a):
 
 @given(quadratic_rational())
 def test_float(a):
-    if abs(a.real) < 10 ** 10 and abs(a.imag) < 10 ** 5 and 2 <= a.root < 10 ** 10:
+    if abs(a.real) < 10**10 and abs(a.imag) < 10**5 and 2 <= a.root < 10**10:
         r = a.rational_approx(20)
         f = float(a.real) + float(a.imag) * math.sqrt(a.root)
-        assert abs(float(r) - f) < 1 / 10 ** 5
+        assert abs(float(r) - f) < 1 / 10**5
 
 
 # =============================
@@ -458,7 +458,7 @@ def test_compatibility():
     fl = 0.5
     cx = complex(1, 2)
 
-    for (x, y) in [(a, b), (a, fl), (a, cx), (b, cx)]:
+    for x, y in [(a, b), (a, fl), (a, cx), (b, cx)]:
         with pytest.raises(TypeError):
             x + y
         with pytest.raises(TypeError):
@@ -484,12 +484,12 @@ def test_compatibility():
         with pytest.raises(TypeError):
             y % x
         with pytest.raises(TypeError):
-            x ** y
+            x**y
         with pytest.raises(TypeError):
-            y ** x
+            y**x
 
     with pytest.raises(TypeError):
-        5 ** a
+        5**a
     with pytest.raises(TypeError):
         frac(3, 2) ** a
     with pytest.raises(TypeError):

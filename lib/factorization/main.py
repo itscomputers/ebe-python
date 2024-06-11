@@ -102,7 +102,7 @@ def factor_nontrivial(number, rho_seeds=None, minus_seeds=None):
         return {number: 1}
 
     sqrt_number = integer_sqrt(number)
-    if sqrt_number ** 2 == number:
+    if sqrt_number**2 == number:
         return combine_counters(dict(), factor_nontrivial(sqrt_number), 1, 2)
 
     remaining = number
@@ -252,7 +252,7 @@ def _divisor_search_generators(number, rho_seeds, minus_seeds):
     divisor_search = dict()
     for seed in rho_seeds or default("rho_seeds"):
         divisor_search[(seed, "rho")] = {
-            "generator": pollard_rho_gen(number, seed, lambda x: x ** 2 + 1)
+            "generator": pollard_rho_gen(number, seed, lambda x: x**2 + 1)
         }
     for seed in minus_seeds or default("minus_seeds"):
         divisor_search[(seed, "p-1")] = {

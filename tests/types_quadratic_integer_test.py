@@ -366,17 +366,17 @@ def test_mod_Rational(a, b):
 
 @given(quadratic_integer(nonzero=True), st.integers(min_value=2, max_value=20))
 def test_pow(a, m):
-    mth_power = a ** m
-    mth_inverse = a ** -m
-    assert type(a ** 0) is QuadraticInteger
-    assert type(a ** 1) is QuadraticInteger
-    assert type(a ** -1) is Quadratic
+    mth_power = a**m
+    mth_inverse = a**-m
+    assert type(a**0) is QuadraticInteger
+    assert type(a**1) is QuadraticInteger
+    assert type(a**-1) is Quadratic
     assert type(mth_power) is QuadraticInteger
     assert type(mth_inverse) is Quadratic
-    assert a ** 0 == 1
-    assert a ** 1 == a
-    assert a ** -1 == a.inverse
-    assert mth_power == a.to_quadratic ** m
+    assert a**0 == 1
+    assert a**1 == a
+    assert a**-1 == a.inverse
+    assert mth_power == a.to_quadratic**m
     assert mth_inverse == mth_power.inverse
 
 
@@ -386,7 +386,7 @@ def test_pow(a, m):
     st.integers(min_value=2),
 )
 def test_pow_mod(a, exp, mod):
-    power = a ** exp
+    power = a**exp
     mod_power = pow(a, exp, mod)
     assert type(power) is QuadraticInteger
     assert type(mod_power) is QuadraticInteger

@@ -29,7 +29,7 @@ def lucas_witness_pair(number, P, Q):
     + Q: int
     ~> (primality, strong): Tuple[str, bool]
     """
-    D = P ** 2 - 4 * Q
+    D = P**2 - 4 * Q
 
     valid = _good_parameters(number, P, Q, D)
     if valid is False:
@@ -136,7 +136,7 @@ def _generate_witness_pairs(number, num_witnesses):
     while len(witnesses) < num_witnesses:
         P = randint(1, 100 * num_witnesses)
         Q = randint(1, 100 * num_witnesses)
-        if P % number != 0 and Q % number != 0 and (P ** 2 - 4 * Q) % number != 0:
+        if P % number != 0 and Q % number != 0 and (P**2 - 4 * Q) % number != 0:
             witnesses = witnesses | set([(P, Q)])
 
     return witnesses

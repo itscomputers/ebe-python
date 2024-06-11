@@ -50,7 +50,7 @@ def halley_sqrt_gen(number, initial=None):
 
     while True:
         yield approx
-        approx = (approx + 8 * number * approx / (3 * approx ** 2 + number)) / 3
+        approx = (approx + 8 * number * approx / (3 * approx**2 + number)) / 3
 
 
 # =============================
@@ -71,7 +71,7 @@ def bakhshali_gen(number, initial=None):
         yield approx
         a = (number / approx - approx) / 2
         b = approx + a
-        approx = b - a ** 2 / (2 * b)
+        approx = b - a**2 / (2 * b)
 
 
 # =============================
@@ -121,7 +121,7 @@ def goldschmidt_gen(number, initial=None):
 
     while True:
         yield x, y
-        b = b * Y ** 2
+        b = b * Y**2
         Y = (3 - b) / 2
         x = x * Y
         y = y * Y
@@ -140,7 +140,7 @@ def ladder_arithmetic_gen(number, initial=None):
     ~> Iterator[Rational]
     """
     m = _first_approximation(number, initial)
-    m2 = m ** 2
+    m2 = m**2
     s0, s1 = 0, 1
     s = frac(0)
 

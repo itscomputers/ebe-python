@@ -7,7 +7,6 @@ __all__ = ["ArithmeticType"]
 
 
 class ArithmeticType:
-
     """
     This class is not meant to be instantiated directly.  Its purpose is to
     meta-program away some of the common functionality of arithmetic types.

@@ -17,7 +17,6 @@ __all__ = [
 
 
 class ModularRing:
-
     """
     Class for computations in the ring of integers relative to a modulus.
     """
