@@ -23,7 +23,17 @@ def polynomial(
     max_exp=100,
     coeff_filter=lambda x: True,
 ):
-    exponents = sample(range(min_exp, max_exp), min(num_terms, max_exp - min_exp + 1))
+    num_terms = min(num_terms, max_exp - min_exp + 1)
+    exponents = draw(
+        st.sets(
+            st.integers(
+                min_value=min_exp,
+                max_value=max_exp,
+            ),
+            min_size=num_terms,
+            max_size=num_terms,
+        ),
+    )
 
     return Polynomial(
         dict(
@@ -147,7 +157,7 @@ def test_eq(a, b):
 def test_eq_int(a, b):
     if a.degree == -1 and b == 0:
         assert a == b
-    elif a.degree == 0 and a[0] == b:
+    elif a.degree == 0 and a.coeffs[0] == b:
         assert a == b
     else:
         assert a != b
@@ -223,7 +233,7 @@ def test_integral(a, b, c):
     if a != 0 or b != 0:
         assert a.integral(b).degree == a.degree + 1
     assert a.integral(b).derivative() == a
-    assert a.derivative().integral(0 if 0 not in a.coeffs else a[0]) == a
+    assert a.derivative().integral(0 if 0 not in a.coeffs else a.coeffs[0]) == a
     assert a.integral(b).eval(0) == b
     assert (c * a).integral() == c * a.integral()
 
