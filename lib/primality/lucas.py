@@ -4,7 +4,7 @@
 from random import randint
 
 from ..basic import gcd, is_square, jacobi, padic
-from ..lucas_sequence import lucas_mod_by_index, lucas_mod_double_index
+from ..sequences import LucasSequence
 
 # ===========================================================
 __all__ = [
@@ -15,44 +15,46 @@ __all__ = [
 # ===========================================================
 
 
-def lucas_witness_pair(number, P, Q):
+def lucas_witness_pair(number: int, p: int, q: int):
     """
     Determine if `number` is composite or probably prime
-    according `(P, Q)`-Lucas sequence pair.
+    according `(p, q)`-Lucas sequence pair.
 
     examples: `lucas_witness_pair(561, 4, 8) ~> ('probable prime', True)`
               `lucas_witness_pair(561, 13, 2) ~> ('probable prime', False)`
               `lucas_witness_pair(561, 3, 5) ~> ('composite', False)`
 
     + number: int
-    + P: int
-    + Q: int
+    + p: int
+    + q: int
     ~> (primality, strong): Tuple[str, bool]
     """
-    D = P**2 - 4 * Q
+    disc = p**2 - 4 * q
 
-    valid = _good_parameters(number, P, Q, D)
+    valid = _good_parameters(number, p, q, disc)
     if valid is False:
         raise ValueError("Bad parameters")
     if type(valid) is int:
         return "composite", False
 
-    delta = number - jacobi(D, number)
+    delta = number - jacobi(disc, number)
     s, d = padic(delta, 2)
     strong = False
 
-    U, V, Q_k = lucas_mod_by_index(d, P, Q, number)
-    if U == 0:
+    seq = LucasSequence.at_index(d, p=p, q=q, modulus=number)
+    q_k = seq.value.q
+    if seq.value.u == 0:
         strong = True
 
     for j in range(s - 1):
-        U, V, Q_k = lucas_mod_double_index(U, V, Q_k, number)
-        if V == 0:
+        seq.double_index()
+        q_k = seq.value.q
+        if seq.value.v == 0:
             strong = True
 
-    U, V, Q_ = lucas_mod_double_index(U, V, Q_k, number)
-    if U == 0:
-        if _trivially_composite(V, Q, Q_k, number, delta):
+    seq.double_index()
+    if seq.value.u == 0:
+        if _trivially_composite(seq.value.v, q, q_k, number, delta):
             return "composite", False
         return "probable prime", strong
 
@@ -145,9 +147,9 @@ def _generate_witness_pairs(number, num_witnesses):
 # =============================
 
 
-def _good_parameters(number, P, Q, D):
+def _good_parameters(number: int, p: int, q: int, disc: int) -> int | bool:
     """Validate parameters are good."""
-    for d in (gcd(P, number), gcd(Q, number), gcd(D, number)):
+    for d in (gcd(p, number), gcd(q, number), gcd(disc, number)):
         if d == number:
             return False
         if d > 1:
@@ -158,15 +160,15 @@ def _good_parameters(number, P, Q, D):
 # -----------------------------
 
 
-def _trivially_composite(V, Q, Q_power, number, delta):
+def _trivially_composite(v: int, q: int, q_power: int, number: int, delta: int) -> bool:
     """Determine if `number` is trivially composite."""
     if delta == number + 1:
-        if V != (2 * Q) % number:
+        if v != (2 * q) % number:
             return True
-        if Q_power != (Q * jacobi(Q, number)) % number:
+        if q_power != (q * jacobi(q, number)) % number:
             return True
     else:
-        if Q_power != jacobi(Q, number) % number:
+        if q_power != jacobi(q, number) % number:
             return True
 
     return False
