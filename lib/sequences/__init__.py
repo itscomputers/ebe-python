@@ -2,6 +2,7 @@
 #   - module for sequences
 
 # ===========================================================
+from .fibonacci import FibonacciSequence
 from .lucas import (
     LucasSequence,
     LucasValue,
@@ -9,6 +10,7 @@ from .lucas import (
 
 # ===========================================================
 __all__ = [
+    "FibonacciSequence",
     "LucasSequence",
     "LucasValue",
 ]

@@ -4,7 +4,7 @@ import env  # noqa
 from hypothesis import given, strategies as st
 
 from lib.types import QuadraticInteger, Quadratic, frac
-from lib.sequences import LucasSequence
+from lib.sequences import FibonacciSequence, LucasSequence
 
 # ===========================================================
 #   lucas sequence
@@ -16,7 +16,7 @@ from lib.sequences import LucasSequence
     st.integers(min_value=1),
     st.integers().filter(lambda x: x != 0),
 )
-def test_by_index(k, p, q):
+def test_lucas_by_index(k, p, q):
     d = p**2 - 4 * q
     quadratic = Quadratic(frac(p, 2), frac(1, 2), d)
     kth_power = quadratic**k
@@ -39,7 +39,7 @@ def test_by_index(k, p, q):
     st.integers().filter(lambda x: x != 0),
     st.integers(min_value=3),
 )
-def test_by_index_mod(k, p, q, mod):
+def test_lucas_by_index_mod(k, p, q, mod):
     mod += 1 - mod % 2
 
     d = p**2 - 4 * q
@@ -84,5 +84,67 @@ def test_lucas_sequence_mod(p, q, mod):
     seq = LucasSequence(p=p, q=q, modulus=mod)
     for k in range(100):
         value = LucasSequence.at_index(k, p=p, q=q, modulus=mod).value
+        assert seq.value == value
+        next(seq)
+
+
+# ===========================================================
+#   fibonacci sequence
+# ===========================================================
+
+
+@given(st.integers(min_value=0, max_value=100))
+def test_fibonacci_by_index(k):
+    quadratic = Quadratic(frac(1, 2), frac(1, 2), 5)
+    kth_power = quadratic**k
+
+    value = 2 * kth_power.imag
+
+    seq = FibonacciSequence.at_index(k)
+    assert seq.value == value
+
+
+# -----------------------------
+
+
+@given(
+    st.integers(min_value=0, max_value=100),
+    st.integers(min_value=3),
+)
+def test_fibonacci_by_index_mod(k, mod):
+    mod += 1 - mod % 2
+
+    quadratic = Quadratic(frac(1, 2), frac(1, 2), 5)
+    kth_power = quadratic**k
+
+    value = 2 * kth_power.imag % mod
+
+    seq = FibonacciSequence.at_index(k, modulus=mod)
+    assert seq.value == value
+
+
+# =============================
+
+
+@given(st.integers(min_value=1))
+def test_fibonacci_sequence(k):
+    seq = FibonacciSequence()
+    for k in range(100):
+        value = FibonacciSequence.at_index(k).value
+        assert seq.value == value
+        next(seq)
+
+
+# -----------------------------
+
+
+@given(
+    st.integers(min_value=1),
+    st.integers(min_value=3),
+)
+def test_fibonacci_sequence_mod(k, mod):
+    seq = FibonacciSequence(modulus=mod)
+    for k in range(100):
+        value = FibonacciSequence.at_index(k, modulus=mod).value
         assert seq.value == value
         next(seq)

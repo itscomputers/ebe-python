@@ -4,8 +4,8 @@ default:
 ipy:
   poetry run python
 
-test path="":
-  poetry run pytest {{path}}
+test path="" flags="":
+  poetry run pytest {{path}} {{flags}}
 
 coverage:
   poetry run pytest --cov lib --cov-report term-missing
