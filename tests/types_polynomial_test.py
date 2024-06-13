@@ -169,7 +169,7 @@ def test_eq_int(a, b):
 def test_eq_Rational(a, b):
     if a.degree == -1 and b == 0:
         assert a == b
-    elif a.degree == 0 and a[0] == b:
+    elif a.degree == 0 and a.coeffs[0] == b:
         assert a == b
     else:
         assert a != b

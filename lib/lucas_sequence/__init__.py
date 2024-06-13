@@ -5,10 +5,12 @@
 from .modular import (
     lucas_mod_gen,
     lucas_mod_by_index,
+    lucas_mod_double_index,
 )
 
 # ===========================================================
 __all__ = [
     "lucas_mod_gen",
     "lucas_mod_by_index",
+    "lucas_mod_double_index",
 ]

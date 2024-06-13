@@ -39,18 +39,19 @@ def test_modular_ring(modulus, a, b, c):
     assert Zm.multiplicative_group() is not None
     assert Zm._multiplicative_group == Zm.multiplicative_group()
 
+    factorization = dict(Zm.factorization())
     if modulus == 2:
         assert Zm.orders == {1: 1}
     else:
         assert Zm.orders == {1: 1, modulus - 1: 2}
 
-    if len(Zm.factorization().keys()) == 1:
-        if 2 in Zm.factorization().keys():
-            assert Zm.is_cyclic() == (Zm.factorization()[2] < 3)
+    if len(factorization.keys()) == 1:
+        if 2 in factorization.keys():
+            assert Zm.is_cyclic() == (factorization[2] < 3)
         else:
             assert Zm.is_cyclic()
-    elif len(Zm.factorization().keys()) == 2:
-        assert Zm.is_cyclic() == ((2, 1) in Zm.factorization().items())
+    elif len(factorization.keys()) == 2:
+        assert Zm.is_cyclic() == ((2, 1) in factorization.items())
     else:
         assert not Zm.is_cyclic()
 

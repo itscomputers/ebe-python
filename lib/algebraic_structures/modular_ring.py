@@ -6,8 +6,8 @@ from collections import Counter
 from functools import reduce
 
 from ..basic import gcd, mod_inverse, mod_power, prime_to
-from ..factorization import factor
-from ..modular import carmichael_lambda, euler_phi, mod_sqrt
+from ..factorization import Factorization
+from ..modular import mod_sqrt
 
 # ===========================================================
 __all__ = [
@@ -44,7 +44,7 @@ class ModularRing:
     def factorization(self):
         """Factorize the modulus."""
         if self._factorization is None:
-            self._factorization = factor(self.modulus)
+            self._factorization = Factorization(self.modulus)
         return self._factorization
 
     # -------------------------
@@ -52,7 +52,7 @@ class ModularRing:
     def euler(self):
         """Compute size of multiplicative group."""
         if self._euler is None:
-            self._euler = euler_phi(self.factorization())
+            self._euler = self.factorization().euler_phi
         return self._euler
 
     # -------------------------
@@ -60,22 +60,22 @@ class ModularRing:
     def carmichael(self):
         """Compute maximum order of element of multiplicative group."""
         if self._carmichael is None:
-            self._carmichael = carmichael_lambda(self.factorization())
+            self._carmichael = self.factorization().carmichael_lambda
         return self._carmichael
 
     # -------------------------
 
     def carmichael_factorization(self):
-        """Factorize the maximum order.  Used for calculating orders."""
+        """Factorize the maximum order. Used for calculating orders."""
         if self._carmichael_factorization is None:
-            self._carmichael_factorization = factor(self.carmichael())
+            self._carmichael_factorization = Factorization(self.carmichael())
         return self._carmichael_factorization
 
     # -------------------------
 
     def carmichael_primes(self):
-        """Prime factors of maximum order.  Used for calculating orders."""
-        return Counter(self.carmichael_factorization()).elements()
+        """Prime factors of maximum order. Used for calculating orders."""
+        return Counter(dict(self.carmichael_factorization())).elements()
 
     # -------------------------
 
@@ -94,7 +94,7 @@ class ModularRing:
     def multiplicative_group(self):
         """Compute the multiplicative group."""
         if self._multiplicative_group is None:
-            self._multiplicative_group = prime_to(self.factorization())
+            self._multiplicative_group = prime_to(dict(self.factorization()))
         return self._multiplicative_group
 
     # -------------------------

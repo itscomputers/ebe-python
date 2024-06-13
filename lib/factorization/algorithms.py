@@ -2,145 +2,138 @@
 #   - module for factor-finding algorithms for composite numbers
 
 # ===========================================================
+from typing import Callable, Generator, Literal
+
 from ..basic import gcd
+from ..types import GaussianInteger
 
 # ===========================================================
 __all__ = [
-    "pollard_rho_gen",
-    "pollard_rho",
-    "pollard_p_minus_one_gen",
-    "pollard_p_minus_one",
-    "williams_p_plus_one_gen",
-    "williams_p_plus_one",
+    "Algorithm",
+    "PollardRho",
+    "PollardPMinusOne",
+    "WilliamsPPlusOne",
 ]
 # ===========================================================
 
 
-def pollard_rho_gen(number, seed, func):
-    """
-    Generator for Pollard's rho algorithm.
+class Algorithm:
+    """Abstract base class for division algorithms."""
 
-    + number: int --composite
-    + seed: int
-    + func: Callable[[int], int]
-    ~> Iterator[int]
-    """
-    x_i = func(seed % number)
-    x_2i = func(x_i) % number
+    @classmethod
+    def build(cls, algorithm: Literal["rho", "p-1", "p+1"], **kwargs) -> "Algorithm":
+        """Builder shortcut for an algorithm."""
 
-    while True:
-        yield gcd(x_2i - x_i, number)
-        x_i = func(x_i) % number
-        x_2i = func(func(x_2i) % number) % number
+        if algorithm == "p-1":
+            return PollardPMinusOne(**kwargs)
+        if algorithm == "p+1":
+            return WilliamsPPlusOne(**kwargs)
+        return PollardRho(**kwargs)
 
+    def generator(self, number: int) -> Generator[int, None, None]:
+        """Generator for potential divisors."""
 
-# -----------------------------
+        return NotImplemented
 
+    def find_divisor(self, number: int) -> int:
+        """
+        Finds a divisor of `number`.
 
-def pollard_rho(number, seed, func):
-    """
-    Pollard's rho algorithm to find divisor of `number`.
+        + number: int --composite
+        ~> int --either nontrivial divisor or number itself
+        """
 
-    example: `pollard_rho(143, 2, lambda x: x**2 + 1) ~> 11`
-
-    + number: int --composite
-    + seed: int
-    + func: Callable[[int], int]
-    ~> int --either nontrivial divisor or number itself
-    """
-    gen = pollard_rho_gen(number, seed, func)
-    divisor = next(gen)
-
-    while divisor == 1:
+        gen = self.generator(number)
         divisor = next(gen)
-
-    return divisor
-
-
-# =============================
-
-
-def pollard_p_minus_one_gen(number, seed):
-    """
-    Generator for Pollard's p-1 algorithm.
-
-    + number: int --composite
-    + seed: int
-    ~> Iterator[int]
-    """
-    x_i = seed % number
-    index = 1
-
-    while True:
-        yield gcd(x_i - 1, number)
-        index = index + 1
-        x_i = pow(x_i, index, number)
-
-
-# -----------------------------
-
-
-def pollard_p_minus_one(number, seed):
-    """
-    Pollard's p-1 algorithm to find divisor of `number`.
-
-    example `pollard_p_minus_one(143, 2) ~> 13`
-
-    + number: int --composite
-    + seed: int
-    ~> int --either nontrivial divisor or number itself
-    """
-    divisor = gcd(number, seed)
-    if divisor > 1:
+        while divisor == 1:
+            divisor = next(gen)
         return divisor
 
-    gen = pollard_p_minus_one_gen(number, seed)
-    divisor = next(gen)
 
-    while divisor == 1:
-        divisor = next(gen)
-
-    return divisor
+# -----------------------------
 
 
-# =============================
-
-
-def williams_p_plus_one_gen(number, quadratic_seed):
+class PollardRho(Algorithm):
     """
-    Generator for Williams' p+1 algorithm.
+    Pollard's rho algorithm to find divisor of an integer.
 
-    + number: int --composite
-    + quadratic_seed: QuadraticInteger
-    ~> Iterator[int]
+    example:
+        `PollardRho(seed=2, func=lambda x: x**2 + 1).find_divisor(143) ~> 11`
+
+    + seed: int
+    + func: Callable[[int], int]
     """
-    z = quadratic_seed
-    power = 1
-    yield gcd(z.norm, number)
 
-    while True:
-        power = power + 1
-        z = pow(z, power, number)
-        yield gcd(z.imag, number)
+    def __init__(self, seed: int = 2, func: Callable[[int], int] = lambda x: x**2 + 1):
+        self.seed = seed
+        self.func = func
+
+    def generator(self, number: int) -> Generator[int, None, None]:
+        """Generator for potential divisors."""
+
+        x_i = self.func(self.seed % number)
+        x_2i = self.func(x_i) % number
+
+        while True:
+            yield gcd(x_2i - x_i, number)
+            x_i = self.func(x_i) % number
+            x_2i = self.func(self.func(x_2i) % number) % number
 
 
 # -----------------------------
 
 
-def williams_p_plus_one(number, quadratic_seed):
+class PollardPMinusOne(Algorithm):
     """
-    Williams' p+1 algorithm to find divisor.
+    Pollard's p-1 algorithm to find divisor of an integer.
 
-    example: `williams_p_plus_one(143, GaussianInteger(1, 2)) ~> 11`
+    example:
+        `PollardPMinusOne(seed=2).find_divisor(143) ~> 13`
 
-    + number: int --composite
-    + quadratic_seed: GaussianInteger
-    ~> int --either nontrivial divisor or number itself
+    + seed: int
     """
-    gen = williams_p_plus_one_gen(number, quadratic_seed)
-    divisor = next(gen)
 
-    while divisor == 1:
-        divisor = next(gen)
+    def __init__(self, seed: int = 2):
+        self.seed = seed
 
-    return divisor
+    def generator(self, number: int) -> Generator[int, None, None]:
+        """Generator for potential divisors."""
+
+        yield gcd(self.seed, number)
+
+        x_i = self.seed % number
+        index = 1
+
+        while True:
+            yield gcd(x_i - 1, number)
+            index = index + 1
+            x_i = pow(x_i, index, number)
+
+
+# -----------------------------
+
+
+class WilliamsPPlusOne(Algorithm):
+    """
+    Williams' p+1 algorithm to find divisor of an integer.
+
+    example:
+        `WilliamsPPlusOne(seed=GaussianInteger(1, 2)).find_divisor(143) ~> 11`
+
+    + seed: GaussianInteger
+    """
+
+    def __init__(self, seed: GaussianInteger = GaussianInteger(1, 2)):
+        self.seed = seed
+
+    def generator(self, number: int) -> Generator[int, None, None]:
+        """Generator for potential divisors."""
+
+        z = self.seed
+        power = 1
+        yield gcd(z.norm, number)
+
+        while True:
+            power = power + 1
+            z = pow(z, power, number)
+            yield gcd(z.imag, number)

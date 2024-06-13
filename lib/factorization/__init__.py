@@ -2,41 +2,18 @@
 #   - module for prime factorization and its applications
 
 # ===========================================================
-from .algorithms import (
-    pollard_rho,
-    pollard_p_minus_one,
-    williams_p_plus_one,
-)
-from .main import (
-    divisors,
-    factor,
-    find_divisor,
-    number_from_factorization,
-)
-from .two_squares import (
-    gaussian_divisor,
-    two_squares,
-)
-from .four_squares import (
-    quaternion_divisor,
-    four_squares,
-)
+from .algorithms import Algorithm
+from .divisor_search import find_divisors, DivisorSearch
+from .factorization import Factorization
+from .gaussian_divisor import get_gaussian_divisor
+from .quaternion_divisor import get_quaternion_divisor
 
 # ===========================================================
 __all__ = [
-    # algorithms
-    "pollard_rho",
-    "pollard_p_minus_one",
-    "williams_p_plus_one",
-    # main
-    "divisors",
-    "factor",
-    "find_divisor",
-    "number_from_factorization",
-    # two_squares
-    "gaussian_divisor",
-    "two_squares",
-    # four_squares
-    "quaternion_divisor",
-    "four_squares",
+    "find_divisors",
+    "get_gaussian_divisor",
+    "get_quaternion_divisor",
+    "Algorithm",
+    "DivisorSearch",
+    "Factorization",
 ]

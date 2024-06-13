@@ -4,8 +4,7 @@ from hypothesis import assume, given, strategies as st
 from random import sample
 
 import env  # noqa
-from lib.factorization import factor
-from lib.modular import euler_phi
+from lib.factorization import Factorization
 from lib.basic import (
     bezout,
     div,
@@ -170,9 +169,9 @@ def test_chinese_remainder_theorem(a, b, c):
 
 @given(st.integers(min_value=2, max_value=500))
 def test_prime_to(number):
-    factorization = factor(number)
-    phi = euler_phi(factorization)
-    group = prime_to(factorization)
+    factorization = Factorization(number)
+    phi = factorization.euler_phi
+    group = prime_to(dict(factorization))
     assert phi == len(group)
     for x in group:
         assert gcd(x, number) == 1
