@@ -3,7 +3,7 @@
 
 # ===========================================================
 from .fibonacci import FibonacciSequence
-from .lucas import (
+from .lucas import (  # noqa: F401
     LucasSequence,
     LucasValue,
 )
@@ -12,5 +12,4 @@ from .lucas import (
 __all__ = [
     "FibonacciSequence",
     "LucasSequence",
-    "LucasValue",
 ]
