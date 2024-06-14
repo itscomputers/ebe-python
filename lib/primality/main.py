@@ -6,8 +6,7 @@ from functools import reduce
 
 from ..config import default
 from ..basic import prime_to
-from .lucas import lucas_test
-from .miller_rabin import miller_rabin_test, miller_rabin_max_cutoff
+from .algorithms import lucas_test, miller_rabin_test, MillerRabinWitness
 
 # ===========================================================
 __all__ = [
@@ -42,15 +41,21 @@ def is_prime(number, mr_wit=None, l_wit=None):
     if number < 2:
         return False
 
-    if number < miller_rabin_max_cutoff():
-        return miller_rabin_test(number, 1) == "prime"
+    if number == 2:
+        return True
+
+    if number % 2 == 0:
+        return False
+
+    if number < MillerRabinWitness.MAX_CUTOFF:
+        return miller_rabin_test(number, witness_count=1).value == "prime"
 
     mr_wit = mr_wit or default("miller_rabin_witness_count")
-    if miller_rabin_test(number, mr_wit) == "composite":
+    if miller_rabin_test(number, witness_count=mr_wit).value == "composite":
         return False
 
     l_wit = l_wit or default("lucas_witness_pair_count")
-    if lucas_test(number, l_wit) == "composite":
+    if lucas_test(number, witness_count=l_wit).value == "composite":
         return False
 
     return True

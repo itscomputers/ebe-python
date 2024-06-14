@@ -2,6 +2,14 @@
 #   - module for primality testing and its applications
 
 # ===========================================================
+from .algorithms import (  # noqa: 401
+    lucas_test,
+    miller_rabin_test,
+    LucasWitness,
+    MillerRabinWitness,
+    Observation,
+    PrimalityWitness,
+)
 from .main import (
     is_prime,
     next_prime_gen,
@@ -14,19 +22,10 @@ from .main import (
     next_twin_primes,
     goldbach_partition,
 )
-from .lucas import (
-    lucas_witness_pair,
-    lucas_test,
-)
-from .miller_rabin import (
-    miller_rabin_witness,
-    miller_rabin_test,
-)
 
 
 # ===========================================================
 __all__ = [
-    # main
     "is_prime",
     "next_prime_gen",
     "next_prime",
@@ -37,10 +36,4 @@ __all__ = [
     "next_twin_primes_gen",
     "next_twin_primes",
     "goldbach_partition",
-    # lucas
-    "lucas_witness_pair",
-    "lucas_test",
-    # miller_rabin
-    "miller_rabin_witness",
-    "miller_rabin_test",
 ]
