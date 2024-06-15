@@ -79,14 +79,7 @@ def prev_primes(number: int, count: int) -> list[int]:
     """
 
     prime_search = PrimeSearch(number)
-    primes = []
-    for _ in range(count):
-        if prime_search.prev().has_value():
-            primes.append(prime_search.value)
-        else:
-            continue
-
-    return primes
+    return [prime_search.value for _ in range(count) if prime_search.prev().has_value()]
 
 
 # ----------------------------
