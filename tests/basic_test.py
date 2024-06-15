@@ -54,7 +54,9 @@ def test_div_with_small_remainder(a, b):
 
 @given(st.integers(), st.integers())
 def test_gcd(a, b):
-    assume((a, b) != (0, 0))
+    if (a, b) == (0, 0):
+        assert gcd(a, b) == 0
+        return
     d = gcd(a, b)
     assert a % d == b % d == 0
     assert gcd(a // d, b // d) == 1

@@ -62,7 +62,7 @@ def gcd(*numbers: int) -> int:
         return gcd(*filter(lambda x: x != 0, numbers))
 
     if len(numbers) == 0:
-        raise ValueError("gcd(0, 0) is undefined")
+        return 0
 
     if len(numbers) == 2:
         return math.gcd(*numbers)
