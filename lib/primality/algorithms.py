@@ -2,15 +2,18 @@
 #   - module for primality testing algorithms
 
 # ===========================================================
+import abc
 from dataclasses import dataclass
 from random import randint
 from typing import Generator, Literal, Iterable, Type
 
 from ..basic import gcd, is_square, jacobi, padic
+from ..config import default
 from ..sequences import LucasSequence
 
 # ===========================================================
 __all__ = [
+    "is_prime",
     "lucas_test",
     "miller_rabin_test",
     "LucasWitness",
@@ -18,6 +21,49 @@ __all__ = [
     "Observation",
 ]
 # ===========================================================
+
+
+def is_prime(number, miller_rabin_count=None, lucas_count=None):
+    """
+    Determine if `number` is prime.
+    - a return value of `False` is always correct.
+    - if `number < 341_550_071_728_321`, only the pre-determined Miller-Rabin
+        witnesses are used and the result is deterministic.
+    - otherwise, the result is probabalistic with probability of incorrectness
+        less than
+        `(1/4)**miller_rabin_count * (4/15)**lucas_count`.
+
+    + number: int
+    + miller_rabin_count: int --number of Miller-Rabin witnesses
+    + lucas_count: int --number of Lucas witness pairs
+    ~> bool
+    """
+    if number < 2:
+        return False
+
+    if number == 2:
+        return True
+
+    if number % 2 == 0:
+        return False
+
+    if number < MillerRabinWitness.MAX_CUTOFF:
+        return miller_rabin_test(number, witness_count=1).value == "prime"
+
+    if miller_rabin_count is None:
+        miller_rabin_count = default("miller_rabin_witness_count")
+    if miller_rabin_test(number, witness_count=miller_rabin_count).value == "composite":
+        return False
+
+    if lucas_count is None:
+        lucas_count = default("lucas_witness_pair_count")
+    if lucas_test(number, witness_count=lucas_count).value == "composite":
+        return False
+
+    return True
+
+
+# -----------------------------
 
 
 def miller_rabin_test(number: int, witness_count: int) -> "Observation":
@@ -43,6 +89,9 @@ def miller_rabin_test(number: int, witness_count: int) -> "Observation":
     return _observe(number, witness_count, MillerRabinWitness)
 
 
+# -----------------------------
+
+
 def lucas_test(number: int, witness_count: int) -> "Observation":
     """
     Lucas test for primality of `number` with `witness_count` witnesses.
@@ -64,6 +113,9 @@ def lucas_test(number: int, witness_count: int) -> "Observation":
     """
 
     return _observe(number, witness_count, LucasWitness)
+
+
+# =============================
 
 
 def _observe(number: int, count: int, cls: Type["PrimalityWitness"]) -> "Observation":
@@ -89,6 +141,9 @@ def _observe(number: int, count: int, cls: Type["PrimalityWitness"]) -> "Observa
     )
 
 
+# =============================
+
+
 @dataclass
 class Observation:
     """
@@ -100,9 +155,13 @@ class Observation:
 
     value: Literal["prime", "probable_prime", "strong_probable_prime", "composite"]
 
+    # ------------------------
+
     @classmethod
     def prime(cls) -> "Observation":
         return Observation(value="prime")
+
+    # ------------------------
 
     @classmethod
     def probable_prime(cls, strong: bool = False) -> "Observation":
@@ -110,9 +169,13 @@ class Observation:
             return Observation(value="strong_probable_prime")
         return Observation(value="probable_prime")
 
+    # ------------------------
+
     @classmethod
     def composite(cls) -> "Observation":
         return Observation(value="composite")
+
+    # ------------------------
 
     @classmethod
     def compose(cls, observations: Iterable["Observation"]) -> "Observation":
@@ -137,7 +200,10 @@ class Observation:
         return Observation.probable_prime(strong=strong)
 
 
-class PrimalityWitness:
+# =============================
+
+
+class PrimalityWitness(abc.ABC):
     """Abstract base class for a primality witness."""
 
     def observe(self, number: int) -> Observation:
@@ -149,6 +215,8 @@ class PrimalityWitness:
         """
 
         return NotImplemented
+
+    # ------------------------
 
     @classmethod
     def generate(
@@ -165,6 +233,9 @@ class PrimalityWitness:
         """
 
         return NotImplemented
+
+
+# =============================
 
 
 class MillerRabinWitness(PrimalityWitness):
@@ -190,8 +261,12 @@ class MillerRabinWitness(PrimalityWitness):
         self._value = value
         self._assured = assured
 
+    # ------------------------
+
     def __repr__(self) -> str:
         return f"MillerRabinWitness(value={self._value}, assured={self._assured})"
+
+    # ------------------------
 
     def observe(self, number: int) -> Observation:
         """
@@ -227,6 +302,8 @@ class MillerRabinWitness(PrimalityWitness):
 
         return Observation.composite()
 
+    # ------------------------
+
     @classmethod
     def generate(
         cls,
@@ -259,6 +336,9 @@ class MillerRabinWitness(PrimalityWitness):
                     yield MillerRabinWitness(prime, assured=True)
 
 
+# =============================
+
+
 class LucasWitness(PrimalityWitness):
     """
     Witness for the Lucas primality test.
@@ -273,8 +353,12 @@ class LucasWitness(PrimalityWitness):
         self._disc = p**2 - 4 * q
         self._strong = False
 
+    # ------------------------
+
     def __repr__(self) -> str:
         return f"LucasWitness(value=({self._p}, {self._q}))"
+
+    # ------------------------
 
     def observe(self, number: int) -> Observation:
         """
@@ -320,6 +404,8 @@ class LucasWitness(PrimalityWitness):
 
         return Observation.composite()
 
+    # ------------------------
+
     @classmethod
     def generate(
         cls,
@@ -352,6 +438,8 @@ class LucasWitness(PrimalityWitness):
                 result_count += 1
                 yield LucasWitness(p, q)
 
+    # ========================
+
     def _first_observation(self, number: int) -> Observation | None:
         """
         Initial observation that might be composite.
@@ -367,6 +455,9 @@ class LucasWitness(PrimalityWitness):
         if fit > 1:
             return Observation.composite()
         return None
+
+
+# =============================
 
 
 def _good_parameters(number: int, p: int, q: int, disc: int | None = None) -> int:

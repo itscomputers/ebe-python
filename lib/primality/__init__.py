@@ -3,6 +3,7 @@
 
 # ===========================================================
 from .algorithms import (  # noqa: 401
+    is_prime,
     lucas_test,
     miller_rabin_test,
     LucasWitness,
@@ -10,30 +11,24 @@ from .algorithms import (  # noqa: 401
     Observation,
     PrimalityWitness,
 )
-from .main import (
+from .prime_search import (  # noqa: 401
     is_prime,
-    next_prime_gen,
     next_prime,
     next_primes,
     primes_in_range,
-    prev_prime_gen,
     prev_prime,
-    next_twin_primes_gen,
-    next_twin_primes,
+    prev_primes,
     goldbach_partition,
+    PrimeSearch,
 )
-
 
 # ===========================================================
 __all__ = [
     "is_prime",
-    "next_prime_gen",
     "next_prime",
     "next_primes",
     "primes_in_range",
-    "prev_prime_gen",
     "prev_prime",
-    "next_twin_primes_gen",
-    "next_twin_primes",
+    "prev_primes",
     "goldbach_partition",
 ]
