@@ -11,6 +11,7 @@ from .algorithms import (  # noqa: 401
     Observation,
     PrimalityWitness,
 )
+from .goldbach import goldbach_partition
 from .prime_search import (  # noqa: 401
     is_prime,
     next_prime,
@@ -18,17 +19,23 @@ from .prime_search import (  # noqa: 401
     primes_in_range,
     prev_prime,
     prev_primes,
-    goldbach_partition,
     PrimeSearch,
+)
+from .twin_prime_search import (  # noqa: 401
+    next_twin_prime,
+    prev_twin_prime,
+    TwinPrimeSearch,
 )
 
 # ===========================================================
 __all__ = [
+    "goldbach_partition",
     "is_prime",
     "next_prime",
     "next_primes",
     "primes_in_range",
     "prev_prime",
     "prev_primes",
-    "goldbach_partition",
+    "next_twin_prime",
+    "prev_twin_prime",
 ]

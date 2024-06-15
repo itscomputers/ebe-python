@@ -13,13 +13,13 @@ from lib.primality.algorithms import (
     MillerRabinWitness,
     Observation,
 )
+from lib.primality.goldbach import goldbach_partition
 from lib.primality.prime_search import (
     next_prime,
     next_primes,
     prev_prime,
     prev_primes,
     primes_in_range,
-    goldbach_partition,
     PrimeSearch,
     Window,
 )
@@ -361,32 +361,6 @@ def test_prev_primes(number):
 
 
 # =============================
-# goldbach conjecture
-# =============================
-
-
-@given(st.integers(min_value=6, max_value=10**10))
-def test_goldbach_conjecture(number):
-    partition = goldbach_partition(number)
-    assert list(partition) == sorted(partition, reverse=True)
-    for p in partition:
-        assert is_prime(p)
-    assert sum(partition) == number
-    if number % 2 == 0:
-        assert len(partition) == 2
-    else:
-        assert 2 <= len(partition) <= 3
-
-
-# -----------------------------
-
-
-def test_goldbach_conjecture_small():
-    assert goldbach_partition(4) == (2, 2)
-    assert goldbach_partition(5) == (3, 2)
-
-
-# =============================
 # window
 # =============================
 
@@ -650,3 +624,29 @@ def test_prev_twin_prime_small(numbers, twin_prime):
         assert (
             prev_twin_prime(number) == twin_prime
         ), f"failed on {number} ~> {twin_prime}"
+
+
+# ==========================================================
+# goldbach conjecture
+# ==========================================================
+
+
+@given(st.integers(min_value=6, max_value=10**10))
+def test_goldbach_conjecture(number):
+    partition = goldbach_partition(number)
+    assert list(partition) == sorted(partition, reverse=True)
+    for p in partition:
+        assert is_prime(p)
+    assert sum(partition) == number
+    if number % 2 == 0:
+        assert len(partition) == 2
+    else:
+        assert 2 <= len(partition) <= 3
+
+
+# -----------------------------
+
+
+def test_goldbach_conjecture_small():
+    assert goldbach_partition(4) == (2, 2)
+    assert goldbach_partition(5) == (3, 2)
